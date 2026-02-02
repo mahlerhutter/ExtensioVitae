@@ -1,0 +1,109 @@
+/**
+ * EXTENSIOVITAE — Unified Plan Generator
+ * ----------------------------------------
+ * Automatically uses LLM (OpenAI/Claude) if credentials are configured,
+ * otherwise falls back to deterministic algorithm.
+ */
+
+import { build30DayBlueprint, TASKS_EXAMPLE } from './planBuilder.js';
+import { isLLMAvailable, generatePlanWithLLM, getLLMProvider } from './llmPlanGenerator.js';
+
+/**
+ * Generate a 30-day longevity plan
+ * 
+ * @param {Object} intakeData - User's intake form data
+ * @param {Object} options - Generation options
+ * @param {boolean} options.forceLLM - If true, only use LLM (fail if not available)
+ * @param {boolean} options.forceAlgorithm - If true, only use algorithm
+ * @returns {Promise<Object>} Generated plan
+ */
+export async function generatePlan(intakeData, options = {}) {
+    const { forceLLM = false, forceAlgorithm = false } = options;
+
+    // Force algorithm mode
+    if (forceAlgorithm) {
+        console.log('[PlanGenerator] Using deterministic algorithm (forced)');
+        return generateWithAlgorithm(intakeData);
+    }
+
+    // Force LLM mode
+    if (forceLLM) {
+        if (!isLLMAvailable()) {
+            throw new Error('LLM generation requested but no API keys configured');
+        }
+        console.log('[PlanGenerator] Using LLM (forced)');
+        return await generateWithLLMWithFallback(intakeData, false);
+    }
+
+    // Auto mode: try LLM first, fallback to algorithm
+    if (isLLMAvailable()) {
+        console.log(`[PlanGenerator] LLM available (${getLLMProvider()}), attempting LLM generation...`);
+        return await generateWithLLMWithFallback(intakeData, true);
+    } else {
+        console.log('[PlanGenerator] No LLM configured, using deterministic algorithm');
+        return generateWithAlgorithm(intakeData);
+    }
+}
+
+/**
+ * Generate plan with LLM, optionally falling back to algorithm on error
+ */
+async function generateWithLLMWithFallback(intakeData, allowFallback) {
+    try {
+        const plan = await generatePlanWithLLM(intakeData);
+
+        // Validate the LLM response has required structure
+        if (!plan.days || !Array.isArray(plan.days) || plan.days.length !== 30) {
+            throw new Error('LLM generated invalid plan structure (missing or incorrect days array)');
+        }
+
+        // Add generation method marker
+        plan.generation_method = 'llm';
+        plan.llm_provider = getLLMProvider();
+
+        return plan;
+    } catch (error) {
+        console.error('[PlanGenerator] LLM generation failed:', error.message);
+
+        if (allowFallback) {
+            console.log('[PlanGenerator] Falling back to deterministic algorithm...');
+            const plan = generateWithAlgorithm(intakeData);
+            plan.llm_error = error.message;
+            return plan;
+        }
+
+        throw error;
+    }
+}
+
+/**
+ * Generate plan using deterministic algorithm
+ */
+function generateWithAlgorithm(intakeData) {
+    const result = build30DayBlueprint(intakeData, TASKS_EXAMPLE);
+    const plan = result.json;
+
+    // Normalize structure to match LLM output format
+    plan.generation_method = 'algorithm';
+
+    // Map pillars for UI compatibility (sleep_recovery -> sleep, etc.)
+    plan.primary_focus_pillars = Object.entries(plan.meta.computed.needs)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 3)
+        .map(([k]) => k.split('_')[0]);
+
+    return plan;
+}
+
+/**
+ * Get information about the current plan generation configuration
+ */
+export function getPlanGeneratorInfo() {
+    return {
+        llmAvailable: isLLMAvailable(),
+        llmProvider: getLLMProvider(),
+        defaultMode: isLLMAvailable() ? 'llm' : 'algorithm'
+    };
+}
+
+export { isLLMAvailable, getLLMProvider };

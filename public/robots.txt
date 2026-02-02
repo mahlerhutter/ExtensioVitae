@@ -1,0 +1,14 @@
+# robots.txt for ExtensioVitae
+
+User-agent: *
+Allow: /
+
+# Disallow admin and auth pages from search engines
+Disallow: /admin
+Disallow: /auth
+
+# Sitemap location
+Sitemap: https://extensiovitae.com/sitemap.xml
+
+# Crawl-delay (optional, helps prevent server overload)
+Crawl-delay: 1

@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extensio Vitae — Extend Your Agency</title>
+    <meta name="description" content="A 30-day longevity blueprint. More years of clarity, strength, autonomy, dignity. 3-minute intake, daily micro-actions.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        /* ============================================
+           CSS VARIABLES
+           ============================================ */
+        :root {
+            --color-bg: #FAFAFA;
+            --color-bg-dark: #0A1628;
+            --color-bg-card: #FFFFFF;
+            --color-text: #1A1A1A;
+            --color-text-muted: #6B7280;
+            --color-text-light: #9CA3AF;
+            --color-accent: #C9A227;
+            --color-accent-hover: #B8922A;
+            --color-border: #E5E7EB;
+            --color-success: #10B981;
+            --color-error: #EF4444;
+
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 2rem;
+            --font-size-4xl: 2.5rem;
+            --font-size-5xl: 3.5rem;
+
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 1rem;
+            --spacing-md: 1.5rem;
+            --spacing-lg: 2rem;
+            --spacing-xl: 3rem;
+            --spacing-2xl: 4rem;
+            --spacing-3xl: 6rem;
+
+            --max-width: 1200px;
+            --max-width-narrow: 720px;
+
+            --transition-fast: 150ms ease;
+            --transition-base: 300ms ease;
+            --transition-slow: 500ms ease;
+        }
+
+        /* ============================================
+           RESET & BASE
+           ============================================ */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            font-size: var(--font-size-base);
+            line-height: 1.6;
+            color: var(--color-text);
+            background: var(--color-bg);
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        /* ============================================
+           TYPOGRAPHY
+           ============================================ */
+        h1, h2, h3, h4 {
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+
+        h1 { font-size: var(--font-size-5xl); }
+        h2 { font-size: var(--font-size-3xl); }
+        h3 { font-size: var(--font-size-xl); }
+
+        p {
+            color: var(--color-text-muted);
+        }
+
+        .text-muted { color: var(--color-text-muted); }
+        .text-light { color: var(--color-text-light); }
+        .text-accent { color: var(--color-accent); }
+        .text-center { text-align: center; }
+        .text-sm { font-size: var(--font-size-sm); }
+        .text-xs { font-size: var(--font-size-xs); }
+
+        /* ============================================
+           LAYOUT
+           ============================================ */
+        .container {
+            width: 100%;
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 0 var(--spacing-lg);
+        }
+
+        .container-narrow {
+            max-width: var(--max-width-narrow);
+        }
+
+        section {
+            padding: var(--spacing-3xl) 0;
+        }
+
+        /* ============================================
+           BUTTONS
+           ============================================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-xs);
+            padding: 0.875rem 1.75rem;
+            font-family: var(--font-sans);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--color-bg-dark);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1a2a3d;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--color-text-muted);
+            background: var(--color-bg-card);
+        }
+
+        .btn-accent {
+            background: var(--color-accent);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            background: var(--color-accent-hover);
+            transform: translateY(-1px);
+        }
+
+        /* ============================================
+           NAVIGATION
+           ============================================ */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(250, 250, 250, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--color-border);
+            transition: all var(--transition-base);
+        }
+
+        nav .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 64px;
+        }
+
+        .logo {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            color: var(--color-bg-dark);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-lg);
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-muted);
+            transition: color var(--transition-fast);
+        }
+
+        .nav-links a:hover {
+            color: var(--color-text);
+        }
+
+        /* ============================================
+           HERO
+           ============================================ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 64px;
+            background: linear-gradient(180deg, var(--color-bg) 0%, #F3F4F6 100%);
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .hero-eyebrow {
+            display: inline-block;
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--color-accent);
+            margin-bottom: var(--spacing-md);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.6s ease forwards;
+        }
+
+        .hero h1 {
+            margin-bottom: var(--spacing-md);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.6s ease 0.1s forwards;
+        }
+
+        .hero-subtitle {
+            font-size: var(--font-size-xl);
+            color: var(--color-text-muted);
+            max-width: 600px;
+            margin: 0 auto var(--spacing-xl);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.6s ease 0.2s forwards;
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: var(--spacing-sm);
+            justify-content: center;
+            flex-wrap: wrap;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.6s ease 0.3s forwards;
+        }
+
+        .hero-note {
+            margin-top: var(--spacing-xl);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-light);
+            opacity: 0;
+            animation: fadeUp 0.6s ease 0.4s forwards;
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================
+           WHY EV SECTION
+           ============================================ */
+        .why-section {
+            background: var(--color-bg-card);
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto var(--spacing-2xl);
+        }
+
+        .section-header h2 {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .axioms {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-2xl);
+        }
+
+        .axiom {
+            padding: var(--spacing-lg);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            transition: all var(--transition-base);
+        }
+
+        .axiom:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-2px);
+        }
+
+        .axiom-number {
+            display: inline-block;
+            width: 32px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--color-accent);
+            background: rgba(201, 162, 39, 0.1);
+            border-radius: 50%;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .axiom h3 {
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .axiom p {
+            font-size: var(--font-size-sm);
+        }
+
+        .enemy-box {
+            background: var(--color-bg-dark);
+            color: white;
+            padding: var(--spacing-xl);
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .enemy-box h3 {
+            color: var(--color-accent);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .enemy-box p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: var(--font-size-lg);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* ============================================
+           THE SYSTEM (PILLARS)
+           ============================================ */
+        .system-section {
+            background: var(--color-bg);
+        }
+
+        .pillars {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: var(--spacing-md);
+        }
+
+        .pillar {
+            text-align: center;
+            padding: var(--spacing-lg) var(--spacing-sm);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            transition: all var(--transition-base);
+        }
+
+        .pillar:hover {
+            border-color: var(--color-accent);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .pillar-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .pillar h3 {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .pillar p {
+            font-size: var(--font-size-xs);
+            line-height: 1.5;
+        }
+
+        /* ============================================
+           MINIMUM VIABLE DAY
+           ============================================ */
+        .mvd-section {
+            background: var(--color-bg-card);
+        }
+
+        .mvd-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-xl);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .mvd-step {
+            text-align: center;
+            position: relative;
+        }
+
+        .mvd-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 40px;
+            right: -30px;
+            width: 60px;
+            height: 2px;
+            background: var(--color-border);
+        }
+
+        .mvd-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--spacing-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background: var(--color-bg);
+            border: 2px solid var(--color-border);
+            border-radius: 50%;
+            transition: all var(--transition-base);
+        }
+
+        .mvd-step:hover .mvd-icon {
+            border-color: var(--color-accent);
+            background: rgba(201, 162, 39, 0.05);
+        }
+
+        .mvd-step h3 {
+            font-size: var(--font-size-base);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .mvd-step p {
+            font-size: var(--font-size-sm);
+        }
+
+        .mvd-time {
+            display: inline-block;
+            margin-top: var(--spacing-sm);
+            padding: 4px 12px;
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+            color: var(--color-accent);
+            background: rgba(201, 162, 39, 0.1);
+            border-radius: 20px;
+        }
+
+        /* ============================================
+           LONGEVITY SCORE CALCULATOR
+           ============================================ */
+        .calculator-section {
+            background: var(--color-bg-dark);
+            color: white;
+        }
+
+        .calculator-section .section-header h2 {
+            color: white;
+        }
+
+        .calculator-section .section-header p {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .calculator {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: var(--spacing-xl);
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--spacing-xl);
+        }
+
+        .calc-inputs h3 {
+            font-size: var(--font-size-base);
+            color: var(--color-accent);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .input-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .input-group label {
+            display: block;
+            font-size: var(--font-size-sm);
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .input-group input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            font-family: var(--font-sans);
+            font-size: var(--font-size-base);
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            outline: none;
+            transition: all var(--transition-fast);
+        }
+
+        .input-group input[type="number"]:focus {
+            border-color: var(--color-accent);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .slider-group {
+            margin-bottom: var(--spacing-md);
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .slider-header label {
+            font-size: var(--font-size-sm);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .slider-value {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            color: var(--color-accent);
+            min-width: 24px;
+            text-align: right;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--color-accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform var(--transition-fast);
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: var(--color-accent);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .calc-results {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .score-display {
+            text-align: center;
+            padding: var(--spacing-lg);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .score-label {
+            font-size: var(--font-size-sm);
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .score-number {
+            font-size: 4rem;
+            font-weight: 600;
+            color: var(--color-accent);
+            line-height: 1;
+        }
+
+        .score-max {
+            font-size: var(--font-size-lg);
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .weeks-display {
+            padding: var(--spacing-md);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .weeks-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-xs) 0;
+            font-size: var(--font-size-sm);
+        }
+
+        .weeks-row:not(:last-child) {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .weeks-row span:first-child {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .weeks-row span:last-child {
+            font-weight: 600;
+        }
+
+        .weeks-delta {
+            color: var(--color-success) !important;
+        }
+
+        .calc-disclaimer {
+            margin-top: var(--spacing-md);
+            padding: var(--spacing-sm);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: var(--font-size-xs);
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+        }
+
+        .tooltip-trigger {
+            color: var(--color-accent);
+            cursor: help;
+            border-bottom: 1px dotted var(--color-accent);
+        }
+
+        .tooltip {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            padding: var(--spacing-sm);
+            background: var(--color-bg-card);
+            color: var(--color-text);
+            font-size: var(--font-size-xs);
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+        }
+
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip-container:hover .tooltip {
+            display: block;
+        }
+
+        /* ============================================
+           BETA SIGNUP
+           ============================================ */
+        .signup-section {
+            background: var(--color-bg);
+        }
+
+        .signup-box {
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .signup-form {
+            margin-top: var(--spacing-lg);
+        }
+
+        .form-row {
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .signup-form input[type="email"],
+        .signup-form input[type="text"] {
+            width: 100%;
+            padding: 14px 18px;
+            font-family: var(--font-sans);
+            font-size: var(--font-size-base);
+            color: var(--color-text);
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            outline: none;
+            transition: all var(--transition-fast);
+        }
+
+        .signup-form input:focus {
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.1);
+        }
+
+        .signup-form button {
+            width: 100%;
+            padding: 14px;
+            margin-top: var(--spacing-sm);
+        }
+
+        .form-note {
+            margin-top: var(--spacing-sm);
+            font-size: var(--font-size-xs);
+            color: var(--color-text-light);
+        }
+
+        .form-message {
+            margin-top: var(--spacing-sm);
+            padding: var(--spacing-sm);
+            border-radius: 8px;
+            font-size: var(--font-size-sm);
+            display: none;
+        }
+
+        .form-message.success {
+            display: block;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--color-success);
+        }
+
+        .form-message.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--color-error);
+        }
+
+        /* ============================================
+           FOOTER
+           ============================================ */
+        footer {
+            padding: var(--spacing-xl) 0;
+            background: var(--color-bg-card);
+            border-top: 1px solid var(--color-border);
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-logo {
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            letter-spacing: 0.1em;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: var(--spacing-lg);
+            list-style: none;
+        }
+
+        .footer-links a {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-muted);
+            transition: color var(--transition-fast);
+        }
+
+        .footer-links a:hover {
+            color: var(--color-text);
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 1024px) {
+            .pillars {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .pillars .pillar:nth-child(4),
+            .pillars .pillar:nth-child(5) {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --font-size-5xl: 2.5rem;
+                --font-size-3xl: 1.75rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .hero {
+                padding-top: 80px;
+            }
+
+            .axioms {
+                grid-template-columns: 1fr;
+            }
+
+            .pillars {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .mvd-steps {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-lg);
+            }
+
+            .mvd-step::after {
+                display: none;
+            }
+
+            .calc-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                flex-direction: column;
+                gap: var(--spacing-md);
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .pillars {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-ctas {
+                flex-direction: column;
+            }
+
+            .hero-ctas .btn {
+                width: 100%;
+            }
+        }
+
+        /* ============================================
+           ANIMATIONS (Intersection Observer)
+           ============================================ */
+        .fade-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Stagger children */
+        .stagger-children > * {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .stagger-children.visible > *:nth-child(1) { transition-delay: 0s; }
+        .stagger-children.visible > *:nth-child(2) { transition-delay: 0.1s; }
+        .stagger-children.visible > *:nth-child(3) { transition-delay: 0.2s; }
+        .stagger-children.visible > *:nth-child(4) { transition-delay: 0.3s; }
+        .stagger-children.visible > *:nth-child(5) { transition-delay: 0.4s; }
+
+        .stagger-children.visible > * {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="#" class="logo">EXTENSIO VITAE</a>
+            <ul class="nav-links">
+                <li><a href="#why">Why EV</a></li>
+                <li><a href="#system">The System</a></li>
+                <li><a href="#calculator">Your Score</a></li>
+                <li><a href="#signup" class="btn btn-primary">Join Beta</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <span class="hero-eyebrow">Extend Your Agency</span>
+                <h1>More years of clarity,<br>strength, and dignity.</h1>
+                <p class="hero-subtitle">
+                    A 30-day longevity blueprint built on boring consistency,
+                    not gadgets or supplements. 3-minute intake. Daily micro-actions.
+                </p>
+                <div class="hero-ctas">
+                    <a href="#signup" class="btn btn-primary">Become a beta tester</a>
+                    <a href="#system" class="btn btn-secondary">See the system</a>
+                </div>
+                <p class="hero-note">
+                    3-minute intake → 30-day blueprint → Under 30 minutes daily
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why EV -->
+    <section class="why-section" id="why">
+        <div class="container">
+            <div class="section-header fade-up">
+                <h2>Why Extensio Vitae</h2>
+                <p>Three axioms that guide everything we build.</p>
+            </div>
+
+            <div class="axioms stagger-children">
+                <div class="axiom">
+                    <span class="axiom-number">1</span>
+                    <h3>Clarity over willpower</h3>
+                    <p>You don't need more motivation. You need a clear system that removes daily decisions. We tell you exactly what to do, when.</p>
+                </div>
+                <div class="axiom">
+                    <span class="axiom-number">2</span>
+                    <h3>Regulation over performance</h3>
+                    <p>Before you optimize, you must regulate. Sleep, stress, movement rhythms. The foundation most skip in pursuit of hacks.</p>
+                </div>
+                <div class="axiom">
+                    <span class="axiom-number">3</span>
+                    <h3>Boring consistency wins</h3>
+                    <p>No biohacks. No gadget dependencies. Just small, evidence-based actions repeated daily. Compounding beats intensity.</p>
+                </div>
+            </div>
+
+            <div class="enemy-box fade-up">
+                <h3>What we're against</h3>
+                <p>The optimization cult — endless gadgets, supplements, and data obsession without a coherent system. More inputs, less clarity. We believe in subtraction, not addition.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- The System (Pillars) -->
+    <section class="system-section" id="system">
+        <div class="container">
+            <div class="section-header fade-up">
+                <h2>The System</h2>
+                <p>Five pillars of sustainable longevity. No supplements required.</p>
+            </div>
+
+            <div class="pillars stagger-children">
+                <div class="pillar">
+                    <div class="pillar-icon">☀️</div>
+                    <h3>Circadian</h3>
+                    <p>Light exposure, meal timing, and caffeine cutoffs that anchor your biological clock.</p>
+                </div>
+                <div class="pillar">
+                    <div class="pillar-icon">🌙</div>
+                    <h3>Sleep</h3>
+                    <p>Temperature, darkness, consistency. The non-negotiable foundation of recovery.</p>
+                </div>
+                <div class="pillar">
+                    <div class="pillar-icon">💪</div>
+                    <h3>Movement</h3>
+                    <p>Zone 2, strength, NEAT. Strategic physical stress for adaptation, not exhaustion.</p>
+                </div>
+                <div class="pillar">
+                    <div class="pillar-icon">🥗</div>
+                    <h3>Nutrition</h3>
+                    <p>Protein timing, blood sugar stability, eating windows. Simple rules, no diets.</p>
+                </div>
+                <div class="pillar">
+                    <div class="pillar-icon">🧠</div>
+                    <h3>Mental</h3>
+                    <p>Breathwork, downregulation, stress inoculation. Your nervous system is trainable.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Minimum Viable Day -->
+    <section class="mvd-section" id="mvd">
+        <div class="container">
+            <div class="section-header fade-up">
+                <h2>Minimum Viable Day</h2>
+                <p>What a good day looks like. Not perfect — sustainable.</p>
+            </div>
+
+            <div class="mvd-steps stagger-children">
+                <div class="mvd-step">
+                    <div class="mvd-icon">🌅</div>
+                    <h3>Morning Light</h3>
+                    <p>2-5 minutes of outdoor light within 30 minutes of waking. No sunglasses. Sets your cortisol rhythm.</p>
+                    <span class="mvd-time">2-5 min</span>
+                </div>
+                <div class="mvd-step">
+                    <div class="mvd-icon">🚶</div>
+                    <h3>Movement Snack</h3>
+                    <p>A 10-minute walk after your largest meal. Blood sugar regulation, digestion, mental clarity.</p>
+                    <span class="mvd-time">10 min</span>
+                </div>
+                <div class="mvd-step">
+                    <div class="mvd-icon">😮‍💨</div>
+                    <h3>Evening Downshift</h3>
+                    <p>5 minutes of physiological sighing or box breathing. Activates parasympathetic recovery.</p>
+                    <span class="mvd-time">5 min</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Longevity Score Calculator -->
+    <section class="calculator-section" id="calculator">
+        <div class="container">
+            <div class="section-header fade-up">
+                <h2>Your Longevity Score</h2>
+                <p>An illustrative model of your current trajectory. Where do you stand?</p>
+            </div>
+
+            <div class="calculator fade-up">
+                <div class="calc-grid">
+                    <div class="calc-inputs">
+                        <h3>Your Inputs</h3>
+
+                        <div class="input-group">
+                            <label for="age">Your Age</label>
+                            <input type="number" id="age" min="18" max="100" value="40" placeholder="40">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Circadian Rhythm</label>
+                                <span class="slider-value" id="circadian-val">5</span>
+                            </div>
+                            <input type="range" id="circadian" min="0" max="10" value="5">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Sleep Quality</label>
+                                <span class="slider-value" id="sleep-val">5</span>
+                            </div>
+                            <input type="range" id="sleep" min="0" max="10" value="5">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Movement</label>
+                                <span class="slider-value" id="movement-val">5</span>
+                            </div>
+                            <input type="range" id="movement" min="0" max="10" value="5">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Nutrition</label>
+                                <span class="slider-value" id="nutrition-val">5</span>
+                            </div>
+                            <input type="range" id="nutrition" min="0" max="10" value="5">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <label>Mental Resilience</label>
+                                <span class="slider-value" id="mental-val">5</span>
+                            </div>
+                            <input type="range" id="mental" min="0" max="10" value="5">
+                        </div>
+                    </div>
+
+                    <div class="calc-results">
+                        <div class="score-display">
+                            <div class="score-label">Longevity Score</div>
+                            <div class="score-number" id="score">50</div>
+                            <div class="score-max">/ 100</div>
+                        </div>
+
+                        <div class="weeks-display">
+                            <div class="weeks-row">
+                                <span>Your life in weeks</span>
+                                <span id="current-weeks">2,340</span>
+                            </div>
+                            <div class="weeks-row">
+                                <span>Baseline (to 85)</span>
+                                <span id="baseline-weeks">2,340</span>
+                            </div>
+                            <div class="weeks-row">
+                                <span>EV-adjusted projection</span>
+                                <span id="ev-weeks">2,600</span>
+                            </div>
+                            <div class="weeks-row">
+                                <span>Potential gain</span>
+                                <span class="weeks-delta" id="delta-weeks">+260 weeks</span>
+                            </div>
+                        </div>
+
+                        <div class="calc-disclaimer">
+                            <div class="tooltip-container">
+                                <span class="tooltip-trigger">How it's calculated</span>
+                                <div class="tooltip">
+                                    <strong>Illustrative Model:</strong><br>
+                                    Score = average of 5 pillar inputs × 10<br>
+                                    Baseline = (85 - age) × 52 weeks<br>
+                                    EV-adjusted = baseline × (1 + score/200)<br><br>
+                                    This is a simplified illustration, not a medical prediction.
+                                </div>
+                            </div>
+                            <br><br>
+                            ⚠️ This calculator provides an illustrative model only. It is not medical advice and does not predict actual lifespan. Consult healthcare professionals for personal guidance.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Beta Signup -->
+    <section class="signup-section" id="signup">
+        <div class="container">
+            <div class="signup-box fade-up">
+                <h2>Join the Beta</h2>
+                <p>Be among the first to receive your personalized 30-day longevity blueprint. Limited spots available.</p>
+
+                <form class="signup-form" id="beta-form">
+                    <div class="form-row">
+                        <input type="email" name="email" placeholder="Your email" required>
+                    </div>
+                    <div class="form-row">
+                        <input type="text" name="name" placeholder="Your name (optional)">
+                    </div>
+                    <button type="submit" class="btn btn-accent">Request beta access</button>
+                    <p class="form-note">No spam. Unsubscribe anytime. We respect your inbox.</p>
+                    <div class="form-message" id="form-message"></div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <span class="footer-logo">EXTENSIO VITAE</span>
+                <ul class="footer-links">
+                    <li><a href="#why">Why EV</a></li>
+                    <li><a href="#system">System</a></li>
+                    <li><a href="#">Privacy</a></li>
+                    <li><a href="#">Terms</a></li>
+                </ul>
+                <span class="text-sm text-muted">© 2026 Extensio Vitae</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const SHEETS_WEBHOOK_URL = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
+
+        // ============================================
+        // INTERSECTION OBSERVER FOR ANIMATIONS
+        // ============================================
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-up, .stagger-children').forEach(el => {
+            observer.observe(el);
+        });
+
+        // ============================================
+        // LONGEVITY SCORE CALCULATOR
+        // ============================================
+        const sliders = ['circadian', 'sleep', 'movement', 'nutrition', 'mental'];
+        const ageInput = document.getElementById('age');
+
+        function updateCalculator() {
+            // Get all values
+            const age = parseInt(ageInput.value) || 40;
+            const values = sliders.map(id => parseInt(document.getElementById(id).value));
+
+            // Update slider value displays
+            sliders.forEach((id, i) => {
+                document.getElementById(`${id}-val`).textContent = values[i];
+            });
+
+            // Calculate score (average of 5 pillars × 10)
+            const avgPillar = values.reduce((a, b) => a + b, 0) / values.length;
+            const score = Math.round(avgPillar * 10);
+
+            // Calculate weeks
+            const baselineYears = Math.max(0, 85 - age);
+            const baselineWeeks = baselineYears * 52;
+
+            // EV adjustment: score improves projection by up to 50% at score 100
+            // At score 50 (average), no change. Below 50, slight reduction.
+            const adjustmentFactor = 1 + ((score - 50) / 100);
+            const evWeeks = Math.round(baselineWeeks * adjustmentFactor);
+            const deltaWeeks = evWeeks - baselineWeeks;
+
+            // Update display
+            document.getElementById('score').textContent = score;
+            document.getElementById('current-weeks').textContent = baselineWeeks.toLocaleString();
+            document.getElementById('baseline-weeks').textContent = baselineWeeks.toLocaleString();
+            document.getElementById('ev-weeks').textContent = evWeeks.toLocaleString();
+
+            const deltaEl = document.getElementById('delta-weeks');
+            if (deltaWeeks >= 0) {
+                deltaEl.textContent = `+${deltaWeeks.toLocaleString()} weeks`;
+                deltaEl.style.color = '#10B981';
+            } else {
+                deltaEl.textContent = `${deltaWeeks.toLocaleString()} weeks`;
+                deltaEl.style.color = '#EF4444';
+            }
+        }
+
+        // Add event listeners
+        sliders.forEach(id => {
+            document.getElementById(id).addEventListener('input', updateCalculator);
+        });
+        ageInput.addEventListener('input', updateCalculator);
+
+        // Initial calculation
+        updateCalculator();
+
+        // ============================================
+        // BETA SIGNUP FORM
+        // ============================================
+        const betaForm = document.getElementById('beta-form');
+        const formMessage = document.getElementById('form-message');
+
+        betaForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(betaForm);
+            const email = formData.get('email');
+            const name = formData.get('name') || '';
+
+            // Reset message
+            formMessage.className = 'form-message';
+            formMessage.style.display = 'none';
+
+            // Validate email
+            if (!email || !email.includes('@')) {
+                formMessage.textContent = 'Please enter a valid email address.';
+                formMessage.className = 'form-message error';
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = betaForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+
+            try {
+                // Check if webhook URL is configured
+                if (SHEETS_WEBHOOK_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
+                    // Demo mode - simulate success
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    formMessage.textContent = '✓ You\'re on the list! We\'ll be in touch soon.';
+                    formMessage.className = 'form-message success';
+                    betaForm.reset();
+                } else {
+                    // Production mode - send to Google Sheets
+                    const response = await fetch(SHEETS_WEBHOOK_URL, {
+                        method: 'POST',
+                        mode: 'no-cors', // Required for Google Apps Script
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            name: name,
+                            timestamp: new Date().toISOString(),
+                            source: 'landing_page'
+                        })
+                    });
+
+                    // With no-cors, we can't read the response, so assume success
+                    formMessage.textContent = '✓ You\'re on the list! We\'ll be in touch soon.';
+                    formMessage.className = 'form-message success';
+                    betaForm.reset();
+                }
+            } catch (error) {
+                console.error('Form submission error:', error);
+                formMessage.textContent = 'Something went wrong. Please try again.';
+                formMessage.className = 'form-message error';
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        // ============================================
+        // SMOOTH SCROLL FOR ANCHOR LINKS
+        // ============================================
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // ============================================
+        // NAVBAR SCROLL EFFECT
+        // ============================================
+        let lastScroll = 0;
+        const nav = document.querySelector('nav');
+
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+
+            if (currentScroll > 100) {
+                nav.style.boxShadow = '0 1px 10px rgba(0, 0, 0, 0.05)';
+            } else {
+                nav.style.boxShadow = 'none';
+            }
+
+            lastScroll = currentScroll;
+        });
+    </script>
+</body>
+</html>

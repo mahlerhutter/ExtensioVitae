@@ -1,0 +1,31 @@
+{
+    "name": "ExtensioVitae - 30-Day Longevity Blueprint",
+    "short_name": "ExtensioVitae",
+    "description": "Get a personalized, science-informed longevity plan delivered to your WhatsApp in under 3 minutes.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#0A1628",
+    "theme_color": "#0A1628",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/icon-192.png",
+            "type": "image/png",
+            "sizes": "192x192",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-512.png",
+            "type": "image/png",
+            "sizes": "512x512",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": [
+        "health",
+        "lifestyle",
+        "wellness"
+    ],
+    "lang": "de-DE",
+    "dir": "ltr"
+}
