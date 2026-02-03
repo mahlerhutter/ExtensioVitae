@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useToast } from '../Toast';
 
 /**
  * General Feedback Panel
@@ -8,6 +9,7 @@ export default function GeneralFeedbackPanel({ onClose, onSubmit }) {
     const [feedbackType, setFeedbackType] = useState('general');
     const [comment, setComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { addToast } = useToast();
 
     const handleSubmit = async () => {
         if (!comment.trim()) return;
@@ -18,10 +20,24 @@ export default function GeneralFeedbackPanel({ onClose, onSubmit }) {
                 feedback_type: feedbackType,
                 general_comment: comment.trim(),
             });
+            addToast('Feedback erfolgreich gesendet! Vielen Dank 🎉', 'success');
             setComment('');
             onClose();
         } catch (error) {
             console.error('Failed to submit feedback:', error);
+
+            // Show user-friendly error message
+            let errorMessage = 'Fehler beim Senden des Feedbacks.';
+
+            if (error.message?.includes('not authenticated')) {
+                errorMessage = 'Bitte melde dich an, um Feedback zu senden.';
+            } else if (error.message?.includes('policy')) {
+                errorMessage = 'Keine Berechtigung. Bitte versuche dich neu anzumelden.';
+            } else if (error.code === 'PGRST301') {
+                errorMessage = 'Datenbankfehler. Bitte kontaktiere den Support.';
+            }
+
+            addToast(errorMessage + ' Fehlerdetails: ' + (error.message || 'Unbekannt'), 'error');
             setIsSubmitting(false);
         }
     };
@@ -74,8 +90,8 @@ export default function GeneralFeedbackPanel({ onClose, onSubmit }) {
                                     key={type.value}
                                     onClick={() => setFeedbackType(type.value)}
                                     className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${feedbackType === type.value
-                                            ? 'bg-amber-400/10 border-amber-400 text-amber-400'
-                                            : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
+                                        ? 'bg-amber-400/10 border-amber-400 text-amber-400'
+                                        : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
                                         }`}
                                     disabled={isSubmitting}
                                 >
