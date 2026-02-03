@@ -47,3 +47,13 @@ Thumbs.db
 .tmp
 node_modules
 .env
+
+# Strategic & Confidential Documents (not for public repo)
+docs/VISION.md
+docs/FUTURE.md
+docs/tasks.md
+docs/AUDIT.md
+SECURITY_AUDIT.md
+REMEDIATION_PROMPTS.md
+GEMINI.md
+CLAUDE.MD

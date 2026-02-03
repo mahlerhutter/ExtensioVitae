@@ -12,6 +12,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import ImprintPage from './pages/ImprintPage';
+import FuturePage from './pages/FuturePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import BetaBadge from './components/BetaBadge';
@@ -112,6 +113,13 @@ export default function App() {
           <Route path="/imprint" element={
             <ErrorBoundary>
               <ImprintPage />
+            </ErrorBoundary>
+          } />
+
+          {/* Hidden Future Vision Page (for trusted users only) */}
+          <Route path="/future" element={
+            <ErrorBoundary>
+              <FuturePage />
             </ErrorBoundary>
           } />
 
