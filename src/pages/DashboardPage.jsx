@@ -514,7 +514,7 @@ export default function DashboardPage() {
         <UserProfileSection intakeData={intakeData} email={userEmail} onEdit={() => setShowEditModal(true)} />
 
         {/* Longevity Score Widget */}
-        <LongevityScoreWidget intakeData={intakeData} />
+        <LongevityScoreWidget intakeData={intakeData} userName={intakeData?.name} />
 
         {selectedDay && selectedDay !== currentDay && (
           <button

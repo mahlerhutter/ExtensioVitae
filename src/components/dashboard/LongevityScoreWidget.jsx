@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { calculateLongevityScore } from '../../lib/longevityScore';
+import ShareScoreCard from '../ShareScoreCard';
 
 // Helper component for score breakdown items
 function ScoreMiniItem({ icon, label, score }) {
@@ -21,7 +22,7 @@ function ScoreMiniItem({ icon, label, score }) {
 }
 
 // Main LongevityScoreWidget Component
-export default function LongevityScoreWidget({ intakeData, compact = false }) {
+export default function LongevityScoreWidget({ intakeData, userName, compact = false }) {
     const scoreData = useMemo(() => {
         if (!intakeData) return null;
         try {
@@ -173,13 +174,21 @@ export default function LongevityScoreWidget({ intakeData, compact = false }) {
 
             {/* Motivation Text */}
             <div className="mt-4 pt-4 border-t border-slate-800 text-center">
-                <p className="text-sm text-slate-400">
+                <p className="text-sm text-slate-400 mb-4">
                     {score >= 70
                         ? "Du investierst in deine Zukunft. Weiter so! 🌟"
                         : score >= 40
                             ? "Jeder Tag zählt. Heute ist der perfekte Tag für Veränderung."
                             : "Kleine Änderungen, große Wirkung. Starte mit einer Sache."}
                 </p>
+
+                {/* Share Score Button */}
+                <div className="max-w-xs mx-auto">
+                    <ShareScoreCard
+                        score={score}
+                        userName={userName || intakeData?.name}
+                    />
+                </div>
             </div>
         </div>
     );
