@@ -138,18 +138,24 @@ function Hero() {
       <div className="max-w-6xl mx-auto px-6">
         {/* Text Content */}
         <div className="text-center mb-12">
+          <p className="text-amber-400 text-sm font-medium uppercase tracking-widest mb-4">
+            Das Family Office für den Körper
+          </p>
           <h1 className="text-4xl md:text-6xl font-semibold text-white leading-tight mb-6">
-            Your Personalized 30-Day
+            Dein autonomes
             <br />
-            <span className="text-amber-400">Longevity Blueprint</span>
+            <span className="text-amber-400">biologisches Betriebssystem</span>
           </h1>
           <p className="text-xl text-slate-300 mb-4 max-w-2xl mx-auto">
-            Science-informed. Delivered daily. Under 30 minutes.
+            Personalisierte 30-Tage Protokolle. Täglich geliefert. Unter 30 Minuten.
+          </p>
+          <p className="text-slate-500 text-sm max-w-xl mx-auto mb-6">
+            Weil dein Körper dein wertvollstes Asset ist.
           </p>
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full mb-8">
             <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
             <span className="text-amber-400 text-sm font-medium">
-              Early Beta - We're improving daily based on your feedback
+              Early Beta - Wir verbessern täglich basierend auf deinem Feedback
             </span>
           </div>
         </div>
