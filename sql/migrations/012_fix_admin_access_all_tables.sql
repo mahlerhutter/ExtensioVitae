@@ -2,10 +2,12 @@
 -- Date: 2026-02-03
 -- Description: Allow authenticated users to view all data (admin check happens in frontend)
 -- This is a temporary solution until proper admin roles are implemented
+-- This migration is IDEMPOTENT - safe to run multiple times
 
 -- =============================================
 -- USER PROFILES - Allow admins to view all
 -- =============================================
+DROP POLICY IF EXISTS "Authenticated users can view all profiles" ON user_profiles;
 DROP POLICY IF EXISTS "Admins can view all profiles" ON user_profiles;
 
 CREATE POLICY "Authenticated users can view all profiles"
@@ -16,7 +18,9 @@ CREATE POLICY "Authenticated users can view all profiles"
 -- =============================================
 -- PLANS - Allow admins to view and manage all
 -- =============================================
+DROP POLICY IF EXISTS "Authenticated users can view all plans" ON plans;
 DROP POLICY IF EXISTS "Admins can view all plans" ON plans;
+DROP POLICY IF EXISTS "Authenticated users can delete any plan" ON plans;
 DROP POLICY IF EXISTS "Admins can delete any plan" ON plans;
 
 CREATE POLICY "Authenticated users can view all plans"
@@ -32,7 +36,9 @@ CREATE POLICY "Authenticated users can delete any plan"
 -- =============================================
 -- DAILY_PROGRESS - Allow admins to view and manage all
 -- =============================================  
+DROP POLICY IF EXISTS "Authenticated users can view all progress" ON daily_progress;
 DROP POLICY IF EXISTS "Admins can view all progress" ON daily_progress;
+DROP POLICY IF EXISTS "Authenticated users can delete any progress" ON daily_progress;
 DROP POLICY IF EXISTS "Admins can delete any progress" ON daily_progress;
 
 CREATE POLICY "Authenticated users can view all progress"
@@ -48,6 +54,7 @@ CREATE POLICY "Authenticated users can delete any progress"
 -- =============================================
 -- INTAKE_RESPONSES - Allow admins to view all
 -- =============================================
+DROP POLICY IF EXISTS "Authenticated users can view all intake" ON intake_responses;
 DROP POLICY IF EXISTS "Admins can view all intake" ON intake_responses;
 
 CREATE POLICY "Authenticated users can view all intake"
