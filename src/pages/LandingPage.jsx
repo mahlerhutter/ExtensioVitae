@@ -135,40 +135,67 @@ function Navbar() {
 function Hero() {
   return (
     <section className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 pt-20">
-      <div className="max-w-4xl mx-auto px-6 text-center">
-        <h1 className="text-4xl md:text-6xl font-semibold text-white leading-tight mb-6">
-          Your Personalized 30-Day
-          <br />
-          <span className="text-amber-400">Longevity Blueprint</span>
-        </h1>
-        <p className="text-xl text-slate-300 mb-4 max-w-2xl mx-auto">
-          Science-informed. Delivered daily. Under 30 minutes.
-        </p>
-        <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full mb-8">
-          <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
-          <span className="text-amber-400 text-sm font-medium">
-            Early Beta - We're improving daily based on your feedback
-          </span>
+      <div className="max-w-6xl mx-auto px-6">
+        {/* Text Content */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-6xl font-semibold text-white leading-tight mb-6">
+            Your Personalized 30-Day
+            <br />
+            <span className="text-amber-400">Longevity Blueprint</span>
+          </h1>
+          <p className="text-xl text-slate-300 mb-4 max-w-2xl mx-auto">
+            Science-informed. Delivered daily. Under 30 minutes.
+          </p>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full mb-8">
+            <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+            <span className="text-amber-400 text-sm font-medium">
+              Early Beta - We're improving daily based on your feedback
+            </span>
+          </div>
         </div>
-        <a
-          href="/intake"
-          className="inline-flex items-center bg-amber-400 hover:bg-amber-500 text-slate-900 px-8 py-4 rounded-lg text-lg font-medium transition-all hover:scale-105"
-        >
-          Get My Blueprint
-          {icons.arrow}
-        </a>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mt-10 text-slate-400">
-          <div className="flex items-center gap-2">
-            {icons.check}
-            <span>3-minute intake</span>
+
+        {/* Hero Video */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl border border-slate-700/50 bg-slate-950">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-auto"
+              poster="/videos/hero-demo-poster.jpg"
+            >
+              <source src="/videos/hero-demo.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+
+            {/* Subtle overlay gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/20 to-transparent pointer-events-none"></div>
           </div>
-          <div className="flex items-center gap-2">
-            {icons.check}
-            <span>Personalized to your life</span>
-          </div>
-          <div className="flex items-center gap-2">
-            {icons.check}
-            <span>Daily WhatsApp nudges</span>
+        </div>
+
+        {/* CTA */}
+        <div className="text-center">
+          <a
+            href="/intake"
+            className="inline-flex items-center bg-amber-400 hover:bg-amber-500 text-slate-900 px-8 py-4 rounded-lg text-lg font-medium transition-all hover:scale-105"
+          >
+            Get My Blueprint
+            {icons.arrow}
+          </a>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mt-10 text-slate-400">
+            <div className="flex items-center gap-2">
+              {icons.check}
+              <span>3-minute intake</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {icons.check}
+              <span>Personalized to your life</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {icons.check}
+              <span>Daily WhatsApp nudges</span>
+            </div>
           </div>
         </div>
       </div>
