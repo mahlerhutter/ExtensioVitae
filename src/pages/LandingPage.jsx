@@ -608,6 +608,7 @@ function Footer() {
             </a>
             <a href="/privacy" className="hover:text-slate-300 transition-colors">Datenschutz</a>
             <a href="/terms" className="hover:text-slate-300 transition-colors">AGB</a>
+            <a href="/imprint" className="hover:text-slate-300 transition-colors">Impressum</a>
             <a href="mailto:hello@extensiovitae.com" className="hover:text-slate-300 transition-colors">Kontakt</a>
           </div>
         </div>

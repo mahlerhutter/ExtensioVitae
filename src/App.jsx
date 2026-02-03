@@ -9,6 +9,9 @@ import AdminPage from './pages/AdminPage';
 import HealthProfilePage from './pages/HealthProfilePage';
 import SciencePage from './pages/SciencePage';
 import NotFoundPage from './pages/NotFoundPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import ImprintPage from './pages/ImprintPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import BetaBadge from './components/BetaBadge';
@@ -43,6 +46,23 @@ export default function App() {
         <Route path="/science" element={
           <ErrorBoundary>
             <SciencePage />
+          </ErrorBoundary>
+        } />
+
+        {/* Legal Pages */}
+        <Route path="/privacy" element={
+          <ErrorBoundary>
+            <PrivacyPage />
+          </ErrorBoundary>
+        } />
+        <Route path="/terms" element={
+          <ErrorBoundary>
+            <TermsPage />
+          </ErrorBoundary>
+        } />
+        <Route path="/imprint" element={
+          <ErrorBoundary>
+            <ImprintPage />
           </ErrorBoundary>
         } />
 
