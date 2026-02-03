@@ -9,12 +9,13 @@ import { logger } from '../lib/logger';
 import PlanReviewModal from '../components/plan-review/PlanReviewModal';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
+// HACK 2: Labor Illusion - Make generation feel like deep analysis
 const STAGES = [
-  'Analyzing your profile...',
-  'Mapping your goals to the 6 pillars...',
-  'Designing your 30-day architecture...',
-  'Optimizing for your constraints...',
-  'Finalizing your blueprint...',
+  'Parsing Circadian Baseline...',
+  'Cross-referencing Huberman Protocols...',
+  'Optimizing Cortisol Peaks...',
+  'Calculating Sleep Architecture...',
+  'Finalizing Your Blueprint...',
 ];
 
 export default function GeneratingPage() {
@@ -25,14 +26,14 @@ export default function GeneratingPage() {
   const [planOverview, setPlanOverview] = useState(null);
   const [generatedPlanId, setGeneratedPlanId] = useState(null);
 
-  // Progress through stages
+  // Progress through stages - HACK 2: 800ms intervals for Labor Illusion
   useEffect(() => {
     const stageInterval = setInterval(() => {
       setCurrentStage((prev) => {
         if (prev < STAGES.length - 1) return prev + 1;
         return prev;
       });
-    }, 4000);
+    }, 800); // Changed from 4000ms to 800ms
 
     return () => clearInterval(stageInterval);
   }, []);

@@ -33,7 +33,7 @@ export default function TodayCard({ day, dayData, progress, onTaskToggle, startD
     const planDayDate = startDate ? new Date(new Date(startDate).getTime() + (day - 1) * 24 * 60 * 60 * 1000) : today;
 
     return (
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
+        <div id="today-card" className="bg-slate-900 border border-slate-800 rounded-xl p-6">
             <div className="flex items-center justify-between mb-6">
                 <div>
                     <h2 className="text-2xl font-semibold text-white">Heute</h2>

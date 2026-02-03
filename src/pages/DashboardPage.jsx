@@ -377,6 +377,30 @@ export default function DashboardPage() {
     }
   }, [day, plan, loading]);
 
+  // HACK 5: Zen Auto-Scroll - Focus on current time block
+  useEffect(() => {
+    if (!loading && plan) {
+      setTimeout(() => {
+        const hour = new Date().getHours();
+        let blockId = 'today-card'; // Default to today card
+
+        // Determine time block
+        if (hour >= 5 && hour < 11) {
+          blockId = 'morning-block';
+        } else if (hour >= 11 && hour < 21) {
+          blockId = 'day-block';
+        } else {
+          blockId = 'evening-block';
+        }
+
+        const element = document.getElementById(blockId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 300); // Wait for layout to stabilize
+    }
+  }, [loading, plan]);
+
   const handleTaskToggle = async (day, taskId) => {
     const dayData = plan.days[day - 1];
     const totalTasks = dayData?.tasks?.length || 0;

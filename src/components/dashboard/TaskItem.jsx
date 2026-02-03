@@ -23,6 +23,11 @@ export default function TaskItem({ task, completed, onToggle }) {
     const { addToast } = useToast();
 
     const handleToggle = () => {
+        // HACK 3: Haptic Dopamine - Pavlovian conditioning
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+            navigator.vibrate(12);
+        }
+
         // Fire confetti if this is the Quick Win task and it's being completed
         if (task.id === 'quick-win-01' && !completed) {
             fireConfetti();
