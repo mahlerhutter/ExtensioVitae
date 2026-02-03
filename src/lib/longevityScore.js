@@ -141,7 +141,6 @@ function calculateBMIImpact(heightCm, weightKg) {
  */
 const SMOKING_IMPACT = {
     never: 0,
-    never: 0,
     former: -1.5,       // Ehemals: teilweise reversibel (-1.5 Jahre vs. Baseline)
     occasional: -3.0,   // Gelegentlich: messbar schädlich
     daily: -8.0         // Täglich: ~10 Jahre weniger (Doll 2004) - konservativ mit -8 berechnet

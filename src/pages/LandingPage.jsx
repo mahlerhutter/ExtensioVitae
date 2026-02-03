@@ -567,6 +567,66 @@ function LifeInWeeksSection() {
   );
 }
 
+// Science Evidence Section
+function ScienceEvidence() {
+  return (
+    <section className="py-20 bg-slate-800/50">
+      <div className="max-w-4xl mx-auto px-6">
+        <a
+          href="/science"
+          className="block bg-gradient-to-br from-slate-900 to-slate-800 hover:from-slate-800 hover:to-slate-900 border border-slate-700 hover:border-amber-400/50 rounded-2xl p-8 transition-all group shadow-xl hover:shadow-amber-400/10"
+        >
+          <div className="flex flex-col md:flex-row items-center gap-6">
+            {/* Icon */}
+            <div className="flex-shrink-0 w-20 h-20 bg-amber-400/10 rounded-2xl flex items-center justify-center">
+              <span className="text-4xl">🔬</span>
+            </div>
+
+            {/* Content */}
+            <div className="flex-1 text-center md:text-left">
+              <h3 className="text-2xl font-semibold text-white mb-2 group-hover:text-amber-400 transition-colors">
+                Wissenschaftliche Evidenz
+              </h3>
+              <p className="text-slate-400 mb-3">
+                Erfahre, warum nur 3 Minuten Fragebogen zu einem personalisierten 30-Tage-Plan führen — basierend auf aktueller Longevity-Forschung.
+              </p>
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm">
+                <span className="flex items-center gap-1 text-slate-500">
+                  <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  6 Longevity Pillars
+                </span>
+                <span className="flex items-center gap-1 text-slate-500">
+                  <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Peer-reviewed Studies
+                </span>
+                <span className="flex items-center gap-1 text-slate-500">
+                  <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  No Medical Claims
+                </span>
+              </div>
+            </div>
+
+            {/* Arrow */}
+            <div className="flex-shrink-0">
+              <div className="w-12 h-12 bg-slate-800 group-hover:bg-amber-400/20 rounded-full flex items-center justify-center transition-colors">
+                <svg className="w-6 h-6 text-slate-500 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </section>
+  );
+}
+
 // Final CTA Section
 function FinalCTA() {
   return (
@@ -612,23 +672,6 @@ function Footer() {
             <a href="mailto:hello@extensiovitae.com" className="hover:text-slate-300 transition-colors">Kontakt</a>
           </div>
         </div>
-        {/* Science teaser */}
-        <div className="pt-6 border-t border-slate-800/50">
-          <a href="/science" className="block bg-slate-900/50 hover:bg-slate-800/50 border border-slate-800 hover:border-amber-400/30 rounded-xl p-4 transition-all group">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">🔬</span>
-                <div>
-                  <p className="text-white font-medium text-sm">Wissenschaftliche Evidenz</p>
-                  <p className="text-slate-500 text-xs">Erfahre, warum 3 Minuten Input zu personalisierten Ergebnissen führen →</p>
-                </div>
-              </div>
-              <svg className="w-5 h-5 text-slate-600 group-hover:text-amber-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
-          </a>
-        </div>
       </div>
     </footer>
   );
@@ -659,6 +702,7 @@ export default function LandingPage() {
       <HowItWorks />
       <LifeInWeeksSection />
       <Philosophy />
+      <ScienceEvidence />
       <FinalCTA />
       <Footer />
 

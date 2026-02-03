@@ -77,7 +77,7 @@ function calculateFocusBreakdown(plan) {
         if (day.tasks && Array.isArray(day.tasks)) {
             day.tasks.forEach(task => {
                 const pillar = task.pillar?.toLowerCase() || 'movement';
-                if (pillarCounts.hasOwnProperty(pillar)) {
+                if (Object.prototype.hasOwnProperty.call(pillarCounts, pillar)) {
                     pillarCounts[pillar]++;
                     totalTasks++;
                 }
