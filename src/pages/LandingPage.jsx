@@ -155,7 +155,7 @@ function Hero() {
         </div>
 
         {/* Hero Video */}
-        <div className="max-w-xl mx-auto mb-8">
+        <div className="max-w-lg mx-auto mb-8">
           <div className="relative rounded-xl overflow-hidden shadow-2xl border border-slate-700/50 bg-slate-950">
             <video
               autoPlay
