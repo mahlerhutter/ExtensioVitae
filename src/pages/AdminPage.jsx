@@ -55,7 +55,7 @@ export default function AdminPage() {
             // Admin email list (simple approach without RLS function)
             const ADMIN_EMAILS = [
                 'michael@extensiovitae.com',
-                'mahlerhutter@gmail.com',
+                'manuelmahlerhutter@gmail.com',
                 'admin@extensiovitae.com',
                 // Add more admin emails here
             ];
