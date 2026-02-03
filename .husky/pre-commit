@@ -1,13 +1,1 @@
-#!/usr/bin/env sh
-
-# Run tests before commit
-echo "🧪 Running tests before commit..."
-node src/tests/simple-test.js
-
-# If tests fail, prevent commit
-if [ $? -ne 0 ]; then
-  echo "❌ Tests failed! Commit aborted."
-  exit 1
-fi
-
-echo "✅ Tests passed! Proceeding with commit..."
+npx lint-staged

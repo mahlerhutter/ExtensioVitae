@@ -5,6 +5,7 @@
 
 import { supabase } from './supabase';
 import { trackFeedbackSubmitted } from './analytics';
+import { logger } from './logger';
 
 /**
  * Submit user feedback
@@ -22,7 +23,7 @@ import { trackFeedbackSubmitted } from './analytics';
  */
 export async function submitFeedback(feedbackData) {
     if (!supabase) {
-        console.warn('[FeedbackService] Supabase not available');
+        logger.warn('[FeedbackService] Supabase not available');
         return null;
     }
 
@@ -45,14 +46,14 @@ export async function submitFeedback(feedbackData) {
 
         if (error) throw error;
 
-        console.log('[FeedbackService] Feedback submitted:', data.id);
+        logger.info('[FeedbackService] Feedback submitted:', data.id);
 
         // Track analytics event
         trackFeedbackSubmitted(feedbackData.feedback_type, feedbackData.overall_rating);
 
         return data;
     } catch (error) {
-        console.error('[FeedbackService] Failed to submit feedback:', error);
+        logger.error('[FeedbackService] Failed to submit feedback:', error);
         throw error;
     }
 }
@@ -63,7 +64,7 @@ export async function submitFeedback(feedbackData) {
  */
 export async function getUserFeedback() {
     if (!supabase) {
-        console.warn('[FeedbackService] Supabase not available');
+        logger.warn('[FeedbackService] Supabase not available');
         return [];
     }
 
@@ -76,7 +77,7 @@ export async function getUserFeedback() {
         if (error) throw error;
         return data || [];
     } catch (error) {
-        console.error('[FeedbackService] Failed to get user feedback:', error);
+        logger.error('[FeedbackService] Failed to get user feedback:', error);
         return [];
     }
 }
@@ -108,7 +109,7 @@ export async function checkIfFeedbackGiven(planId, feedbackType) {
 
         return !!data;
     } catch (error) {
-        console.error('[FeedbackService] Failed to check feedback:', error);
+        logger.error('[FeedbackService] Failed to check feedback:', error);
         return false;
     }
 }
@@ -122,7 +123,7 @@ export async function checkIfFeedbackGiven(planId, feedbackType) {
  */
 export async function getAllFeedback(filters = {}) {
     if (!supabase) {
-        console.warn('[FeedbackService] Supabase not available');
+        logger.warn('[FeedbackService] Supabase not available');
         return [];
     }
 
@@ -176,7 +177,7 @@ export async function getAllFeedback(filters = {}) {
 
         return enrichedFeedback;
     } catch (error) {
-        console.error('[FeedbackService] Failed to get all feedback:', error);
+        logger.error('[FeedbackService] Failed to get all feedback:', error);
         return [];
     }
 }
@@ -189,7 +190,7 @@ export async function getAllFeedback(filters = {}) {
  */
 export async function markFeedbackReviewed(feedbackId, adminNotes = null) {
     if (!supabase) {
-        console.warn('[FeedbackService] Supabase not available');
+        logger.warn('[FeedbackService] Supabase not available');
         return null;
     }
 
@@ -207,7 +208,7 @@ export async function markFeedbackReviewed(feedbackId, adminNotes = null) {
         if (error) throw error;
         return data;
     } catch (error) {
-        console.error('[FeedbackService] Failed to mark feedback as reviewed:', error);
+        logger.error('[FeedbackService] Failed to mark feedback as reviewed:', error);
         throw error;
     }
 }
@@ -264,7 +265,7 @@ export async function getFeedbackStats() {
 
         return stats;
     } catch (error) {
-        console.error('[FeedbackService] Failed to get feedback stats:', error);
+        logger.error('[FeedbackService] Failed to get feedback stats:', error);
         return {
             total: 0,
             byType: {},

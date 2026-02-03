@@ -3,6 +3,7 @@ import { saveIntake, getIntake } from '../lib/dataService';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserProfile } from '../lib/supabase';
 import { trackIntakeCompleted } from '../lib/analytics';
+import { useToast } from '../components/Toast';
 
 const QUESTIONS = {
   mandatory: [
@@ -367,8 +368,12 @@ function ConsentCheckbox({ checked, onChange }) {
   );
 }
 
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
+
 export default function IntakePage() {
+  useDocumentTitle('Design Your Plan - ExtensioVitae');
   const { user, isAuthenticated } = useAuth();
+  const { addToast } = useToast();
 
   // Initialize with default values for range fields
   const [formData, setFormData] = useState({
@@ -543,7 +548,12 @@ export default function IntakePage() {
   const handleSubmit = async () => {
     const errors = getValidationErrors();
     if (errors.length > 0) {
-      alert("Please fix the following issues:\n\n- " + errors.join("\n- "));
+      addToast(errors[0], 'error'); // Show first error prominently
+      if (errors.length > 1) {
+        addToast(`And ${errors.length - 1} more issues...`, 'warning');
+      }
+      // Log specific errors for debugging if needed, or maybe show them all?
+      // errors.forEach(err => addToast(err, 'error', 5000)); // might be too many
       return;
     }
 

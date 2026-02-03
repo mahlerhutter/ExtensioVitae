@@ -16,7 +16,9 @@ import {
     updateProgressInSupabase,
     getCurrentUser,
     getArchivedPlansFromSupabase,
+
 } from './supabase';
+import { logger } from './logger';
 
 // ============================================
 // Data Source Detection
@@ -57,13 +59,13 @@ export async function saveIntake(intakeData) {
         submitted_at: intakeData.submitted_at || new Date().toISOString(),
     };
     localStorage.setItem('intake_data', JSON.stringify(dataWithTimestamp));
-    console.log('[DataService] Intake saved to localStorage');
+    logger.debug('[DataService] Intake saved to localStorage');
 
     // Also save to Supabase if authenticated
     if (userId) {
         try {
             const savedIntake = await saveIntakeToSupabase(dataWithTimestamp, userId);
-            console.log('[DataService] Intake saved to Supabase');
+            logger.info('[DataService] Intake saved to Supabase');
 
             // Sync ID back to localStorage
             if (savedIntake?.id) {
@@ -72,7 +74,7 @@ export async function saveIntake(intakeData) {
                 return updatedData;
             }
         } catch (error) {
-            console.error('[DataService] Failed to save intake to Supabase:', error);
+            logger.error('[DataService] Failed to save intake to Supabase:', error);
             // Continue with localStorage only
         }
     }
@@ -92,20 +94,20 @@ export async function getIntake() {
         try {
             const supabaseData = await getIntakeFromSupabase(userId);
             if (supabaseData) {
-                console.log('[DataService] Intake loaded from Supabase');
+                logger.debug('[DataService] Intake loaded from Supabase');
                 // Sync to localStorage
                 localStorage.setItem('intake_data', JSON.stringify(supabaseData));
                 return supabaseData;
             }
         } catch (error) {
-            console.error('[DataService] Failed to get intake from Supabase:', error);
+            logger.error('[DataService] Failed to get intake from Supabase:', error);
         }
     }
 
     // Fall back to localStorage
     const localData = localStorage.getItem('intake_data');
     if (localData) {
-        console.log('[DataService] Intake loaded from localStorage');
+        logger.debug('[DataService] Intake loaded from localStorage');
         return JSON.parse(localData);
     }
 
@@ -125,7 +127,7 @@ export async function savePlan(plan) {
 
     // Always save to localStorage
     localStorage.setItem('generated_plan', JSON.stringify(plan));
-    console.log('[DataService] Plan saved to localStorage');
+    logger.debug('[DataService] Plan saved to localStorage');
 
     // Also save to Supabase if authenticated
     if (userId) {
@@ -138,10 +140,10 @@ export async function savePlan(plan) {
             // Add Supabase plan ID to local storage
             const planWithId = { ...plan, supabase_plan_id: savedPlan.id };
             localStorage.setItem('generated_plan', JSON.stringify(planWithId));
-            console.log('[DataService] Plan saved to Supabase:', savedPlan.id);
+            logger.info('[DataService] Plan saved to Supabase:', savedPlan.id);
             return planWithId;
         } catch (error) {
-            console.error('[DataService] Failed to save plan to Supabase:', error);
+            logger.error('[DataService] Failed to save plan to Supabase:', error);
         }
     }
 
@@ -160,11 +162,12 @@ export async function getPlan() {
     if (userId) {
         try {
             supabasePlan = await getActivePlanFromSupabase(userId);
+            supabasePlan = await getActivePlanFromSupabase(userId);
             if (supabasePlan) {
-                console.log('[DataService] Plan loaded from Supabase');
+                logger.debug('[DataService] Plan loaded from Supabase');
             }
         } catch (error) {
-            console.error('[DataService] Failed to get plan from Supabase:', error);
+            logger.error('[DataService] Failed to get plan from Supabase:', error);
         }
     }
 
@@ -173,7 +176,7 @@ export async function getPlan() {
     let localPlan = localPlanJson ? JSON.parse(localPlanJson) : null;
 
     if (localPlan) {
-        console.log('[DataService] Plan loaded from localStorage');
+        logger.debug('[DataService] Plan loaded from localStorage');
     }
 
     // Conflict Resolution:
@@ -192,7 +195,7 @@ export async function getPlan() {
         // If local plan is newer (at all), prefer local
         // This allows the Dashboard to see the "unsynced" new plan and sync it.
         if (localTime > supabaseTime) {
-            console.log('[DataService] Local plan is newer than Supabase active plan. Using local.');
+            logger.warn('[DataService] Local plan is newer than Supabase active plan. Using local.');
             return localPlan;
         }
 
@@ -211,11 +214,11 @@ export async function getCachedPlan(intakeData) {
     const plan = await getPlan();
 
     if (plan && plan.meta?.input?.submitted_at === intakeData.submitted_at) {
-        console.log('[DataService] Using cached plan (intake matches)');
+        logger.debug('[DataService] Using cached plan (intake matches)');
         return plan;
     }
 
-    console.log('[DataService] No cached plan or intake changed');
+    logger.debug('[DataService] No cached plan or intake changed');
     return null;
 }
 
@@ -249,7 +252,7 @@ export async function getProgress(supabasePlanId = null) {
         try {
             const supabaseProgress = await getProgressFromSupabase(supabasePlanId);
             if (Object.keys(supabaseProgress).length > 0) {
-                console.log('[DataService] Progress loaded from Supabase');
+                logger.debug('[DataService] Progress loaded from Supabase');
                 // Sync to localStorage
                 localStorage.setItem('plan_progress', JSON.stringify(supabaseProgress));
                 return supabaseProgress;
@@ -262,7 +265,7 @@ export async function getProgress(supabasePlanId = null) {
     // Fall back to localStorage
     const localProgress = localStorage.getItem('plan_progress');
     if (localProgress) {
-        console.log('[DataService] Progress loaded from localStorage');
+        logger.debug('[DataService] Progress loaded from localStorage');
         return JSON.parse(localProgress);
     }
 
@@ -281,15 +284,15 @@ export async function updateProgress(day, taskId, completed, totalTasks, supabas
     dayProgress[taskId] = completed;
     localProgress[day] = dayProgress;
     localStorage.setItem('plan_progress', JSON.stringify(localProgress));
-    console.log('[DataService] Progress saved to localStorage');
+    logger.debug('[DataService] Progress saved to localStorage');
 
     // Also update Supabase if authenticated
     if (userId && supabasePlanId) {
         try {
             await updateProgressInSupabase(supabasePlanId, userId, day, taskId, completed, totalTasks);
-            console.log('[DataService] Progress saved to Supabase');
+            logger.debug('[DataService] Progress saved to Supabase');
         } catch (error) {
-            console.error('[DataService] Failed to save progress to Supabase:', error);
+            logger.error('[DataService] Failed to save progress to Supabase:', error);
         }
     }
 
@@ -307,7 +310,7 @@ export function clearLocalData() {
     localStorage.removeItem('intake_data');
     localStorage.removeItem('generated_plan');
     localStorage.removeItem('plan_progress');
-    console.log('[DataService] Local data cleared');
+    logger.info('[DataService] Local data cleared');
 }
 
 /**

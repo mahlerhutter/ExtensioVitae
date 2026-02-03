@@ -627,11 +627,15 @@ function Footer() {
   );
 }
 
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
+
 // Main Landing Page Component
 export default function LandingPage() {
   const { isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  useDocumentTitle('ExtensioVitae - Scientific Longevity Plans');
 
   useEffect(() => {
     // Only redirect if authenticated AND 'noredirect' param is NOT present

@@ -6,16 +6,92 @@ Science-informed. Delivered daily. Under 30 minutes.
 
 ---
 
+## Overview
+
+ExtensioVitae is a sophisticated longevity lifestyle optimization platform that generates personalized 30-day blueprints based on scientific pillars. It uses advanced algorithms and optional AI (LLM) to craft daily routines tailored to user goals, time constraints, and health profiles.
+
+## Key Features
+
+-   **Personalized Blueprints**: 30-day plans based on 6 core longevity pillars.
+-   **Health Profile Integration**: Adapts plans for chronic conditions, injuries, and limitations.
+-   **Hybrid Generation Engine**:
+    -   **Deterministic**: Robust, rule-based generation (Default).
+    -   **AI-Enhanced**: Optional LLM integration (OpenAI/Claude) for hyper-personalized content.
+-   **Longevity Score**: Real-time scoring based on scientific literature (Cappuccio, Walker, Yin).
+-   **Progress Tracking**: Daily check-ins and completion analytics.
+-   **Flexible Architecture**:
+    -   **Privacy-First**: Works entirely client-side with localStorage.
+    -   **Cloud-Sync**: Optional Supabase integration for cross-device sync and authentication.
+
+---
+
+## The 6 Longevity Pillars
+
+| Pillar | Focus | Scientific Basis |
+| :--- | :--- | :--- |
+| 🌙 **Sleep & Recovery** | Hygiene, duration, environment | *Walker (2017), Cappuccio (2010)* |
+| ☀️ **Circadian Rhythm** | Light exposure, timing | *Satchin Panda, Huberman* |
+| 🧠 **Mental Resilience** | Breathwork, meditation | *Steptoe & Kivimäki (2012)* |
+| 🥗 **Nutrition & Metabolism** | Protein timing, glucose control | *Valter Longo, Peter Attia* |
+| 💪 **Movement & Muscle** | NEAT, Zone-2, Strength | *Study references on sarcopenia* |
+| 💊 **Supplements** | Targeted protocols | *Evidence-based supplementation* |
+
+---
+
+## Tech Stack
+
+-   **Frontend**: React 18, Vite, Tailwind CSS
+-   **State Management**: React Context + Custom Hooks
+-   **Data Persistence**: Hybrid (localStorage + Supabase)
+-   **AI/LLM**: OpenAI GPT-4 / Anthropic Claude (via API proxy)
+-   **Analytics**: PostHog (Privacy-focused)
+-   **Logging**: Centralized Logger with environment awareness
+
+---
+
 ## Quick Start
+
+### 1. Installation
 
 ```bash
 # Install dependencies
 npm install
+```
 
-# Start development server
+### 2. Environment Setup
+
+Copy `.env.example` to `.env` (or create one):
+
+```bash
+cp .env.example .env
+```
+
+**Required Variables for Full Feature Set:**
+
+```env
+# Supabase (Required for Auth, Sync & LLM Proxy)
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Analytics (Optional)
+VITE_POSTHOG_API_KEY=your_posthog_key
+VITE_POSTHOG_HOST=https://eu.i.posthog.com
+
+# Logging
+VITE_LOG_LEVEL=info
+```
+
+**Note:** LLM API Keys (OpenAI/Anthropic) are now managed securely via Supabase Edge Functions and are NOT stored in the frontend `.env` file.
+
+### 3. Development
+
+```bash
 npm run dev
+```
 
-# Build for production
+### 4. Production Build
+
+```bash
 npm run build
 ```
 
@@ -25,119 +101,47 @@ npm run build
 
 ```
 extensiovitae/
-├── docs/                    # Documentation
-│   ├── 01-PRODUCT-OVERVIEW.md
-│   ├── 02-USER-FLOW.md
-│   ├── 03-LANDING-PAGE.md
-│   ├── 04-INTAKE-FORM.md
-│   ├── 05-AI-PLAN-GENERATION.md
-│   ├── 06-WHATSAPP-FLOW.md
-│   ├── 07-DASHBOARD.md
-│   ├── 09-MAKE-AUTOMATIONS.md
-│   └── 10-DEPLOYMENT-CHECKLIST.md
 ├── src/
-│   ├── lib/
-│   │   ├── supabase.js      # Supabase client (optional)
-│   │   ├── planBuilder.js   # Deterministic plan generation
-│   │   └── taskLibrary.js   # Task definitions
-│   └── pages/
-│       ├── LandingPage.jsx
-│       ├── IntakePage.jsx
-│       └── DashboardPage.jsx
-├── package.json
-├── vite.config.js
-└── index.html
+│   ├── lib/                 # Core Logic
+│   │   ├── planBuilder.js   # Deterministic algorithm
+│   │   ├── llmPlanGenerator.js # AI generation logic
+│   │   ├── longevityScore.js # Scoring algorithm
+│   │   ├── healthConstraints.js # Medical/Health logic
+│   │   └── supabase.js      # Database client
+│   ├── pages/               # Route Components
+│   │   ├── IntakePage.jsx   # Questionnaire
+│   │   ├── GeneratingPage.jsx # Loading/Processing
+│   │   └── DashboardPage.jsx # Main User Interface
+│   └── components/          # UI Components
+├── sql/
+│   ├── complete_database_setup.sql # Single source of truth
+│   ├── CHANGELOG.md         # Database version history
+│   └── archive/             # Old fix scripts
+├── docs/
+│   ├── README.md            # Documentation index
+│   ├── tasks.md             # Current priorities
+│   ├── POST_DATABASE_SETUP.md # Setup guide
+│   └── archive/             # Resolved documentation
+└── CLEANUP_SUMMARY.md       # Recent cleanup (2026-02-03)
 ```
 
----
-
-## Tech Stack
-
-| Layer | Technology |
-|-------|------------|
-| Frontend | React 18 + Vite |
-| Styling | Tailwind CSS |
-| State | localStorage (MVP) |
-| Plan Generation | Deterministic algorithm (no LLM) |
-| Hosting | Any static host (Vercel, Netlify) |
+**📚 For detailed documentation, see [`docs/README.md`](docs/README.md)**
 
 ---
 
-## The 6 Longevity Pillars
+## Scoring System
 
-| Pillar | Icon | Description |
-|--------|------|-------------|
-| 🌙 Sleep & Recovery | `sleep_recovery` | Regeneration, hormones, brain health |
-| ☀️ Circadian Rhythm | `circadian_rhythm` | Light, caffeine timing, daily rhythm |
-| 🧠 Mental Resilience | `mental_resilience` | Stress management, breathwork, mindfulness |
-| 🥗 Nutrition & Metabolism | `nutrition_metabolism` | Protein timing, blood sugar control |
-| 💪 Movement & Muscle | `movement_muscle` | Strength, NEAT, Zone-2 cardio |
-| 💊 Supplements | `supplements` | Targeted supplementation |
+The **Longevity Score** (0-100) is calculated using a weighted algorithm derived from meta-analyses on mortality risk factors.
 
----
+-   **Baseline**: 50 points
+-   **Multipliers**: Sleep duration, stress levels, VO2 max proxies (activity), diet quality.
+-   **Penalties**: Smoking, inactivity, poor social connection.
 
-## User Flow
-
-1. **Landing Page** → Explains the product
-2. **Intake Form** → 12-question questionnaire (German)
-3. **Dashboard** → Personalized 30-day plan with daily tasks
-
----
-
-## Dashboard Features
-
-### Main Content Area
-- **Heute (Today)**: Current date, day number, tasks with checkboxes
-- **Dein Plan**: Plan summary, focus areas, "30-Tage Plan ansehen" button
-- **Die 6 Säulen**: Inline pillars explanation with personalized need scores
-
-### Sidebar
-- **Your 30 Days**: Calendar grid with completion status
-- **Meine Angaben ansehen**: Button to view intake form answers
-
-### Modals
-- **Full Plan Modal**: All 30 days with phases and tasks
-- **Intake Data Modal**: Original questionnaire answers
-
----
-
-## Data Storage (MVP)
-
-| Key | Description |
-|-----|-------------|
-| `intake_data` | User's questionnaire answers |
-| `plan_progress` | Task completion status per day |
-
----
-
-## Development
-
-```bash
-# Start development server on port 3100
-npm run dev
-
-# Access the app
-open http://localhost:3100
-```
-
----
-
-## Key Decisions
-
-1. **German UI** — Primary market is DACH region
-2. **No authentication for MVP** — Uses localStorage
-3. **Deterministic plan generation** — Same inputs = same output
-4. **No gamification** — Target users are adults who don't need badges
-5. **30-minute daily limit** — All tasks must fit within this constraint
-6. **No medical claims** — Lifestyle optimization language only
+*Note: This is a motivational metric, not a medical diagnosis.*
 
 ---
 
 ## License
 
-Proprietary. All rights reserved.
-
----
-
+Proprietary. All rights reserved by ExtensioVitae.
 Built with focus by the ExtensioVitae team.
-# Test

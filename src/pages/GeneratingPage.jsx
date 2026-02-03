@@ -4,7 +4,9 @@ import { savePlan, shouldUseSupabase } from '../lib/dataService';
 import { calculatePlanOverview, savePlanOverview } from '../lib/planOverviewService';
 import { getHealthProfile, createPlanSnapshot } from '../lib/profileService';
 import { supabase } from '../lib/supabase';
+import { logger } from '../lib/logger';
 import PlanReviewModal from '../components/plan-review/PlanReviewModal';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 const STAGES = [
   'Analyzing your profile...',
@@ -15,6 +17,7 @@ const STAGES = [
 ];
 
 export default function GeneratingPage() {
+  useDocumentTitle('Generating Blueprint... - ExtensioVitae');
   const [currentStage, setCurrentStage] = useState(0);
   const [dots, setDots] = useState('');
   const [showReview, setShowReview] = useState(false);
@@ -52,7 +55,7 @@ export default function GeneratingPage() {
         // 1. Get intake data
         const intakeStr = localStorage.getItem('intake_data');
         if (!intakeStr) {
-          console.warn('No intake data found, redirecting to intake');
+          logger.warn('No intake data found, redirecting to intake');
           window.location.href = '/intake';
           return;
         }
@@ -68,23 +71,23 @@ export default function GeneratingPage() {
             userId = user.id;
             healthProfile = await getHealthProfile(user.id);
             if (healthProfile) {
-              console.log('[Generating] Health profile loaded:', {
+              logger.debug('[Generating] Health profile loaded:', {
                 conditions: healthProfile.chronic_conditions?.length || 0,
                 injuries: healthProfile.injuries_limitations?.length || 0
               });
             }
           }
         } catch (error) {
-          console.warn('[Generating] Could not fetch health profile:', error);
+          logger.warn('[Generating] Could not fetch health profile:', error);
         }
 
         // 3. Build plan with health profile integration (v2.1)
-        console.log('[Generating] Building plan for:', intake);
+        logger.info('[Generating] Building plan for:', intake);
         const result = build30DayBlueprint(intake, TASKS_EXAMPLE, {}, healthProfile);
 
         // Log health adaptations
         if (result.json.meta?.health?.hasProfile) {
-          console.log('[Generating] Plan adapted for health profile:', {
+          logger.info('[Generating] Plan adapted for health profile:', {
             tasksFiltered: result.json.meta.health.tasksFiltered,
             intensityCap: result.json.meta.health.intensityCap,
             warnings: result.json.meta.health.warnings?.length || 0
@@ -92,25 +95,25 @@ export default function GeneratingPage() {
         }
 
         // 4. Calculate plan overview
-        console.log('[Generating] Calculating plan overview...');
+        logger.debug('[Generating] Calculating plan overview...');
         const overview = calculatePlanOverview(result.json, intake);
 
         if (!overview) {
-          console.error('[Generating] Failed to calculate overview');
+          logger.error('[Generating] Failed to calculate overview');
         }
 
         // 5. Save to storage
         const savedPlan = await savePlan(result.json);
-        console.log('[Generating] Plan saved:', savedPlan);
+        logger.info('[Generating] Plan saved:', savedPlan.id);
 
         // 6. Save overview to Supabase if authenticated
         if (savedPlan?.supabase_plan_id && overview) {
           try {
             await savePlanOverview(supabase, savedPlan.supabase_plan_id, overview);
-            console.log('[Generating] Overview saved to Supabase');
+            logger.info('[Generating] Overview saved to Supabase');
             setGeneratedPlanId(savedPlan.supabase_plan_id);
           } catch (error) {
-            console.error('[Generating] Error saving overview:', error);
+            logger.error('[Generating] Error saving overview:', error);
           }
         }
 
@@ -128,9 +131,9 @@ export default function GeneratingPage() {
                 notes: result.json.meta.health?.warnings?.join('; ')
               }
             );
-            console.log('[Generating] Plan snapshot created');
+            logger.info('[Generating] Plan snapshot created');
           } catch (error) {
-            console.error('[Generating] Error creating snapshot:', error);
+            logger.error('[Generating] Error creating snapshot:', error);
           }
         }
 
@@ -139,7 +142,7 @@ export default function GeneratingPage() {
         setShowReview(true);
 
       } catch (error) {
-        console.error('[Generating] Error generating plan:', error);
+        logger.error('[Generating] Error generating plan:', error);
         // Fallback - redirect to dashboard
         window.location.href = '/dashboard';
       }
@@ -160,7 +163,7 @@ export default function GeneratingPage() {
         window.location.href = '/auth?next=/dashboard&mode=signup';
       }
     } catch (error) {
-      console.error('[Generating] Error confirming plan:', error);
+      logger.error('[Generating] Error confirming plan:', error);
       window.location.href = '/dashboard';
     }
   };

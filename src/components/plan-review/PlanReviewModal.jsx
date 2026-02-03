@@ -46,6 +46,9 @@ export default function PlanReviewModal({ planOverview, onConfirm, onBack }) {
                     {/* Plan Overview Card */}
                     <PlanOverview overview={planOverview} />
 
+                    {/* Health Impact Check */}
+                    <HealthImpactCheck health={planOverview.health} />
+
                     {/* Focus Breakdown */}
                     <div>
                         <h3 className="text-xl font-semibold text-white mb-4">
@@ -109,6 +112,57 @@ export default function PlanReviewModal({ planOverview, onConfirm, onBack }) {
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+function HealthImpactCheck({ health }) {
+    if (!health || !health.hasProfile) return null;
+
+    return (
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-6">
+            <h3 className="text-emerald-400 font-semibold mb-4 flex items-center gap-2">
+                <span>🩺</span> Medizinischer Check
+            </h3>
+
+            <div className="space-y-3">
+                {health.intensityCap && (
+                    <div className="flex items-start gap-3 text-sm text-slate-300">
+                        <span className="text-emerald-400 mt-1">✓</span>
+                        <span>
+                            <strong>Intensität angepasst:</strong> Dein Plan wurde auf
+                            <span className="text-white mx-1 font-medium bg-emerald-500/20 px-2 py-0.5 rounded">
+                                {health.intensityCap === 'gentle' ? 'Sanft' : 'Moderat'}
+                            </span>
+                            begrenzt.
+                        </span>
+                    </div>
+                )}
+
+                {health.tasksFiltered > 0 && (
+                    <div className="flex items-start gap-3 text-sm text-slate-300">
+                        <span className="text-emerald-400 mt-1">✓</span>
+                        <span>
+                            <strong>Sicherheitsfilter:</strong> {health.tasksFiltered} Übungen wurden automatisch ausgetauscht,
+                            um deine Gesundheit zu schützen.
+                        </span>
+                    </div>
+                )}
+
+                {health.warnings && health.warnings.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-emerald-500/20">
+                        <p className="text-xs text-slate-400 uppercase tracking-wider mb-2">Wichtige Hinweise</p>
+                        <ul className="space-y-2">
+                            {health.warnings.map((w, i) => (
+                                <li key={i} className="text-sm text-slate-300 flex items-start gap-2">
+                                    <span className="text-emerald-500">•</span>
+                                    {w}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
             </div>
         </div>
     );

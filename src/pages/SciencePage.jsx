@@ -196,7 +196,10 @@ function EvidenceCard({ section }) {
   );
 }
 
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
+
 export default function SciencePage() {
+  useDocumentTitle('Science & Evidence - ExtensioVitae');
   const overviewSection = EVIDENCE_SECTIONS.find(s => s.id === 'overview');
   const factorSections = EVIDENCE_SECTIONS.filter(s => s.id !== 'overview');
 

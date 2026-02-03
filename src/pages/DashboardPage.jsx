@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../components/Toast';
 import { generatePlan, getPlanGeneratorInfo } from '../lib/planGenerator';
 import { calculateLongevityScore } from '../lib/longevityScore';
 import {
@@ -39,6 +40,7 @@ import { submitFeedback, checkIfFeedbackGiven } from '../lib/feedbackService';
 
 // Analytics
 import { trackTaskCompleted, trackDayCompleted, trackFeatureUsed } from '../lib/analytics';
+import { logger } from '../lib/logger';
 
 
 // Pillar configuration
@@ -98,8 +100,11 @@ function calculatePlanDay(startDate) {
   return Math.max(1, Math.min(30, diffDays)); // Clamp between 1 and 30
 }
 
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
+
 // Main Dashboard Page
 export default function DashboardPage() {
+  useDocumentTitle('Your Dashboard - ExtensioVitae');
   const [plan, setPlan] = useState(null);
   const [progress, setProgress] = useState({});
   const [currentDay, setCurrentDay] = useState(7);
@@ -116,6 +121,7 @@ export default function DashboardPage() {
   const [loadingArchivedPlan, setLoadingArchivedPlan] = useState(false); // Loading state for archived plans
   const [userEmail, setUserEmail] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false); // Admin status
+  const { addToast } = useToast();
 
   // Feedback states
   const [showInitialFeedback, setShowInitialFeedback] = useState(false);
@@ -137,7 +143,7 @@ export default function DashboardPage() {
       try {
         // Log storage info for debugging
         const storageInfo = await getStorageInfo();
-        console.log('[Dashboard] Storage mode:', storageInfo);
+        logger.debug('[Dashboard] Storage mode:', storageInfo);
 
         if (user) {
           setUserEmail(user.email);
@@ -152,9 +158,9 @@ export default function DashboardPage() {
 
         // Get intake data from Supabase or localStorage
         let intakeData = await getIntake();
-        console.log('[Dashboard] Intake data loaded:', intakeData ? 'YES' : 'NO', intakeData);
+        logger.debug('[Dashboard] Intake data loaded:', intakeData ? 'YES' : 'NO');
         const isSupabaseAuth = await shouldUseSupabase();
-        console.log('[Dashboard] Supabase auth:', isSupabaseAuth ? 'YES' : 'NO');
+        logger.debug('[Dashboard] Supabase auth:', isSupabaseAuth ? 'YES' : 'NO');
 
         // Load user profile to get email and phone if authenticated
         if (isSupabaseAuth && user) {
@@ -168,10 +174,10 @@ export default function DashboardPage() {
                 email: userProfile.email || intakeData.email || user.email,
                 phone_number: userProfile.phone_number || intakeData.phone_number
               };
-              console.log('[Dashboard] Merged user profile data (email, phone)');
+              logger.debug('[Dashboard] Merged user profile data (email, phone)');
             }
           } catch (err) {
-            console.warn('[Dashboard] Could not load user profile:', err);
+            logger.warn('[Dashboard] Could not load user profile:', err);
           }
         }
 
@@ -180,7 +186,7 @@ export default function DashboardPage() {
 
         // If planId is provided in URL, load that specific plan
         if (planId && isSupabaseAuth) {
-          console.log('[Dashboard] Loading specific plan from URL:', planId);
+          logger.debug('[Dashboard] Loading specific plan from URL:', planId);
           try {
             const { data, error } = await supabase
               .from('plans')
@@ -189,11 +195,11 @@ export default function DashboardPage() {
               .single();
 
             if (error) {
-              console.error('[Dashboard] Error loading plan from URL:', error);
+              logger.error('[Dashboard] Error loading plan from URL:', error);
               // Fall back to default plan loading
               existingPlan = await getPlan();
             } else {
-              console.log('[Dashboard] Loaded plan from URL:', data);
+              logger.debug('[Dashboard] Loaded plan from URL:', data.id);
               existingPlan = data;
 
               // Extract intake data from plan if available
@@ -203,7 +209,7 @@ export default function DashboardPage() {
               }
             }
           } catch (err) {
-            console.error('[Dashboard] Error loading plan from URL:', err);
+            logger.error('[Dashboard] Error loading plan from URL:', err);
             existingPlan = await getPlan();
           }
         } else {
@@ -211,25 +217,27 @@ export default function DashboardPage() {
           existingPlan = await getPlan();
         }
 
-        console.log('[Dashboard] Existing plan loaded:', existingPlan ? 'YES' : 'NO', existingPlan?.supabase_plan_id || 'no-id');
+        if (existingPlan) {
+          logger.debug('[Dashboard] Existing plan loaded:', existingPlan?.supabase_plan_id || 'no-id');
+        }
 
         // If authenticated but no intake data AND no existing plan, force intake
         if (isSupabaseAuth && !intakeData && !existingPlan) {
-          console.log('[Dashboard] Authenticated user missing intake data and plan. Redirecting to intake.');
+          logger.info('[Dashboard] Authenticated user missing intake data and plan. Redirecting to intake.');
           navigate('/intake');
           return;
         }
 
         // If we have a plan but no intake, extract intake from plan metadata
         if (!intakeData && existingPlan && existingPlan.meta?.input) {
-          console.log('[Dashboard] No intake data, but found plan with metadata. Using plan metadata as intake.');
+          logger.info('[Dashboard] No intake data, but found plan with metadata. Using plan metadata as intake.');
           intakeData = existingPlan.meta.input;
           setIntakeData(intakeData);
         }
 
         // Sync intake to Supabase if logged in
         if (intakeData && isSupabaseAuth) {
-          console.log('[Dashboard] Syncing intake to Supabase...');
+          logger.debug('[Dashboard] Syncing intake to Supabase...');
           await saveIntake(intakeData);
         }
 
@@ -238,25 +246,25 @@ export default function DashboardPage() {
 
           // Sync local plan to Supabase if logged in and not yet synced
           if (existingPlan && !existingPlan.supabase_plan_id && await shouldUseSupabase()) {
-            console.log('[Dashboard] Syncing anonymous plan to Supabase account...');
+            logger.info('[Dashboard] Syncing anonymous plan to Supabase account...');
             // This will attach the new supabase_plan_id and return the updated plan
             existingPlan = await savePlan(existingPlan);
           }
 
           // Use existing plan if found (DO NOT auto-regenerate based on intake timestamp)
           if (existingPlan) {
-            console.log('[Dashboard] Using active plan:', existingPlan.supabase_plan_id || 'local-only');
+            logger.debug('[Dashboard] Using active plan:', existingPlan.supabase_plan_id || 'local-only');
           } else {
             // Generate new plan ONLY if no plan exists at all
-            console.log('[Dashboard] No active plan found. Generating new plan...');
+            logger.info('[Dashboard] No active plan found. Generating new plan...');
             const generatorInfo = getPlanGeneratorInfo();
-            console.log('[Dashboard] Plan generator config:', generatorInfo);
+            logger.debug('[Dashboard] Plan generator config:', generatorInfo);
 
             existingPlan = await generatePlan(intakeData);
 
-            console.log(`[Dashboard] Plan generated via: ${existingPlan.generation_method}`);
+            logger.info(`[Dashboard] Plan generated via: ${existingPlan.generation_method}`);
             if (existingPlan.llm_provider) {
-              console.log(`[Dashboard] LLM provider: ${existingPlan.llm_provider}`);
+              logger.info(`[Dashboard] LLM provider: ${existingPlan.llm_provider}`);
             }
 
             // Save to Supabase/localStorage
@@ -311,12 +319,12 @@ export default function DashboardPage() {
                 }, 3000);
               }
             } catch (e) {
-              console.error('[Dashboard] Failed to check feedback status:', e);
+              logger.warn('[Dashboard] Failed to check feedback status:', e);
             }
           }
 
         } else {
-          console.log('[Dashboard] No intake data, using mock plan');
+          logger.info('[Dashboard] No intake data, using mock plan');
           setPlan(MOCK_PLAN);
           setArchivedPlans([{
             supabase_plan_id: 'mock-archived-1',
@@ -328,7 +336,7 @@ export default function DashboardPage() {
           setProgress(MOCK_PROGRESS);
         }
       } catch (err) {
-        console.error('[Dashboard] Error loading/generating plan:', err);
+        logger.error('[Dashboard] Error loading/generating plan:', err);
         setPlan(MOCK_PLAN);
         setProgress(MOCK_PROGRESS);
       } finally {
@@ -344,10 +352,10 @@ export default function DashboardPage() {
     if (day && plan && !loading) {
       const dayNum = parseInt(day, 10);
       if (!isNaN(dayNum) && dayNum >= 1 && dayNum <= 30) {
-        console.log('[Dashboard] Setting selected day from URL:', dayNum);
+        logger.debug('[Dashboard] Setting selected day from URL:', dayNum);
         setSelectedDay(dayNum);
       } else {
-        console.warn('[Dashboard] Invalid day parameter in URL:', day);
+        logger.warn('[Dashboard] Invalid day parameter in URL:', day);
       }
     }
   }, [day, plan, loading]);
@@ -396,7 +404,7 @@ export default function DashboardPage() {
         navigate(`/d/${plan.supabase_plan_id}/${day}`, { replace: true });
       } else {
         // For local plans without supabase_plan_id, just update the day in state
-        console.log('[Dashboard] Local plan, not updating URL');
+        logger.debug('[Dashboard] Local plan, not updating URL');
       }
     }
   };
@@ -441,9 +449,9 @@ export default function DashboardPage() {
             height_cm: updatedData.height_cm,
             weight_kg: updatedData.weight_kg
           });
-          console.log('[Dashboard] User profile updated');
+          logger.info('[Dashboard] User profile updated');
         } catch (err) {
-          console.warn('[Dashboard] Could not update user profile:', err);
+          logger.warn('[Dashboard] Could not update user profile:', err);
         }
       }
 
@@ -456,8 +464,8 @@ export default function DashboardPage() {
 
       setShowEditModal(false);
     } catch (err) {
-      console.error("Failed to update profile", err);
-      alert("Fehler beim Speichern: " + err.message);
+      logger.error("Failed to update profile", err);
+      addToast("Fehler beim Speichern: " + err.message, 'error');
     }
   };
 
@@ -467,7 +475,7 @@ export default function DashboardPage() {
 
   // Safety check: if plan has no days, redirect to intake
   if (!plan || !plan.days || plan.days.length === 0) {
-    console.error('[Dashboard] Plan has no days data. Redirecting to intake.');
+    logger.error('[Dashboard] Plan has no days data. Redirecting to intake.');
     navigate('/intake');
     return <InteractiveLoading message="Redirecting..." />;
   }
@@ -517,12 +525,12 @@ export default function DashboardPage() {
                 setShowHistoryModal(true);
                 setLoadingHistory(true);
                 try {
-                  console.log('[Dashboard] Fetching history...');
+                  logger.debug('[Dashboard] Fetching history...');
                   const history = await getArchivedPlans();
-                  console.log('[Dashboard] History fetched:', history);
+                  logger.debug('[Dashboard] History fetched length:', history.length);
                   setArchivedPlans(history);
                 } catch (e) {
-                  console.error("Failed to load history", e);
+                  logger.error("Failed to load history", e);
                 } finally {
                   setLoadingHistory(false);
                 }
@@ -604,7 +612,7 @@ export default function DashboardPage() {
                             handleSelectDay(null);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           } catch (error) {
-                            console.error('Error loading archived plan:', error);
+                            logger.error('Error loading archived plan:', error);
                           } finally {
                             setLoadingArchivedPlan(false);
                           }
@@ -691,8 +699,8 @@ export default function DashboardPage() {
               setShowInitialFeedback(false);
               setFeedbackSubmitted(true);
             } catch (error) {
-              console.error('[Dashboard] Failed to submit initial feedback:', error);
-              alert('Fehler beim Senden des Feedbacks. Bitte versuche es später erneut.');
+              logger.error('[Dashboard] Failed to submit initial feedback:', error);
+              addToast('Fehler beim Senden des Feedbacks. Bitte versuche es später erneut.', 'error');
             }
           }}
           onSkip={() => {
@@ -712,7 +720,7 @@ export default function DashboardPage() {
                 plan_id: plan?.supabase_plan_id,
               });
             } catch (error) {
-              console.error('[Dashboard] Failed to submit general feedback:', error);
+              logger.error('[Dashboard] Failed to submit general feedback:', error);
               throw error;
             }
           }}

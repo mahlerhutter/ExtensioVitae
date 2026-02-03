@@ -2,6 +2,7 @@
  * Plan Overview Service
  * Generates metadata and overview information for plan review
  */
+import { logger } from './logger';
 
 /**
  * Calculate plan overview metadata from a generated plan
@@ -11,7 +12,7 @@
  */
 export function calculatePlanOverview(plan, intakeData = {}) {
     if (!plan || !plan.days) {
-        console.error('[PlanOverview] Invalid plan structure');
+        logger.error('[PlanOverview] Invalid plan structure');
         return null;
     }
 
@@ -47,10 +48,11 @@ export function calculatePlanOverview(plan, intakeData = {}) {
             phases,
             focus_breakdown: focusBreakdown,
             sample_activities: sampleActivities,
+            health: plan.meta?.health || null,
             generated_at: new Date().toISOString(),
         };
     } catch (error) {
-        console.error('[PlanOverview] Error calculating overview:', error);
+        logger.error('[PlanOverview] Error calculating overview:', error);
         return null;
     }
 }
@@ -252,7 +254,7 @@ function calculateProjectedImpact(focusBreakdown, timeCommitment) {
  */
 export async function savePlanOverview(supabase, planId, overview) {
     if (!supabase || !planId || !overview) {
-        console.error('[PlanOverview] Missing required parameters');
+        logger.error('[PlanOverview] Missing required parameters');
         return null;
     }
 
@@ -266,10 +268,10 @@ export async function savePlanOverview(supabase, planId, overview) {
 
         if (error) throw error;
 
-        console.log('[PlanOverview] Saved overview for plan:', planId);
+        logger.info('[PlanOverview] Saved overview for plan:', planId);
         return data;
     } catch (error) {
-        console.error('[PlanOverview] Error saving overview:', error);
+        logger.error('[PlanOverview] Error saving overview:', error);
         throw error;
     }
 }
@@ -279,7 +281,7 @@ export async function savePlanOverview(supabase, planId, overview) {
  */
 export async function getPlanOverview(supabase, planId) {
     if (!supabase || !planId) {
-        console.error('[PlanOverview] Missing required parameters');
+        logger.error('[PlanOverview] Missing required parameters');
         return null;
     }
 
@@ -294,7 +296,7 @@ export async function getPlanOverview(supabase, planId) {
 
         return data?.plan_overview || null;
     } catch (error) {
-        console.error('[PlanOverview] Error getting overview:', error);
+        logger.error('[PlanOverview] Error getting overview:', error);
         return null;
     }
 }

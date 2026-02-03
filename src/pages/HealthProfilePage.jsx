@@ -9,13 +9,17 @@ import {
     calculatePlanConstraints,
     generateConstraintsSummary
 } from '../lib/profileService';
+import { useToast } from '../components/Toast';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 /**
  * Health Profile Settings Page
  * Allows users to add extended health information for personalized plans
  */
 export default function HealthProfilePage() {
+    useDocumentTitle('Health Profile - ExtensioVitae');
     const { user } = useAuth();
+    const { addToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
@@ -100,7 +104,7 @@ export default function HealthProfilePage() {
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch (error) {
             console.error('Error saving health profile:', error);
-            alert('Fehler beim Speichern. Bitte versuche es erneut.');
+            addToast('Fehler beim Speichern. Bitte versuche es erneut.', 'error');
         } finally {
             setSaving(false);
         }

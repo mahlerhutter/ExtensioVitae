@@ -16,6 +16,8 @@
  * - Conversion tracking (custom events)
  */
 
+import { logger } from './logger';
+
 // PostHog configuration
 const POSTHOG_API_KEY = import.meta.env.VITE_POSTHOG_API_KEY || '';
 const POSTHOG_HOST = import.meta.env.VITE_POSTHOG_HOST || 'https://eu.i.posthog.com';
@@ -56,13 +58,13 @@ export const initAnalytics = async () => {
 
     // In development without API key, just log
     if (!POSTHOG_API_KEY) {
-        console.log('[Analytics] No API key configured - events will be logged to console');
+        logger.info('[Analytics] No API key configured - events will be logged to console');
         return;
     }
 
     // Only fully enable in production
     if (!isEnabled()) {
-        console.log('[Analytics] Development mode - events logged to console');
+        logger.info('[Analytics] Development mode - events logged to console');
         return;
     }
 
@@ -70,7 +72,7 @@ export const initAnalytics = async () => {
         const posthogLib = await tryLoadPosthog();
 
         if (!posthogLib) {
-            console.log('[Analytics] posthog-js not installed. Install with: npm install posthog-js');
+            logger.warn('[Analytics] posthog-js not installed. Install with: npm install posthog-js');
             return;
         }
 
@@ -81,7 +83,7 @@ export const initAnalytics = async () => {
             capture_pageleave: true,
             disable_session_recording: false,
             loaded: (ph) => {
-                console.log('[Analytics] PostHog initialized');
+                logger.info('[Analytics] PostHog initialized');
                 posthog = ph;
             },
             respect_dnt: true,
@@ -91,7 +93,7 @@ export const initAnalytics = async () => {
 
         posthog = posthogLib;
     } catch (error) {
-        console.log('[Analytics] PostHog not available');
+        logger.warn('[Analytics] PostHog not available');
     }
 };
 
@@ -116,7 +118,7 @@ export const identifyUser = (userId, properties = {}) => {
 export const trackEvent = (eventName, properties = {}) => {
     // Always log in development for debugging
     if (import.meta.env.MODE !== 'production') {
-        console.log(`[Analytics] ${eventName}`, properties);
+        logger.debug(`[Analytics] ${eventName}`, properties);
     }
 
     if (!posthog) return;

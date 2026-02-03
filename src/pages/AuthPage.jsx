@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { supabase, signInWithGoogle } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
+
 export default function AuthPage() {
+  useDocumentTitle('Login / Sign Up - ExtensioVitae');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -12,15 +15,29 @@ export default function AuthPage() {
   const [message, setMessage] = useState(null);
   const navigate = useNavigate();
 
-  // Check if already signed in
+  // Check if already signed in AND listen for OAuth callback
   useEffect(() => {
-    if (supabase) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          navigate('/dashboard');
-        }
-      });
-    }
+    if (!supabase) return;
+
+    // Check initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate('/dashboard');
+      }
+    });
+
+    // Listen for auth state changes (important for OAuth callback!)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        // User just signed in (via OAuth or email)
+        navigate('/dashboard');
+      }
+    });
+
+    // Cleanup subscription
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, [navigate]);
 
   const handleAuth = async (e) => {
@@ -60,17 +77,25 @@ export default function AuthPage() {
   };
 
   const handleGoogleLogin = async () => {
+    console.log('[DEBUG] Google login clicked');
     setGoogleLoading(true);
     setError(null);
 
     try {
+      console.log('[DEBUG] Calling signInWithGoogle...');
       const { error } = await signInWithGoogle();
+      console.log('[DEBUG] signInWithGoogle result:', { error });
+
       if (error) {
+        console.error('[DEBUG] OAuth error:', error);
         setError(error.message);
         setGoogleLoading(false);
+      } else {
+        console.log('[DEBUG] OAuth initiated successfully');
       }
       // If successful, the page will redirect to Google OAuth
     } catch (err) {
+      console.error('[DEBUG] Exception in Google login:', err);
       setError('Google login failed. Please try again.');
       setGoogleLoading(false);
     }

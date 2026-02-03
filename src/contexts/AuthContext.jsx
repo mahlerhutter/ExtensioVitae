@@ -7,7 +7,9 @@ import {
     onAuthStateChange,
     isAuthAvailable
 } from '../lib/supabase';
+
 import { identifyUser, resetUser, trackLogin } from '../lib/analytics';
+import { logger } from '../lib/logger';
 
 // Create the auth context
 const AuthContext = createContext({
@@ -35,9 +37,8 @@ export function AuthProvider({ children }) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Check if Supabase auth is available
         if (!isAuthAvailable()) {
-            console.log('[Auth] Supabase not configured, using localStorage mode');
+            logger.info('[Auth] Supabase not configured, using localStorage mode');
             setLoading(false);
             return;
         }
@@ -53,7 +54,7 @@ export function AuthProvider({ children }) {
                     setUser(user);
                 }
             } catch (error) {
-                console.error('[Auth] Error initializing auth:', error);
+                logger.error('[Auth] Error initializing auth:', error);
             } finally {
                 setLoading(false);
             }
@@ -63,7 +64,7 @@ export function AuthProvider({ children }) {
 
         // Subscribe to auth changes
         const unsubscribe = onAuthStateChange((event, session) => {
-            console.log('[Auth] Auth state changed:', event);
+            logger.debug('[Auth] Auth state changed:', event);
             setSession(session);
             setUser(session?.user ?? null);
 
@@ -92,11 +93,11 @@ export function AuthProvider({ children }) {
         try {
             const { error } = await signInWithGoogle();
             if (error) {
-                console.error('[Auth] Google sign in error:', error);
+                logger.error('[Auth] Google sign in error:', error);
                 throw error;
             }
         } catch (error) {
-            console.error('[Auth] Sign in failed:', error);
+            logger.error('[Auth] Sign in failed:', error);
             throw error;
         }
     };
@@ -106,14 +107,15 @@ export function AuthProvider({ children }) {
         try {
             const { error } = await supabaseSignOut();
             if (error) {
-                console.error('[Auth] Sign out error:', error);
+                logger.error('[Auth] Sign out error:', error);
                 throw error;
             }
             // Clear local storage data on sign out
             localStorage.removeItem('intake_data');
             localStorage.removeItem('plan_progress');
+            localStorage.removeItem('plan_progress');
         } catch (error) {
-            console.error('[Auth] Sign out failed:', error);
+            logger.error('[Auth] Sign out failed:', error);
             throw error;
         }
     };

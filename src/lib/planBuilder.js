@@ -15,6 +15,7 @@
  * 11. Health Profile Integration (v2.1) - Chronic conditions, injuries, limitations
  */
 
+import { logger } from './logger.js';
 import {
     filterTasksByHealth,
     healthPreferenceBoost,
@@ -759,7 +760,11 @@ export function build30DayBlueprint(intake, tasks, userState = {}, healthProfile
     let filteredTasks = tasks;
     if (healthProfile) {
         filteredTasks = filterTasksByHealth(tasks, healthProfile);
-        console.log(`[PlanBuilder] Health profile filtering: ${tasks.length} → ${filteredTasks.length} tasks`);
+        if (import.meta.env.MODE !== 'production' && typeof logger !== 'undefined') {
+            logger.info(`[PlanBuilder] Health profile filtering: ${tasks.length} → ${filteredTasks.length} tasks`);
+        } else if (import.meta.env.MODE !== 'production') {
+            console.log(`[PlanBuilder] Health profile filtering: ${tasks.length} → ${filteredTasks.length} tasks`);
+        }
     }
 
     // Generate health warnings for the plan

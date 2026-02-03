@@ -7,6 +7,7 @@
 
 import { build30DayBlueprint, TASKS_EXAMPLE } from './planBuilder.js';
 import { isLLMAvailable, generatePlanWithLLM, getLLMProvider } from './llmPlanGenerator.js';
+import { logger } from './logger.js';
 
 /**
  * Generate a 30-day longevity plan
@@ -22,7 +23,7 @@ export async function generatePlan(intakeData, options = {}) {
 
     // Force algorithm mode
     if (forceAlgorithm) {
-        console.log('[PlanGenerator] Using deterministic algorithm (forced)');
+        logger.info('[PlanGenerator] Using deterministic algorithm (forced)');
         return generateWithAlgorithm(intakeData);
     }
 
@@ -31,16 +32,16 @@ export async function generatePlan(intakeData, options = {}) {
         if (!isLLMAvailable()) {
             throw new Error('LLM generation requested but no API keys configured');
         }
-        console.log('[PlanGenerator] Using LLM (forced)');
+        logger.info('[PlanGenerator] Using LLM (forced)');
         return await generateWithLLMWithFallback(intakeData, false);
     }
 
     // Auto mode: try LLM first, fallback to algorithm
     if (isLLMAvailable()) {
-        console.log(`[PlanGenerator] LLM available (${getLLMProvider()}), attempting LLM generation...`);
+        logger.info(`[PlanGenerator] LLM available (${getLLMProvider()}), attempting LLM generation...`);
         return await generateWithLLMWithFallback(intakeData, true);
     } else {
-        console.log('[PlanGenerator] No LLM configured, using deterministic algorithm');
+        logger.info('[PlanGenerator] No LLM configured, using deterministic algorithm');
         return generateWithAlgorithm(intakeData);
     }
 }
@@ -63,10 +64,10 @@ async function generateWithLLMWithFallback(intakeData, allowFallback) {
 
         return plan;
     } catch (error) {
-        console.error('[PlanGenerator] LLM generation failed:', error.message);
+        logger.error('[PlanGenerator] LLM generation failed:', error.message);
 
         if (allowFallback) {
-            console.log('[PlanGenerator] Falling back to deterministic algorithm...');
+            logger.info('[PlanGenerator] Falling back to deterministic algorithm...');
             const plan = generateWithAlgorithm(intakeData);
             plan.llm_error = error.message;
             return plan;

@@ -64,7 +64,7 @@ const SLEEP_IMPACT = {
     "6-6.5": -2.0,    // Suboptimal
     "6.5-7": -0.8,    // Leicht unter optimal
     "7-7.5": 0,       // Optimal für die meisten Erwachsenen
-    "7.5-8": +0.3,    // Optimal
+    "7.5-8": +0.3,    // Optimal +0.3 Jahre (basierend auf Meta-Analyse von Yin et al. 2017)
     "8-8.5": 0,       // Noch ok
     ">8": -0.5        // J-Kurve: >9h assoziiert mit erhöhter Mortalität
 };
@@ -141,9 +141,10 @@ function calculateBMIImpact(heightCm, weightKg) {
  */
 const SMOKING_IMPACT = {
     never: 0,
-    former: -1.5,       // Ehemals: teilweise reversibel
+    never: 0,
+    former: -1.5,       // Ehemals: teilweise reversibel (-1.5 Jahre vs. Baseline)
     occasional: -3.0,   // Gelegentlich: messbar schädlich
-    daily: -8.0         // Täglich: ~10 Jahre weniger (Doll 2004)
+    daily: -8.0         // Täglich: ~10 Jahre weniger (Doll 2004) - konservativ mit -8 berechnet
 };
 
 /**
@@ -175,9 +176,9 @@ const SOCIAL_CONNECTION_IMPACT = {
  * Sozialer Jetlag kostet Gesundheit
  */
 const CIRCADIAN_IMPACT = {
-    aligned: +0.8,      // Natürlicher Rhythmus, früh schlafen
+    aligned: +0.8,      // Natürlicher Rhythmus, früh schlafen (+0.8 Jahre Vorteil)
     moderate: 0,        // Durchschnitt
-    misaligned: -1.2,   // Schichtarbeit, spätes Zubettgehen
+    misaligned: -1.2,   // Schichtarbeit, spätes Zubettgehen (-1.2 Jahre)
     severe: -2.0        // Chronischer Jetlag, wechselnde Schichten
 };
 
@@ -304,8 +305,11 @@ export function calculateLongevityScore(intake) {
     const score = Math.round(Math.max(0, Math.min(100, scoreRaw)));
 
     // === BIOLOGICAL AGE ESTIMATE ===
-    const biologicalAgeOffset = -adjustedLifestyleImpact * 0.75;
-    const biologicalAge = Math.round(age + biologicalAgeOffset);
+    // === BIOLOGICAL AGE ESTIMATE ===
+    const biologicalAgeOffset = -adjustedLifestyleImpact * 0.75; // 0.75 relates lifestyle impact years to biological age shift (conservative estimate)
+    // Guard against negative/unrealistic values
+    const biologicalAgeRaw = age + biologicalAgeOffset;
+    const biologicalAge = Math.max(18, Math.round(biologicalAgeRaw));
 
     // === SCORE BREAKDOWN ===
     const breakdown = {
@@ -543,6 +547,10 @@ function calculateOptimizationPotential(intake, ageFactor) {
 // ============================================
 
 function normalizeSubScore(impact, min, max) {
+    // Guard against zero division
+    if (min === max) {
+        return 50; // Default to neutral if range is invalid
+    }
     const normalized = ((impact - min) / (max - min)) * 100;
     return Math.round(Math.max(0, Math.min(100, normalized)));
 }
@@ -661,7 +669,7 @@ function getNutritionTip(patterns) {
 }
 
 function getBMITip(height, weight) {
-    if (!height || !weight) return "Gewicht und Größe tracken für bessere Einschätzung";
+    if (!height || !weight || height <= 0 || weight <= 0) return "Gewicht und Größe tracken für bessere Einschätzung";
     const bmi = weight / ((height / 100) ** 2);
     if (bmi < 18.5) return "Leicht untergewichtig - auf ausreichend Protein achten";
     if (bmi < 25) return "Guter Bereich - weiter so!";
@@ -794,16 +802,16 @@ export function generateLifeInWeeksData(scoreData) {
 export function calculateQuickScore({ age, sleepHours, stressLevel, exerciseFrequency }) {
     const sleepBucket =
         sleepHours < 6 ? "<6" :
-        sleepHours < 6.5 ? "6-6.5" :
-        sleepHours < 7 ? "6.5-7" :
-        sleepHours < 7.5 ? "7-7.5" :
-        sleepHours < 8 ? "7.5-8" :
-        sleepHours < 8.5 ? "8-8.5" : ">8";
+            sleepHours < 6.5 ? "6-6.5" :
+                sleepHours < 7 ? "6.5-7" :
+                    sleepHours < 7.5 ? "7-7.5" :
+                        sleepHours < 8 ? "7.5-8" :
+                            sleepHours < 8.5 ? "8-8.5" : ">8";
 
     const trainingFreq =
         exerciseFrequency === 0 ? "0" :
-        exerciseFrequency <= 2 ? "1-2" :
-        exerciseFrequency <= 4 ? "3-4" : "5+";
+            exerciseFrequency <= 2 ? "1-2" :
+                exerciseFrequency <= 4 ? "3-4" : "5+";
 
     const intake = {
         age,

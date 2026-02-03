@@ -5,13 +5,17 @@ import { AuthProvider } from './contexts/AuthContext';
 import { initAnalytics } from './lib/analytics';
 import './index.css';
 
+import { ToastProvider } from './components/Toast';
+
 // Initialize analytics (non-blocking)
 initAnalytics().catch(console.error);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthProvider>
-      <App />
+      <ToastProvider>
+        <App />
+      </ToastProvider>
     </AuthProvider>
   </React.StrictMode>
 );

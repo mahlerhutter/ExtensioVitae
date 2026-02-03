@@ -1,117 +1,113 @@
 # ExtensioVitae Documentation
 
-> **Last Updated:** 2026-02-02  
-> **Version:** v2.1 (Health Profile Integration)
+**Last Updated:** 2026-02-03  
+**Version:** 2.1.2
 
 ---
 
-## 📚 Documentation Structure
+## 📚 Documentation Index
 
-### 🎯 **Product Documentation** (Root Level)
-Core product specifications and user flows:
+### 🚀 **Getting Started**
 
-- **[01-PRODUCT-OVERVIEW.md](./01-PRODUCT-OVERVIEW.md)** - Product vision and core features
-- **[02-USER-FLOW.md](./02-USER-FLOW.md)** - End-to-end user journey
-- **[03-LANDING-PAGE.md](./03-LANDING-PAGE.md)** - Landing page specifications
-- **[04-INTAKE-FORM.md](./04-INTAKE-FORM.md)** - Intake form design
-- **[05-AI-PLAN-GENERATION.md](./05-AI-PLAN-GENERATION.md)** - Plan generation logic
-- **[06-WHATSAPP-FLOW.md](./06-WHATSAPP-FLOW.md)** - WhatsApp integration
-- **[07-DASHBOARD.md](./07-DASHBOARD.md)** - Dashboard specifications
-- **[09-MAKE-AUTOMATIONS.md](./09-MAKE-AUTOMATIONS.md)** - Make.com workflows
+1. **[POST_DATABASE_SETUP.md](POST_DATABASE_SETUP.md)** - Complete setup guide
+   - Supabase project setup
+   - Database initialization
+   - Environment configuration
+   - Google OAuth setup
+   - Local testing
 
-### 💡 **[concepts/](./concepts/)** - Design Concepts & Planning
-High-level concepts and future features:
+### 📋 **Product Documentation**
 
-- **[FEEDBACK_LOOP_CONCEPT.md](./concepts/FEEDBACK_LOOP_CONCEPT.md)** - Feedback system design
-- **[PLAN_REVIEW_REFINEMENT_CONCEPT.md](./concepts/PLAN_REVIEW_REFINEMENT_CONCEPT.md)** - Plan refinement vision
+2. **[01-PRODUCT-OVERVIEW.md](01-PRODUCT-OVERVIEW.md)** - Product vision and concept
+3. **[02-USER-FLOW.md](02-USER-FLOW.md)** - Complete user journey
+4. **[03-LANDING-PAGE.md](03-LANDING-PAGE.md)** - Landing page design
+5. **[04-INTAKE-FORM.md](04-INTAKE-FORM.md)** - Questionnaire structure
+6. **[05-AI-PLAN-GENERATION.md](05-AI-PLAN-GENERATION.md)** - Plan generation logic
+7. **[06-WHATSAPP-FLOW.md](06-WHATSAPP-FLOW.md)** - WhatsApp integration concept
+8. **[07-DASHBOARD.md](07-DASHBOARD.md)** - Dashboard features
+9. **[09-MAKE-AUTOMATIONS.md](09-MAKE-AUTOMATIONS.md)** - Make.com workflows
 
-### 🔧 **[implementation/](./implementation/)** - Implementation Details
-Current system implementations and technical documentation:
+### 🔧 **Technical Documentation**
 
-- **[USER_HEALTH_PROFILE_SYSTEM.md](./implementation/USER_HEALTH_PROFILE_SYSTEM.md)** ⭐ **NEW** - Health profile architecture (v2.1)
-- **[FEEDBACK_LOOP_STATUS.md](./implementation/FEEDBACK_LOOP_STATUS.md)** - Feedback system status
-- **[PLAN_REVIEW_MVP_SUMMARY.md](./implementation/PLAN_REVIEW_MVP_SUMMARY.md)** - Plan review implementation
-- **[ADMIN_EMAIL_CONFIG.md](./implementation/ADMIN_EMAIL_CONFIG.md)** - Admin configuration
-- **[FAVICON_SEO_IMPLEMENTATION.md](./implementation/FAVICON_SEO_IMPLEMENTATION.md)** - SEO setup
-- **[DASHBOARD_URL_PARAMS.md](./implementation/DASHBOARD_URL_PARAMS.md)** - URL parameter handling
-- **[MONTH_OVERVIEW_ENHANCEMENT.md](./implementation/MONTH_OVERVIEW_ENHANCEMENT.md)** - Month view features
-- **[status_field_standardization.md](./implementation/status_field_standardization.md)** - Status field conventions
+10. **[AUDIT.md](AUDIT.md)** - Code quality audit and recommendations
+11. **[tasks.md](tasks.md)** - Current tasks and technical debt
+12. **[ANALYTICS_ADMIN_SETUP.md](ANALYTICS_ADMIN_SETUP.md)** - Analytics and admin setup
+13. **[GIT_GITHUB_SETUP.md](GIT_GITHUB_SETUP.md)** - Git and GitHub configuration
 
-### 📖 **[guides/](./guides/)** - Quick Start Guides
-Step-by-step guides for developers:
+### 💡 **Planning & Ideas**
 
-- **[FEEDBACK_QUICK_START.md](./guides/FEEDBACK_QUICK_START.md)** - Feedback system setup
-- **[PLAN_REVIEW_MVP_QUICK_START.md](./guides/PLAN_REVIEW_MVP_QUICK_START.md)** - Plan review setup
-- **[MIGRATION_GUIDE.md](./guides/MIGRATION_GUIDE.md)** - Database migrations
-- **[10-DEPLOYMENT-CHECKLIST.md](./guides/10-DEPLOYMENT-CHECKLIST.md)** - Deployment steps
-
-### 📦 **[archive/](./archive/)** - Archived Documentation
-Completed refactorings and historical documentation:
-
-- Dashboard refactoring phases (1-4)
-- Bug fixes and testing documentation
-- Session summaries
+14. **[Ideas.md](Ideas.md)** - Feature ideas and backlog
+15. **[UPDATE_SUMMARY.md](UPDATE_SUMMARY.md)** - Recent updates summary
+16. **[concepts/](concepts/)** - Detailed concept documents
 
 ---
 
-## 🚀 Latest Features (v2.1)
+## 🗂️ Archived Documentation
 
-### Health Profile System
-**Status:** ✅ Fully Implemented (2026-02-02)
+Older or superseded documentation has been moved to `docs/archive/`:
 
-The system now supports detailed health profiles that influence plan generation:
-
-- **User Profiles** - Stable identity data (name, email, demographics)
-- **Health Profiles** - Plan-relevant health data (conditions, injuries, lifestyle)
-- **Plan Snapshots** - Frozen health state at plan generation
-
-**Key Features:**
-- 🩺 16 chronic conditions with automatic task filtering
-- 🩹 11 injury types with exercise avoidance rules
-- 🥗 9 dietary restrictions
-- 💊 Medication tracking
-- 🔒 Automatic intensity capping based on health status
-- ⚡ Real-time constraint preview
-
-**Documentation:** [implementation/USER_HEALTH_PROFILE_SYSTEM.md](./implementation/USER_HEALTH_PROFILE_SYSTEM.md)
+- `DEBUG_OAUTH.md` - OAuth debugging guide (issue resolved)
+- `FIX_GOOGLE_OAUTH.md` - Google OAuth fix guide (issue resolved)
+- `FRESH_DATABASE_SETUP.md` - Old database setup (superseded by POST_DATABASE_SETUP.md)
+- `QUICKSTART_DATABASE.md` - Quick setup (superseded by POST_DATABASE_SETUP.md)
+- `CONSOLIDATED_TASKS.md` - Old task list (superseded by tasks.md)
+- `GIT_HISTORY_CLEANUP.md` - Git cleanup guide (completed)
+- `ADMIN_FEEDBACK_DEBUG_STATUS.md` - Debug status (resolved)
 
 ---
 
-## 📝 Working Documents
+## 🎯 Quick Links
 
-- **[tasks.md](./tasks.md)** - Current development tasks and backlog
-- **[Ideas.md](./Ideas.md)** - Feature ideas and brainstorming
-- **[claude.md](./claude.md)** - Claude AI integration notes
-- **[gemini.md](./gemini.md)** - Gemini AI integration notes
+### For New Developers
+1. Start with [POST_DATABASE_SETUP.md](POST_DATABASE_SETUP.md)
+2. Read [01-PRODUCT-OVERVIEW.md](01-PRODUCT-OVERVIEW.md)
+3. Check [tasks.md](tasks.md) for current priorities
 
----
+### For Product/Design
+1. [02-USER-FLOW.md](02-USER-FLOW.md) - User journey
+2. [03-LANDING-PAGE.md](03-LANDING-PAGE.md) - Landing page
+3. [07-DASHBOARD.md](07-DASHBOARD.md) - Dashboard features
 
-## 🗂️ Related Documentation
-
-### Database
-- **SQL Migrations:** `/sql/migrations/`
-  - `005_separate_user_and_health_profiles.sql` - Latest migration (Health Profiles)
-
-### Code Documentation
-- **Plan Builder:** `/src/lib/planBuilder.js` - v2.1 (health-aware)
-- **Health Constraints:** `/src/lib/healthConstraints.js` - Health filtering logic
-- **Profile Service:** `/src/lib/profileService.js` - Profile management
+### For DevOps/Deployment
+1. [POST_DATABASE_SETUP.md](POST_DATABASE_SETUP.md) - Database setup
+2. [ANALYTICS_ADMIN_SETUP.md](ANALYTICS_ADMIN_SETUP.md) - Analytics
+3. [tasks.md](tasks.md) - Deployment blockers
 
 ---
 
-## 🔄 Version History
+## 📝 Recent Changes (v2.1.2)
 
-| Version | Date | Description |
-|---------|------|-------------|
-| **v2.1** | 2026-02-02 | Health Profile System Integration |
-| **v2.0** | 2026-02-01 | Plan Review MVP & Feedback Loop |
-| **v1.x** | 2026-01 | Core MVP with Dashboard & WhatsApp |
+### ✅ Auth System Fixes
+- Google OAuth login working
+- User signup/login working
+- RLS policies fixed (no more infinite recursion)
+- Dashboard redirect working
+
+### ✅ Documentation Cleanup
+- Archived outdated guides
+- Updated setup documentation
+- Created comprehensive changelog
+
+### ⚠️ Known Issues
+- Admin panel temporarily disabled (needs re-implementation)
+- Foreign key constraint removed on `user_profiles.user_id`
+
+See [tasks.md](tasks.md) for full details.
 
 ---
 
-## 📞 Support
+## 🔗 External Resources
 
-For questions or issues, refer to:
-1. **Implementation docs** for technical details
-2. **Guides** for step-by-step instructions
-3. **Archive** for historical context
+- **Supabase Docs:** https://supabase.com/docs
+- **React Router:** https://reactrouter.com
+- **PostHog Analytics:** https://posthog.com/docs
+- **Make.com:** https://www.make.com/en/help
+
+---
+
+## 📧 Support
+
+For questions or issues, check:
+1. [tasks.md](tasks.md) - Known issues and fixes
+2. [AUDIT.md](AUDIT.md) - Code quality recommendations
+3. [archive/](archive/) - Historical documentation

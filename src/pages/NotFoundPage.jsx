@@ -1,11 +1,14 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
+
 /**
  * NotFoundPage Component
  * Displays a 404 error page when users navigate to an undefined route
  */
 export default function NotFoundPage() {
+    useDocumentTitle('404 Not Found - ExtensioVitae');
     const navigate = useNavigate();
 
     return (

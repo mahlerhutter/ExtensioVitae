@@ -1,10 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
+import { logger } from './logger';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Supabase credentials not configured. Using mock data.');
+  logger.warn('Supabase credentials not configured. Using mock data.');
 }
 
 export const supabase = supabaseUrl && supabaseAnonKey
@@ -22,7 +23,7 @@ export async function getPlan(planId) {
     .single();
 
   if (error) {
-    console.error('Error fetching plan:', error);
+    logger.error('Error fetching plan:', error);
     return null;
   }
 
@@ -38,7 +39,7 @@ export async function getProgress(planId) {
     .eq('plan_id', planId);
 
   if (error) {
-    console.error('Error fetching progress:', error);
+    logger.error('Error fetching progress:', error);
     return {};
   }
 
@@ -79,7 +80,7 @@ export async function updateTaskProgress(planId, dayNumber, taskId, completed) {
     });
 
   if (error) {
-    console.error('Error updating progress:', error);
+    logger.error('Error updating progress:', error);
     throw error;
   }
 }
@@ -88,7 +89,7 @@ export async function submitIntake(intakeData) {
   const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL;
 
   if (!webhookUrl) {
-    console.warn('Make.com webhook not configured. Simulating submission.');
+    logger.warn('Make.com webhook not configured. Simulating submission.');
     return { success: true, plan_id: 'mock-plan-id' };
   }
 
@@ -118,20 +119,20 @@ export async function submitIntake(intakeData) {
  */
 export async function signInWithGoogle() {
   if (!supabase) {
-    console.warn('Supabase not configured. Cannot sign in with Google.');
+    logger.warn('Supabase not configured. Cannot sign in with Google.');
     return { error: new Error('Supabase not configured') };
   }
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${window.location.origin}/dashboard`,
-      queryParams: {
-        access_type: 'offline',
-        prompt: 'consent',
-      },
+      redirectTo: `${window.location.origin}/auth`,
     },
   });
+
+  if (error) {
+    logger.error('[Auth] Google OAuth error:', error);
+  }
 
   return { data, error };
 }
@@ -141,7 +142,7 @@ export async function signInWithGoogle() {
  */
 export async function signOut() {
   if (!supabase) {
-    console.warn('Supabase not configured. Cannot sign out.');
+    logger.warn('Supabase not configured. Cannot sign out.');
     return { error: null };
   }
 
@@ -233,11 +234,11 @@ export async function saveIntakeToSupabase(intakeData, userId) {
     .single();
 
   if (error) {
-    console.error('[Supabase] Error saving intake:', error);
+    logger.error('[Supabase] Error saving intake:', error);
     throw error;
   }
 
-  console.log('[Supabase] Intake saved:', data.id);
+  logger.info('[Supabase] Intake saved:', data.id);
   return data;
 }
 
@@ -257,10 +258,10 @@ export async function getIntakeFromSupabase(userId) {
     .maybeSingle(); // Use maybeSingle() to handle zero rows gracefully
 
   if (error) {
-    console.error('[Supabase] Error fetching intake:', error);
-    console.error('[Supabase] Error code:', error.code);
-    console.error('[Supabase] Error message:', error.message);
-    console.error('[Supabase] Error details:', error.details);
+    logger.error('[Supabase] Error fetching intake:', error);
+    logger.error('[Supabase] Error code:', error.code);
+    logger.error('[Supabase] Error message:', error.message);
+    logger.error('[Supabase] Error details:', error.details);
     return null;
   }
 
@@ -297,11 +298,11 @@ export async function savePlanToSupabase(plan, userId, intakeId = null) {
       .single();
 
     if (error) {
-      console.error('[Supabase] Error updating plan:', error);
+      logger.error('[Supabase] Error updating plan:', error);
       throw error;
     }
 
-    console.log('[Supabase] Plan updated:', data.id);
+    logger.info('[Supabase] Plan updated:', data.id);
     return data;
   }
 
@@ -318,7 +319,7 @@ export async function savePlanToSupabase(plan, userId, intakeId = null) {
     .eq('status', 'active');
 
   if (archiveError) {
-    console.error('[Supabase] Error archiving old plans:', archiveError);
+    logger.error('[Supabase] Error archiving old plans:', archiveError);
     // Proceed anyway, but log it
   }
 
@@ -348,7 +349,7 @@ export async function savePlanToSupabase(plan, userId, intakeId = null) {
 
   // If failed with foreign key violation (intake_id not found), retry without it
   if (result.error && result.error.code === '23503') {
-    console.warn('[Supabase] Intake ID not found. Retrying without link...');
+    logger.warn('[Supabase] Intake ID not found. Retrying without link...');
     payload.intake_id = null;
     result = await insertPlan(payload);
   }
@@ -356,12 +357,12 @@ export async function savePlanToSupabase(plan, userId, intakeId = null) {
   const { data, error } = result;
 
   if (error) {
-    console.error('[Supabase] CRITICAL Error creating plan:', error);
-    console.error('[Supabase] Error details:', error.details, error.hint, error.message);
+    logger.error('[Supabase] CRITICAL Error creating plan:', error);
+    logger.error('[Supabase] Error details:', error.details, error.hint, error.message);
     throw error;
   }
 
-  console.log('[Supabase] Plan created successfully (and previous set to inactive):', data.id);
+  logger.info('[Supabase] Plan created successfully (and previous set to inactive):', data.id);
   return data;
 }
 
@@ -382,7 +383,7 @@ export async function getActivePlanFromSupabase(userId) {
     .maybeSingle(); // Use maybeSingle() to handle zero rows gracefully
 
   if (error) {
-    console.error('[Supabase] Error fetching plan:', error);
+    logger.error('[Supabase] Error fetching plan:', error);
     return null;
   }
 
@@ -393,7 +394,7 @@ export async function getActivePlanFromSupabase(userId) {
 
     // If plan_data contains another plan_data, unwrap it
     if (planData && planData.plan_data) {
-      console.warn('[Supabase] Detected double-nested plan_data, unwrapping...');
+      logger.warn('[Supabase] Detected double-nested plan_data, unwrapping...');
       planData = planData.plan_data;
     }
 
@@ -449,7 +450,7 @@ export async function getProgressFromSupabase(planId) {
     .eq('plan_id', planId);
 
   if (error) {
-    console.error('[Supabase] Error fetching progress:', error);
+    logger.error('[Supabase] Error fetching progress:', error);
     return {};
   }
 
@@ -504,11 +505,11 @@ export async function updateProgressInSupabase(planId, userId, dayNumber, taskId
     });
 
   if (error) {
-    console.error('[Supabase] Error updating progress:', error);
+    logger.error('[Supabase] Error updating progress:', error);
     throw error;
   }
 
-  console.log(`[Supabase] Progress updated: Day ${dayNumber}, Task ${taskId} = ${completed}`);
+  logger.info(`[Supabase] Progress updated: Day ${dayNumber}, Task ${taskId} = ${completed}`);
 }
 
 /**
@@ -525,7 +526,7 @@ export async function getUserProfile(userId) {
     .maybeSingle(); // Use maybeSingle() to handle zero rows gracefully
 
   if (error) {
-    console.error('[Supabase] Error fetching profile:', error);
+    logger.error('[Supabase] Error fetching profile:', error);
     return null;
   }
 

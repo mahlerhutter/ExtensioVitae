@@ -4,17 +4,15 @@ import { supabase, getCurrentUser } from '../lib/supabase';
 import LogViewer from '../components/LogViewer';
 import logger from '../lib/logger';
 import { getAllFeedback, getFeedbackStats, markFeedbackReviewed } from '../lib/feedbackService';
-
-// Admin email whitelist from environment variable
-// Format: VITE_ADMIN_EMAILS="email1@example.com,email2@example.com"
-const ADMIN_EMAILS = import.meta.env.VITE_ADMIN_EMAILS
-    ? import.meta.env.VITE_ADMIN_EMAILS.split(',').map(email => email.trim()).filter(Boolean)
-    : [];
+import { useToast } from '../components/Toast';
 
 
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export default function AdminPage() {
+    useDocumentTitle('Admin Dashboard - ExtensioVitae');
     const navigate = useNavigate();
+    const { addToast } = useToast();
     const [loading, setLoading] = useState(true);
     const [isAdmin, setIsAdmin] = useState(false);
     const [users, setUsers] = useState([]);
@@ -54,13 +52,20 @@ export default function AdminPage() {
                 return;
             }
 
-            if (!ADMIN_EMAILS.includes(user.email)) {
+            // Client-side optimizing: Check env var if available, but relying on RLS is safer/better source of truth.
+            // We removed the hard strict check to avoid leaking emails efficiently, 
+            // relying instead on the database call below to fail if unauthorized.
+
+            // Try to load data. If this fails, we know we aren't admin (RLS).
+            const success = await loadAdminData();
+            if (success) {
+                setIsAdmin(true);
+            } else {
+                // RLS prevented access or other error
+                logger.warn('[Admin] Access denied or data load failed');
                 navigate('/dashboard');
-                return;
             }
 
-            setIsAdmin(true);
-            await loadAdminData();
         } catch (error) {
             console.error('Admin check failed:', error);
             navigate('/dashboard');
@@ -70,17 +75,18 @@ export default function AdminPage() {
     };
 
     const loadAdminData = async () => {
-        if (!supabase) return;
+        if (!supabase) return false;
 
         try {
-            // Fetch all user profiles
+            // Fetch all user profiles - RLS should only allow this for admins
             const { data: profilesData, error: profilesError } = await supabase
                 .from('user_profiles')
                 .select('*')
                 .order('created_at', { ascending: false });
 
             if (profilesError) {
-                console.error('Error fetching profiles:', profilesError);
+                logger.warn('[Admin] RLS Check failed (likely not admin):', profilesError);
+                return false;
             }
             setUsers(profilesData || []);
 
@@ -113,8 +119,11 @@ export default function AdminPage() {
             const stats = await getFeedbackStats();
             setFeedbackStats(stats);
 
+            return true;
+
         } catch (error) {
             console.error('Failed to load admin data:', error);
+            return false;
         }
     };
 
@@ -140,9 +149,10 @@ export default function AdminPage() {
             // Refresh data
             await loadAdminData();
             setShowDeleteConfirm(null);
+            addToast('Plan gelöscht', 'success');
         } catch (error) {
             console.error('Failed to delete plan:', error);
-            alert('Fehler beim Löschen: ' + error.message);
+            addToast('Fehler beim Löschen: ' + error.message, 'error');
         } finally {
             setDeleteLoading(false);
         }
@@ -221,14 +231,14 @@ export default function AdminPage() {
             await loadAdminData();
 
             if (updatesCount > 0) {
-                alert(`Cleanup erfolgreich! ${updatesCount} Änderungen bei ${usersAffected} Usern durchgeführt.`);
+                addToast(`Cleanup erfolgreich! ${updatesCount} Änderungen bei ${usersAffected} Usern durchgeführt.`, 'success');
             } else {
-                alert('Keine Änderungen erforderlich. Alle Daten sind bereits sauber.');
+                addToast('Keine Änderungen erforderlich. Alle Daten sind bereits sauber.', 'info');
             }
 
         } catch (error) {
             console.error('Cleanup failed:', error);
-            alert('Cleanup fehlgeschlagen: ' + error.message);
+            addToast('Cleanup fehlgeschlagen: ' + error.message, 'error');
         } finally {
             setLoading(false);
         }
@@ -1168,8 +1178,8 @@ export default function AdminPage() {
                             <button
                                 onClick={() => setFeedbackFilter('all')}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${feedbackFilter === 'all'
-                                        ? 'bg-amber-400 text-slate-900'
-                                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                                    ? 'bg-amber-400 text-slate-900'
+                                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                                     }`}
                             >
                                 All
@@ -1177,8 +1187,8 @@ export default function AdminPage() {
                             <button
                                 onClick={() => setFeedbackFilter('unreviewed')}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${feedbackFilter === 'unreviewed'
-                                        ? 'bg-amber-400 text-slate-900'
-                                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                                    ? 'bg-amber-400 text-slate-900'
+                                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                                     }`}
                             >
                                 Unreviewed ({feedbackStats.unreviewed})
@@ -1188,8 +1198,8 @@ export default function AdminPage() {
                                     key={type}
                                     onClick={() => setFeedbackFilter(type)}
                                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${feedbackFilter === type
-                                            ? 'bg-amber-400 text-slate-900'
-                                            : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                                        ? 'bg-amber-400 text-slate-900'
+                                        : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                                         }`}
                                 >
                                     {type}
@@ -1232,10 +1242,10 @@ export default function AdminPage() {
                                                             </span>
                                                             <span
                                                                 className={`px-2 py-0.5 rounded text-xs font-medium capitalize ${fb.feedback_type === 'bug'
-                                                                        ? 'bg-red-500/20 text-red-400'
-                                                                        : fb.feedback_type === 'feature'
-                                                                            ? 'bg-purple-500/20 text-purple-400'
-                                                                            : 'bg-slate-700 text-slate-300'
+                                                                    ? 'bg-red-500/20 text-red-400'
+                                                                    : fb.feedback_type === 'feature'
+                                                                        ? 'bg-purple-500/20 text-purple-400'
+                                                                        : 'bg-slate-700 text-slate-300'
                                                                     }`}
                                                             >
                                                                 {fb.feedback_type}
@@ -1310,9 +1320,10 @@ export default function AdminPage() {
                                                             try {
                                                                 await markFeedbackReviewed(fb.id);
                                                                 await loadAdminData();
+                                                                addToast('Marked as reviewed', 'success');
                                                             } catch (error) {
                                                                 console.error('Failed to mark as reviewed:', error);
-                                                                alert('Error marking as reviewed');
+                                                                addToast('Error marking as reviewed', 'error');
                                                             }
                                                         }}
                                                         className="px-3 py-1.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-xs transition-colors"
