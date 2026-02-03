@@ -343,6 +343,25 @@ function MultiSelectField({ question, value = [], onChange, options, max_select 
   );
 }
 
+// WhatsApp Consent Checkbox (for future messaging feature)
+function ConsentCheckbox({ checked, onChange }) {
+  return (
+    <div className="space-y-4">
+      <label className="flex items-start gap-3 cursor-pointer p-4 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-slate-600 transition-all">
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="mt-1 w-5 h-5 rounded border-slate-600 bg-slate-800 text-amber-400 focus:ring-amber-400 focus:ring-offset-slate-900"
+        />
+        <span className="text-slate-300 text-sm leading-relaxed">
+          I agree to receive notifications about my longevity plan. I can unsubscribe anytime.
+        </span>
+      </label>
+    </div>
+  );
+}
+
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 
@@ -531,7 +550,7 @@ export default function IntakePage() {
     setIsSubmitting(true);
     const payload = {
       ...formData,
-
+      whatsapp_consent: formData.whatsapp_consent || false,
       submitted_at: new Date().toISOString(),
     };
 
@@ -614,6 +633,10 @@ export default function IntakePage() {
 
             {/* Consent & Submit */}
             <div className="space-y-8 bg-slate-900 pb-10">
+              <ConsentCheckbox
+                checked={formData.whatsapp_consent || false}
+                onChange={(val) => updateField('whatsapp_consent', val)}
+              />
 
               <button
                 type="button"
