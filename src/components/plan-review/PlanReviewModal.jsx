@@ -3,6 +3,9 @@ import PlanOverview from './PlanOverview';
 import FocusBreakdownChart from './FocusBreakdownChart';
 import PhaseTimeline from './PhaseTimeline';
 import ActivityPreview from './ActivityPreview';
+import ScoreGauge from '../ScoreGauge';
+import ShareScoreCard from '../ShareScoreCard';
+
 
 /**
  * Plan Review Modal
@@ -43,6 +46,31 @@ export default function PlanReviewModal({ planOverview, onConfirm, onBack }) {
 
                 {/* Content */}
                 <div className="px-8 py-6 space-y-8">
+                    {/* Longevity Score Hero */}
+                    {planOverview.longevity_score !== undefined && (
+                        <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-8 flex flex-col items-center">
+                            <ScoreGauge score={planOverview.longevity_score} />
+
+                            <div className="mt-6 text-center max-w-lg">
+                                <h3 className="text-white font-semibold text-lg mb-2">
+                                    Dein Startpunkt
+                                </h3>
+                                <p className="text-slate-400 mb-6">
+                                    Dies ist deine geschätzte biologische Ausgangsbasis basierend auf deinen Antworten.
+                                    Dein neuer Plan ist darauf ausgelegt, diesen Wert in den nächsten 30 Tagen zu verbessern.
+                                </p>
+
+                                {/* Share Score Button */}
+                                <div className="max-w-xs mx-auto">
+                                    <ShareScoreCard
+                                        score={planOverview.longevity_score}
+                                        userName={planOverview.title?.includes('Your') ? null : planOverview.title}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Plan Overview Card */}
                     <PlanOverview overview={planOverview} />
 

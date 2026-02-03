@@ -37,10 +37,13 @@ import InitialFeedbackModal from '../components/feedback/InitialFeedbackModal';
 import FloatingFeedbackButton from '../components/feedback/FloatingFeedbackButton';
 import GeneralFeedbackPanel from '../components/feedback/GeneralFeedbackPanel';
 import { submitFeedback, checkIfFeedbackGiven } from '../lib/feedbackService';
+import CommitmentModal from '../components/CommitmentModal';
+import WhatsAppButton from '../components/WhatsAppButton';
 
 // Analytics
 import { trackTaskCompleted, trackDayCompleted, trackFeatureUsed } from '../lib/analytics';
 import { logger } from '../lib/logger';
+import { generateICS, downloadICS } from '../utils/icsGenerator';
 
 
 // Pillar configuration
@@ -127,6 +130,9 @@ export default function DashboardPage() {
   const [showInitialFeedback, setShowInitialFeedback] = useState(false);
   const [showFeedbackPanel, setShowFeedbackPanel] = useState(false);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+
+  // Commitment Contract State
+  const [showCommitmentModal, setShowCommitmentModal] = useState(false);
 
   const navigate = useNavigate();
   const { planId, day } = useParams(); // Get URL parameters
@@ -345,6 +351,17 @@ export default function DashboardPage() {
     };
 
     loadPlan();
+
+    // Check commitment contract
+    const hasSigned = localStorage.getItem('has_signed_contract');
+    if (!hasSigned) {
+      // Small delay to let loading finish first if needed, or strictly blocking
+      // If we want it to be blocking immediately, we can set it true
+      // But let's wait until plan is loaded so we don't block empty state?
+      // Actually, if we are on dashboard, we should block.
+      // Let's set it after a tick to avoid hydration mismatch if using SSR (though this is SPA)
+      setTimeout(() => setShowCommitmentModal(true), 1000);
+    }
   }, [user, navigate, planId]); // Re-run when user changes (login/logout) or planId changes
 
   // Set selected day from URL parameter when plan is loaded
@@ -561,6 +578,22 @@ export default function DashboardPage() {
                 </svg>
                 🩺 Gesundheitsprofil
               </button>
+
+              {/* Calendar Export Button */}
+              <button
+                onClick={() => {
+                  const icsContent = generateICS(plan);
+                  downloadICS(icsContent);
+                  addToast('📅 Calendar exported!', 'success');
+                  trackFeatureUsed('calendar_export');
+                }}
+                className="w-full mt-3 py-3 bg-slate-800 hover:bg-slate-700 text-white font-medium rounded-lg transition-all border border-slate-700 hover:border-slate-600 flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Sync to Calendar
+              </button>
             </div>
 
             <MonthOverview
@@ -571,6 +604,14 @@ export default function DashboardPage() {
               startDate={plan.start_date}
             />
 
+
+            {/* WhatsApp Save Button */}
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
+              <h3 className="text-white font-semibold text-sm uppercase tracking-wider text-slate-400 mb-3">
+                Don't lose your plan
+              </h3>
+              <WhatsAppButton />
+            </div>
 
             {/* History */}
             {archivedPlans.length > 0 && (
@@ -648,6 +689,14 @@ export default function DashboardPage() {
           Need help? <a href="mailto:hello@extensiovitae.com" className="text-amber-400 hover:text-amber-300">hello@extensiovitae.com</a>
         </div>
       </footer>
+
+      <CommitmentModal
+        isOpen={showCommitmentModal}
+        onCommit={() => {
+          setShowCommitmentModal(false);
+          addToast('Protocol Initiated. Welcome.', 'success');
+        }}
+      />
 
 
 

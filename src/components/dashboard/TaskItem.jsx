@@ -1,4 +1,7 @@
 import React from 'react';
+import { fireConfetti } from '../../utils/confetti';
+import { useToast } from '../Toast';
+import EvidenceText from './EvidenceText';
 
 // Pillar configuration
 const PILLARS = {
@@ -17,17 +20,34 @@ const PILLARS = {
  */
 export default function TaskItem({ task, completed, onToggle }) {
     const pillar = PILLARS[task.pillar] || { label: task.pillar || 'Task', color: 'bg-slate-500', textColor: 'text-slate-400' };
+    const { addToast } = useToast();
+
+    const handleToggle = () => {
+        // Fire confetti if this is the Quick Win task and it's being completed
+        if (task.id === 'quick-win-01' && !completed) {
+            fireConfetti();
+            addToast('🎉 Momentum started!', 'success');
+        }
+        onToggle();
+    };
+
+    const isQuickWin = task.is_quick_win || task.id === 'quick-win-01';
 
     return (
         <div
-            className={`flex items-start gap-4 p-4 rounded-lg transition-all cursor-pointer ${completed ? 'bg-slate-800/30' : 'bg-slate-800/60 hover:bg-slate-800'
-                }`}
-            onClick={onToggle}
+            className={`relative flex items-start gap-4 p-4 rounded-lg transition-all cursor-pointer ${isQuickWin ? 'border-2 border-amber-400/50 bg-amber-400/5' : ''
+                } ${completed ? 'bg-slate-800/30' : 'bg-slate-800/60 hover:bg-slate-800'}`}
+            onClick={handleToggle}
         >
+            {isQuickWin && (
+                <div className="absolute -top-2 -right-2 bg-amber-400 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    Start Here
+                </div>
+            )}
             <button
                 className={`mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${completed
-                        ? 'bg-amber-400 border-amber-400'
-                        : 'border-slate-600 hover:border-amber-400'
+                    ? 'bg-amber-400 border-amber-400'
+                    : 'border-slate-600 hover:border-amber-400'
                     }`}
             >
                 {completed && (
@@ -42,7 +62,7 @@ export default function TaskItem({ task, completed, onToggle }) {
                     <span className={`text-xs font-medium ${pillar.textColor}`}>{pillar.label}</span>
                 </div>
                 <p className={`text-sm leading-relaxed ${completed ? 'text-slate-500 line-through' : 'text-slate-200'}`}>
-                    {task.task}
+                    <EvidenceText text={task.task} />
                 </p>
             </div>
             <span className="text-slate-500 text-sm whitespace-nowrap">{task.time_minutes} min</span>

@@ -94,6 +94,23 @@ function generateWithAlgorithm(intakeData, options = {}) {
         .slice(0, 3)
         .map(([k]) => k.split('_')[0]);
 
+    // Inject "Quick Win" task at the start of Day 1
+    if (plan.days && plan.days.length > 0) {
+        const quickWinTask = {
+            id: 'quick-win-01',
+            pillar: 'nutrition',
+            task: 'Hydration Kickstart',
+            description: 'Drink 1 large glass of water immediately.',
+            how: 'Fill a glass with 300-500ml of water and drink it now. This simple action kickstarts your metabolism and hydration.',
+            time_minutes: 1,
+            when: 'now',
+            is_quick_win: true
+        };
+
+        // Add to the beginning of Day 1
+        plan.days[0].tasks.unshift(quickWinTask);
+    }
+
     return plan;
 }
 

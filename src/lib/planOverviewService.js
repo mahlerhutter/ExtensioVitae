@@ -3,6 +3,7 @@
  * Generates metadata and overview information for plan review
  */
 import { logger } from './logger';
+import { calculateLongevityScore } from '../utils/scoring';
 
 /**
  * Calculate plan overview metadata from a generated plan
@@ -38,9 +39,13 @@ export function calculatePlanOverview(plan, intakeData = {}) {
         // Calculate projected impact (placeholder - can be enhanced)
         const projectedImpact = calculateProjectedImpact(focusBreakdown, timeCommitment);
 
+        // Calculate Longevity Score
+        const longevityScore = calculateLongevityScore(intakeData);
+
         return {
             title,
             tagline,
+            longevity_score: longevityScore,
             projected_impact: projectedImpact,
             daily_commitment_avg: timeCommitment.average,
             daily_commitment_range: timeCommitment.range,

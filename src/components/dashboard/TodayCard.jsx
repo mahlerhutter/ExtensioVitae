@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ProgressRing from './ProgressRing';
 import TaskItem from './TaskItem';
+import { getCurrentBlock, getBlockDisplayName, isTaskInCurrentBlock } from '../../utils/time';
 
 // Helper to format date
 function formatDate(date) {
@@ -10,9 +11,17 @@ function formatDate(date) {
 
 /**
  * Today Card Component
- * Shows today's tasks with progress tracking
+ * Shows today's tasks with progress tracking and Focus Mode
  */
 export default function TodayCard({ day, dayData, progress, onTaskToggle, startDate }) {
+    const [viewMode, setViewMode] = useState('focus'); // 'focus' | 'list'
+    const currentBlock = getCurrentBlock();
+
+    // Filter tasks based on view mode
+    const displayTasks = viewMode === 'focus'
+        ? dayData.tasks.filter(task => isTaskInCurrentBlock(task, currentBlock))
+        : dayData.tasks;
+
     const completedCount = dayData.tasks.filter((t) => progress[t.id]).length;
     const totalTime = dayData.tasks.reduce((acc, t) => acc + t.time_minutes, 0);
     const remainingTime = dayData.tasks
@@ -34,16 +43,50 @@ export default function TodayCard({ day, dayData, progress, onTaskToggle, startD
                 <ProgressRing completed={completedCount} total={dayData.tasks.length} />
             </div>
 
-            <div className="space-y-3">
-                {dayData.tasks.map((task) => (
-                    <TaskItem
-                        key={task.id}
-                        task={task}
-                        completed={progress[task.id] || false}
-                        onToggle={() => onTaskToggle(day, task.id)}
+            {/* Focus Mode Toggle */}
+            <div className="mb-4 flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
+                <div className="flex items-center gap-2">
+                    <span className="text-slate-400 text-sm font-medium">
+                        {viewMode === 'focus' ? `🎯 Focus: ${getBlockDisplayName(currentBlock)}` : '📋 Alle Aufgaben'}
+                    </span>
+                    {viewMode === 'focus' && displayTasks.length === 0 && (
+                        <span className="text-xs text-slate-500">(Keine Aufgaben)</span>
+                    )}
+                </div>
+
+                <button
+                    onClick={() => setViewMode(viewMode === 'focus' ? 'list' : 'focus')}
+                    className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+                    style={{ backgroundColor: viewMode === 'focus' ? '#fbbf24' : '#475569' }}
+                >
+                    <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${viewMode === 'focus' ? 'translate-x-6' : 'translate-x-1'
+                            }`}
                     />
-                ))}
+                </button>
             </div>
+
+            {/* Tasks Display */}
+            {viewMode === 'focus' && displayTasks.length === 0 ? (
+                <div className="py-12 text-center">
+                    <div className="text-6xl mb-4">🧘</div>
+                    <h3 className="text-xl font-semibold text-white mb-2">Rest & Recovery Mode</h3>
+                    <p className="text-slate-400 text-sm">
+                        Keine Aufgaben für diesen Zeitblock. Genieße die Pause.
+                    </p>
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {displayTasks.map((task) => (
+                        <TaskItem
+                            key={task.id}
+                            task={task}
+                            completed={progress[task.id] || false}
+                            onToggle={() => onTaskToggle(day, task.id)}
+                        />
+                    ))}
+                </div>
+            )}
 
             <div className="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-sm">
                 <span className="text-slate-400">Gesamt: {totalTime} min</span>
