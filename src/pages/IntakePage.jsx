@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { saveIntake, getIntake } from '../lib/dataService';
 import { useAuth } from '../contexts/AuthContext';
 import { getUserProfile } from '../lib/supabase';
+import { trackIntakeCompleted } from '../lib/analytics';
 
 const QUESTIONS = {
   mandatory: [
@@ -557,6 +558,9 @@ export default function IntakePage() {
       // Save using DataService (auto Supabase/localStorage)
       await saveIntake(payload);
       console.log('[Intake] Data saved successfully');
+
+      // Track analytics event
+      trackIntakeCompleted(payload);
 
       // Navigate to generating page
       window.location.href = '/generating';

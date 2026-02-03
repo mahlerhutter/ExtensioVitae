@@ -4,6 +4,7 @@
  */
 
 import { supabase } from './supabase';
+import { trackFeedbackSubmitted } from './analytics';
 
 /**
  * Submit user feedback
@@ -45,6 +46,10 @@ export async function submitFeedback(feedbackData) {
         if (error) throw error;
 
         console.log('[FeedbackService] Feedback submitted:', data.id);
+
+        // Track analytics event
+        trackFeedbackSubmitted(feedbackData.feedback_type, feedbackData.overall_rating);
+
         return data;
     } catch (error) {
         console.error('[FeedbackService] Failed to submit feedback:', error);

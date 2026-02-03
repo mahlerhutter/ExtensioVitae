@@ -16,21 +16,19 @@
 
 ---
 
-### 1. 🟠 Admin Page: User Count Shows 0 Despite Active Plans
-**Location:** `src/pages/AdminPage.jsx`  
-**Issue:** Admin overview shows "0 Registrierte User" while showing 188 plans with names. Suggests user registration isn't linked correctly to plan creators.  
-**Impact:** Admin visibility - can't see active user count  
-**Effort:** 1 hour
+### 1. 🟠 Admin Panel RLS Fix - PENDING MIGRATION
+**Location:** `sql/migrations/008_admin_access_policies.sql`  
+**Status:** ⏳ Migration created, needs to be run in Supabase  
+**Issue:** Admin overview shows "0 Registrierte User" due to RLS policies blocking access.  
+**Solution:** Created `is_admin_user()` function with SECURITY DEFINER to check admin emails and grant access.
 
-**Prompt to fix:**
+**To complete:**
 ```
-Debug the admin page user count:
-1. Check how "Registrierte User" count is calculated
-2. Verify the query joins user_profiles with auth.users correctly
-3. Consider counting distinct user_ids from intake_responses or plans table
-4. Add user email display alongside user name in plan list
+1. Go to Supabase → SQL Editor
+2. Run contents of sql/migrations/008_admin_access_policies.sql
+3. Verify admin page shows correct user count
 ```
-**Model:** Claude Sonnet 4
+**Effort:** 5 minutes
 
 ---
 
@@ -128,6 +126,44 @@ Create a migration utility to populate health_profiles for existing users:
 ---
 
 ## ✅ COMPLETED TASKS (Recent)
+
+### ✅ Analytics Integration (2026-02-03)
+**Status:** ✅ **COMPLETE**  
+**Priority:** 🟠 HIGH  
+**Effort:** 1 hour
+
+**Implementation:**
+- ✅ Created `src/lib/analytics.js` with PostHog integration
+- ✅ Added tracking for key events:
+  - User login/logout
+  - Intake form completion
+  - Task completion
+  - Day completion
+  - Feedback submission
+- ✅ Integrated with AuthContext, IntakePage, DashboardPage, feedbackService
+- ✅ Updated `.env.example` with PostHog configuration
+- ✅ Created documentation in `docs/ANALYTICS_ADMIN_SETUP.md`
+
+**To enable:**
+1. Create PostHog account at https://posthog.com
+2. Add `VITE_POSTHOG_API_KEY` to `.env`
+3. Run `npm install posthog-js`
+
+---
+
+### ✅ Admin Panel RLS Fix Prepared (2026-02-03)
+**Status:** ✅ **MIGRATION CREATED**  
+**Priority:** 🟠 HIGH  
+**Effort:** 30 minutes
+
+**Implementation:**
+- ✅ Created `sql/migrations/008_admin_access_policies.sql`
+- ✅ Added `is_admin_user()` function with SECURITY DEFINER
+- ✅ Added admin policies for all relevant tables
+
+**To complete:** Run migration in Supabase SQL Editor
+
+---
 
 ### ✅ Unit Test Setup (2026-02-02)
 **Status:** ✅ **COMPLETE**  

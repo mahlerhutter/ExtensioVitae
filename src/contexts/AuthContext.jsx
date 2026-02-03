@@ -7,6 +7,7 @@ import {
     onAuthStateChange,
     isAuthAvailable
 } from '../lib/supabase';
+import { identifyUser, resetUser, trackLogin } from '../lib/analytics';
 
 // Create the auth context
 const AuthContext = createContext({
@@ -66,10 +67,20 @@ export function AuthProvider({ children }) {
             setSession(session);
             setUser(session?.user ?? null);
 
+            if (event === 'SIGNED_IN' && session?.user) {
+                // Identify user in analytics
+                identifyUser(session.user.id, {
+                    email: session.user.email,
+                });
+                trackLogin('google');
+            }
+
             if (event === 'SIGNED_OUT') {
                 // Clear any cached user data
                 setUser(null);
                 setSession(null);
+                // Reset analytics user
+                resetUser();
             }
         });
 

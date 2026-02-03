@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import AuthPage from './pages/AuthPage';
 import AdminPage from './pages/AdminPage';
 import HealthProfilePage from './pages/HealthProfilePage';
+import SciencePage from './pages/SciencePage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/intake" element={<IntakePage />} />
           <Route path="/generating" element={<GeneratingPage />} />
+          <Route path="/science" element={<SciencePage />} />
 
           {/* Protected Dashboard Routes with Error Boundary */}
           <Route path="/dashboard" element={

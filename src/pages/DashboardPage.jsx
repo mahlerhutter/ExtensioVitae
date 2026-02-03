@@ -37,6 +37,9 @@ import FloatingFeedbackButton from '../components/feedback/FloatingFeedbackButto
 import GeneralFeedbackPanel from '../components/feedback/GeneralFeedbackPanel';
 import { submitFeedback, checkIfFeedbackGiven } from '../lib/feedbackService';
 
+// Analytics
+import { trackTaskCompleted, trackDayCompleted, trackFeatureUsed } from '../lib/analytics';
+
 
 // Pillar configuration
 const PILLARS = {
@@ -352,6 +355,7 @@ export default function DashboardPage() {
   const handleTaskToggle = async (day, taskId) => {
     const dayData = plan.days[day - 1];
     const totalTasks = dayData?.tasks?.length || 0;
+    const task = dayData?.tasks?.find(t => t.id === taskId);
 
     setProgress((prev) => {
       const dayProgress = prev[day] || {};
@@ -367,6 +371,17 @@ export default function DashboardPage() {
 
       // Save to Supabase/localStorage in background
       updateProgress(day, taskId, newStatus, totalTasks, plan.supabase_plan_id);
+
+      // Track task completion in analytics
+      if (newStatus && task) {
+        trackTaskCompleted({ id: taskId, pillar: task.pillar, day });
+
+        // Check if day is completed
+        const completedTasks = Object.values(newProgress[day] || {}).filter(Boolean).length;
+        if (completedTasks === totalTasks) {
+          trackDayCompleted(day, completedTasks, totalTasks);
+        }
+      }
 
       return newProgress;
     });
