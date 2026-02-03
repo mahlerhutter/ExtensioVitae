@@ -8,7 +8,7 @@ export default function FloatingFeedbackButton({ onClick }) {
     return (
         <button
             onClick={onClick}
-            className="fixed bottom-6 right-6 bg-amber-400 text-slate-900 font-semibold px-6 py-3 rounded-full shadow-lg hover:bg-amber-300 transition-all hover:scale-105 hover:shadow-xl flex items-center gap-2 z-40 group"
+            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 bg-amber-400 text-slate-900 font-semibold px-4 py-2.5 sm:px-6 sm:py-3 rounded-full shadow-lg hover:bg-amber-300 transition-all hover:scale-105 hover:shadow-xl flex items-center gap-2 z-40 group"
             aria-label="Feedback geben"
         >
             <svg

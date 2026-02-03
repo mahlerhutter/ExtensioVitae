@@ -57,7 +57,7 @@ export default function GeneralFeedbackPanel({ onClose, onSubmit }) {
             />
 
             {/* Panel */}
-            <div className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-slate-900 border-l border-slate-800 shadow-2xl z-50 flex flex-col animate-slideInRight">
+            <div className="fixed inset-0 sm:inset-auto sm:right-0 sm:top-0 sm:bottom-0 w-full sm:max-w-md bg-slate-900 sm:border-l border-slate-800 shadow-2xl z-50 flex flex-col animate-slideInRight">
                 {/* Header */}
                 <div className="p-6 border-b border-slate-800">
                     <div className="flex items-center justify-between mb-4">
