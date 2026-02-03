@@ -4,6 +4,11 @@
  * Uses PostHog for privacy-friendly analytics
  * https://posthog.com
  * 
+ * GRACEFUL DEGRADATION:
+ * - If posthog-js is not installed, events are logged to console in dev mode
+ * - If no API key is configured, analytics is disabled
+ * - Works without any dependencies installed
+ * 
  * Event Types:
  * - Page views (automatic)
  * - User actions (custom events)
@@ -15,51 +20,78 @@
 const POSTHOG_API_KEY = import.meta.env.VITE_POSTHOG_API_KEY || '';
 const POSTHOG_HOST = import.meta.env.VITE_POSTHOG_HOST || 'https://eu.i.posthog.com';
 
-// Check if analytics is enabled
+// Check if analytics is enabled (needs API key AND production mode)
 const isEnabled = () => {
     return Boolean(POSTHOG_API_KEY) && import.meta.env.MODE === 'production';
 };
 
-// PostHog instance (lazy-loaded)
+// PostHog instance (lazy-loaded, may be null if not installed)
 let posthog = null;
+let initAttempted = false;
+
+/**
+ * Try to load PostHog dynamically
+ * Uses a try-catch approach that works with Vite's bundler
+ */
+const tryLoadPosthog = async () => {
+    try {
+        // Check if posthog-js is available in node_modules
+        // This uses a string variable to prevent Vite from analyzing the import
+        const moduleName = 'posthog-js';
+        const module = await import(/* @vite-ignore */ moduleName);
+        return module.default;
+    } catch (e) {
+        return null;
+    }
+};
 
 /**
  * Initialize PostHog analytics
  * Call this in your App.jsx or main.jsx
+ * Gracefully handles cases where posthog-js is not installed
  */
 export const initAnalytics = async () => {
+    if (initAttempted) return;
+    initAttempted = true;
+
+    // In development without API key, just log
+    if (!POSTHOG_API_KEY) {
+        console.log('[Analytics] No API key configured - events will be logged to console');
+        return;
+    }
+
+    // Only fully enable in production
     if (!isEnabled()) {
-        console.log('[Analytics] Disabled (no API key or not in production)');
+        console.log('[Analytics] Development mode - events logged to console');
         return;
     }
 
     try {
-        // Dynamic import PostHog
-        const { default: posthogLib } = await import('posthog-js');
+        const posthogLib = await tryLoadPosthog();
+
+        if (!posthogLib) {
+            console.log('[Analytics] posthog-js not installed. Install with: npm install posthog-js');
+            return;
+        }
 
         posthogLib.init(POSTHOG_API_KEY, {
             api_host: POSTHOG_HOST,
-            // Privacy settings
             autocapture: true,
             capture_pageview: true,
             capture_pageleave: true,
             disable_session_recording: false,
-            // Performance
             loaded: (ph) => {
                 console.log('[Analytics] PostHog initialized');
                 posthog = ph;
             },
-            // Respect Do Not Track
             respect_dnt: true,
-            // Cookie settings
             persistence: 'localStorage+cookie',
-            // Disable in dev
-            opt_out_capturing_by_default: import.meta.env.MODE !== 'production',
+            opt_out_capturing_by_default: false,
         });
 
         posthog = posthogLib;
     } catch (error) {
-        console.error('[Analytics] Failed to initialize:', error);
+        console.log('[Analytics] PostHog not available');
     }
 };
 
@@ -82,13 +114,12 @@ export const identifyUser = (userId, properties = {}) => {
  * Track a custom event
  */
 export const trackEvent = (eventName, properties = {}) => {
-    if (!posthog) {
-        // Log in development
-        if (import.meta.env.MODE !== 'production') {
-            console.log(`[Analytics] Event: ${eventName}`, properties);
-        }
-        return;
+    // Always log in development for debugging
+    if (import.meta.env.MODE !== 'production') {
+        console.log(`[Analytics] ${eventName}`, properties);
     }
+
+    if (!posthog) return;
 
     posthog.capture(eventName, {
         ...properties,
@@ -97,7 +128,7 @@ export const trackEvent = (eventName, properties = {}) => {
 };
 
 /**
- * Track page view (called automatically, but can be called manually for SPAs)
+ * Track page view
  */
 export const trackPageView = (pageName) => {
     if (!posthog) return;
@@ -116,9 +147,6 @@ export const resetUser = () => {
 // Pre-defined Event Helpers
 // ============================================
 
-/**
- * Track intake form completion
- */
 export const trackIntakeCompleted = (intakeData) => {
     trackEvent('intake_completed', {
         age: intakeData.age,
@@ -129,9 +157,6 @@ export const trackIntakeCompleted = (intakeData) => {
     });
 };
 
-/**
- * Track plan generation
- */
 export const trackPlanGenerated = (planData) => {
     trackEvent('plan_generated', {
         longevity_score: planData.longevityScore,
@@ -141,9 +166,6 @@ export const trackPlanGenerated = (planData) => {
     });
 };
 
-/**
- * Track task completion
- */
 export const trackTaskCompleted = (taskData) => {
     trackEvent('task_completed', {
         task_id: taskData.id,
@@ -152,9 +174,6 @@ export const trackTaskCompleted = (taskData) => {
     });
 };
 
-/**
- * Track day completion
- */
 export const trackDayCompleted = (dayNumber, tasksCompleted, totalTasks) => {
     trackEvent('day_completed', {
         day: dayNumber,
@@ -164,9 +183,6 @@ export const trackDayCompleted = (dayNumber, tasksCompleted, totalTasks) => {
     });
 };
 
-/**
- * Track feedback submission
- */
 export const trackFeedbackSubmitted = (feedbackType, rating) => {
     trackEvent('feedback_submitted', {
         type: feedbackType,
@@ -174,41 +190,22 @@ export const trackFeedbackSubmitted = (feedbackType, rating) => {
     });
 };
 
-/**
- * Track user signup
- */
 export const trackSignup = (method = 'email') => {
-    trackEvent('user_signed_up', {
-        method: method,
-    });
+    trackEvent('user_signed_up', { method });
 };
 
-/**
- * Track user login
- */
 export const trackLogin = (method = 'email') => {
-    trackEvent('user_logged_in', {
-        method: method,
-    });
+    trackEvent('user_logged_in', { method });
 };
 
-/**
- * Track plan review modal opened
- */
 export const trackPlanReviewOpened = () => {
     trackEvent('plan_review_opened');
 };
 
-/**
- * Track plan accepted
- */
 export const trackPlanAccepted = () => {
     trackEvent('plan_accepted');
 };
 
-/**
- * Track health profile updated
- */
 export const trackHealthProfileUpdated = (hasConditions, hasInjuries) => {
     trackEvent('health_profile_updated', {
         has_conditions: hasConditions,
@@ -216,17 +213,12 @@ export const trackHealthProfileUpdated = (hasConditions, hasInjuries) => {
     });
 };
 
-/**
- * Track feature usage
- */
 export const trackFeatureUsed = (featureName) => {
-    trackEvent('feature_used', {
-        feature: featureName,
-    });
+    trackEvent('feature_used', { feature: featureName });
 };
 
 // ============================================
-// Export default for easy import
+// Export default
 // ============================================
 
 export default {
@@ -235,7 +227,6 @@ export default {
     track: trackEvent,
     pageView: trackPageView,
     reset: resetUser,
-    // Pre-defined events
     events: {
         intakeCompleted: trackIntakeCompleted,
         planGenerated: trackPlanGenerated,
