@@ -11,12 +11,14 @@ import SciencePage from './pages/SciencePage';
 import NotFoundPage from './pages/NotFoundPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
+import BetaBadge from './components/BetaBadge';
 
 
 
 export default function App() {
   return (
     <BrowserRouter>
+      <BetaBadge />
       <Routes>
         <Route path="/" element={
           <ErrorBoundary>

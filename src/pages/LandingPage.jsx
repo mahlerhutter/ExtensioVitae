@@ -141,9 +141,15 @@ function Hero() {
           <br />
           <span className="text-amber-400">Longevity Blueprint</span>
         </h1>
-        <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
+        <p className="text-xl text-slate-300 mb-4 max-w-2xl mx-auto">
           Science-informed. Delivered daily. Under 30 minutes.
         </p>
+        <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full mb-8">
+          <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+          <span className="text-amber-400 text-sm font-medium">
+            Early Beta - We're improving daily based on your feedback
+          </span>
+        </div>
         <a
           href="/intake"
           className="inline-flex items-center bg-amber-400 hover:bg-amber-500 text-slate-900 px-8 py-4 rounded-lg text-lg font-medium transition-all hover:scale-105"
