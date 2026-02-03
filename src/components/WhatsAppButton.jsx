@@ -5,28 +5,27 @@ import React, { useState, useEffect } from 'react';
  * Enables users to send the plan link to themselves to pin it.
  */
 export default function WhatsAppButton() {
-    const [isDesktop, setIsDesktop] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
-        // Check if desktop
-        const checkDesktop = () => {
-            setIsDesktop(window.innerWidth > 768);
+        // Detect mobile device via User Agent (more reliable than window width)
+        const checkMobile = () => {
+            const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            setIsMobile(mobile);
         };
 
-        checkDesktop();
-        window.addEventListener('resize', checkDesktop);
-        return () => window.removeEventListener('resize', checkDesktop);
+        checkMobile();
     }, []);
 
     const handleClick = () => {
         const currentUrl = window.location.href;
         const text = encodeURIComponent(`My ExtensioVitae Protocol: ${currentUrl} — Pin this chat to keep your plan accessible.`);
 
-        // Mobile: Deep link to open contact picker for "Message Yourself"
-        // Desktop: Web WhatsApp fallback
-        const url = isDesktop
-            ? `https://web.whatsapp.com/send?text=${text}`
-            : `https://wa.me//?text=${text}`;
+        // Mobile: Use // hack to open contact picker for "Message Yourself"
+        // Desktop: Use web.whatsapp.com with text parameter (works without contact)
+        const url = isMobile
+            ? `https://wa.me//?text=${text}`
+            : `https://web.whatsapp.com/send?text=${text}`;
 
         window.open(url, '_blank');
     };

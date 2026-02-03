@@ -68,11 +68,27 @@ export default function TodayCard({ day, dayData, progress, onTaskToggle, startD
 
             {/* Tasks Display */}
             {viewMode === 'focus' && displayTasks.length === 0 ? (
-                <div className="py-12 text-center">
-                    <div className="text-6xl mb-4">🧘</div>
-                    <h3 className="text-xl font-semibold text-white mb-2">Rest & Recovery Mode</h3>
-                    <p className="text-slate-400 text-sm">
-                        Keine Aufgaben für diesen Zeitblock. Genieße die Pause.
+                <div className="py-12 text-center bg-slate-800/30 rounded-xl border border-slate-700/50">
+                    <div className="text-5xl mb-4">🧘</div>
+                    <h3 className="text-xl font-semibold text-white mb-2">Active Recovery</h3>
+                    <p className="text-slate-400 text-sm mb-4">
+                        Keine Aufgaben für diesen Zeitblock.
+                    </p>
+
+                    {/* Next Protocol Time */}
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                        <svg className="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-amber-400 text-sm font-medium">
+                            {currentBlock === 'morning' && 'Next Protocol: 11:00 (Midday)'}
+                            {currentBlock === 'day' && 'Next Protocol: 21:00 (Evening)'}
+                            {currentBlock === 'evening' && 'Next Protocol: 07:00 (Morning)'}
+                        </span>
+                    </div>
+
+                    <p className="text-slate-500 text-xs mt-4">
+                        💧 Stay hydrated · 🚶 Take a walk · 🧠 Rest your mind
                     </p>
                 </div>
             ) : (
