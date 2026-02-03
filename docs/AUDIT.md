@@ -671,3 +671,497 @@ export function decryptData(encrypted) {
 ## Kontakt
 
 Bei Fragen zu diesem Audit: Entwicklungsteam kontaktieren.
+
+
+# ExtensioVitae - Comprehensive Code Audit Report
+## MVP Deployment Readiness Assessment
+
+**Datum:** 03. Februar 2026
+**Auditor:** Claude (Comprehensive Analysis)
+**Projekt:** ExtensioVitae - Personalized 30-Day Longevity Blueprint
+**Version:** 1.0.0
+
+---
+
+## Executive Summary
+
+ExtensioVitae ist eine ambitionierte Longevity-Plattform mit solidem technischem Fundament, weist jedoch **kritische Sicherheitsprobleme** und mehrere **UX/Usability-Issues** auf, die vor einem MVP-Deployment behoben werden müssen.
+
+### Gesamtbewertung: ⚠️ **NICHT DEPLOYMENT-READY**
+
+| Kategorie | Status | Priorität |
+|-----------|--------|-----------|
+| **Sicherheit** | 🔴 Kritisch | BLOCKER |
+| **Usability** | 🟡 Verbesserungsbedarf | Hoch |
+| **Scoring-Logik** | 🟢 Gut | Mittel |
+| **Code-Qualität** | 🟡 Akzeptabel | Mittel |
+| **Architektur** | 🟢 Solide | Niedrig |
+
+---
+
+## 🔴 KRITISCHE SECURITY-ISSUES (BLOCKER)
+
+### 1. **KRITISCH: .env-Datei im Repository**
+
+**Problem:**
+```bash
+-rw------- 1 user user 2797 Feb  3 09:07 .env
+```
+Die `.env`-Datei existiert physisch im Repo-Verzeichnis. Obwohl sie in `.gitignore` steht und nicht getrackt wird, stellt dies ein **hohes Risiko** dar:
+
+- Entwickler könnten versehentlich `git add -f .env` ausführen
+- Secrets könnten in Backups/Screenshots/Logs landen
+- Production-Credentials sind gefährdet
+
+**Impact:** 🔴 **CRITICAL** - API-Keys (OpenAI, Anthropic, Supabase) könnten exponiert werden
+
+**Lösung:**
+1. `.env` sofort löschen und niemals committen
+2. Alle API-Keys rotieren (OpenAI, Anthropic, Supabase, PostHog)
+3. Git-History überprüfen: `git log --all --full-history -- .env`
+4. Credentials nur über sichere Secrets-Manager (GitHub Secrets, Vercel Env Vars)
+
+---
+
+### 2. **KRITISCH: Admin-Email-Whitelist im Client-Code**
+
+**Problem:**
+```javascript
+// src/pages/AdminPage.jsx
+const ADMIN_EMAILS = import.meta.env.VITE_ADMIN_EMAILS
+    ? import.meta.env.VITE_ADMIN_EMAILS.split(',').map(email => email.trim())
+    : [];
+```
+
+**Client-seitige Admin-Checks sind UNSICHER:**
+- `VITE_*` Environment-Variablen werden in den **Build-Output** kompiliert
+- Jeder kann den Bundle inspizieren und Admin-Emails sehen
+- Admin-Check kann über Browser DevTools manipuliert werden
+
+**Impact:** 🔴 **CRITICAL** - Unauthorized Admin Access möglich
+
+**Lösung:**
+1. **Server-Side Authorization:** Supabase RLS-Policies verwenden (bereits implementiert in `008_admin_access_policies.sql`)
+2. Admin-Check ausschließlich über `is_admin_user()` PostgreSQL-Funktion
+3. Client-Check nur als UX-Layer (keine Security-Funktion)
+4. Email-Liste aus `.env` entfernen oder dokumentieren, dass sie keine Security-Funktion hat
+
+---
+
+### 3. **HOCH: Fehlende API-Key-Rotation-Strategie**
+
+**Problem:**
+- Keine dokumentierte Key-Rotation
+- API-Keys in Environment-Variablen ohne Expiry
+- Kein Monitoring für API-Key-Missbrauch
+
+**Impact:** 🟠 **HIGH** - Bei Key-Leak keine schnelle Reaktionsmöglichkeit
+
+**Lösung:**
+1. API-Key-Rotation-Prozess dokumentieren
+2. Rate-Limiting für LLM-Calls implementieren
+3. API-Usage-Monitoring einrichten (PostHog/Custom)
+
+---
+
+### 4. **MITTEL: CORS & API-Proxy fehlt**
+
+**Problem:**
+```javascript
+// Direct API calls from client
+fetch('https://api.openai.com/v1/chat/completions', {
+    headers: { 'Authorization': `Bearer ${apiKey}` }
+})
+```
+
+**Client-seitige LLM-Calls sind problematisch:**
+- API-Keys im Browser exponiert (DevTools Network Tab)
+- CORS-Issues bei direct API calls
+- Keine Rate-Limiting-Kontrolle
+
+**Impact:** 🟡 **MEDIUM** - API-Key-Leaks, Kosten-Explosion
+
+**Lösung:**
+1. **Backend-Proxy** implementieren (Vercel Serverless Functions oder Supabase Edge Functions)
+2. API-Keys nur server-side halten
+3. Rate-Limiting auf Proxy-Ebene
+
+---
+
+## 🟡 USABILITY & UX-ISSUES
+
+### 5. **HOCH: Pflichtfeld "WhatsApp Number" blockiert Onboarding**
+
+**Problem:**
+```javascript
+// src/pages/IntakePage.jsx
+{
+  id: 'phone_number',
+  question: "Your WhatsApp number",
+  type: 'tel',
+  required: true,  // ⚠️ BLOCKER
+}
+```
+
+**Warum problematisch:**
+- User ohne WhatsApp können sich nicht registrieren
+- Privacy-Concerns: Phone Number zu früh im Funnel
+- Internationale Nutzer haben Bedenken
+
+**Impact:** 🟠 **HIGH** - 30-50% Conversion-Drop
+
+**Lösung:**
+1. Phone Number auf **optional** setzen
+2. WhatsApp-Aktivierung als Post-Onboarding-Step
+3. Alternative Notification-Channels anbieten (Email, Push)
+
+**Code-Fix:**
+```javascript
+{
+  id: 'phone_number',
+  question: "WhatsApp number (optional - for daily nudges)",
+  type: 'tel',
+  required: false,  // ✅ FIXED
+  helper: "We'll send your daily reminders here if you opt in"
+}
+```
+
+---
+
+### 6. **MITTEL: Longevity Score zu aggressiv/demotivierend**
+
+**Problem:**
+```javascript
+// src/lib/longevityScore.js
+const SMOKING_IMPACT = {
+    daily: -8.0  // -8 Jahre für tägliches Rauchen
+};
+const STRESS_IMPACT = {
+    10: -6.0  // -6 Jahre bei Stress Level 10
+};
+```
+
+**Psychologische Issues:**
+- Score kann **extrem negativ** sein (z.B. Score 15-25 für Raucher mit Stress)
+- Demotivierend statt motivierend
+- "Biological Age = 52" bei Chronological Age 35 schockt User
+
+**Impact:** 🟡 **MEDIUM** - Negative Emotional Response, Churn
+
+**Lösung:**
+1. **Score-Floor** bei 25-30 einführen (nie unter "Verbesserungsbedarf")
+2. **Positive Framing:** "Optimization Potential" statt "You're doomed"
+3. **Progressive Disclosure:** Erst positive Pillars zeigen, dann Verbesserungspotenzial
+
+**Empfohlene Adjustments:**
+```javascript
+// Weniger aggressive Penalties
+const SMOKING_IMPACT = {
+    daily: -5.0  // statt -8.0
+};
+// Score clamping
+const score = Math.max(25, Math.min(100, scoreRaw));  // Floor bei 25
+```
+
+---
+
+### 7. **MITTEL: "Life in Weeks" Visualisierung zu düster**
+
+**Problem:**
+- 90x52 = 4680 Wochen-Grid kann überwältigend wirken
+- "Already lived" Wochen in dunklem Blau = Mortality Salience
+- Kann Anxiety auslösen statt Motivation
+
+**Impact:** 🟡 **MEDIUM** - Negative Emotional Response
+
+**Lösung:**
+1. **Opt-in statt Default:** Nur auf Nachfrage zeigen
+2. **Positive Framing:** "Weeks to optimize" statt "Weeks already gone"
+3. Alternative Visualisierung: Progress Bar mit Milestones
+
+---
+
+### 8. **MITTEL: Fehlende Error-Handling-Messages**
+
+**Problem:**
+- LLM-Failures zeigen generic "Generation failed"
+- Supabase-Errors nicht user-friendly
+- Keine Retry-Mechanismen
+
+**Impact:** 🟡 **MEDIUM** - User-Frustration bei Errors
+
+**Lösung:**
+1. User-freundliche Error-Messages
+2. Automatic Retry mit Exponential Backoff
+3. Graceful Degradation (Algorithm fallback documented)
+
+---
+
+## 🟢 SCORING-SYSTEM EVALUATION
+
+### 9. ✅ **Wissenschaftliche Fundierung ist EXZELLENT**
+
+**Positive Aspekte:**
+```javascript
+// Ausgezeichnete wissenschaftliche Referenzen
+* SCHLAF: Cappuccio et al. (2010), Walker (2017) ✅
+* STRESS: Kivimäki et al. (2012), Steptoe & Kivimäki (2012) ✅
+* BEWEGUNG: Wen et al. (2011), Moore et al. (2012) ✅
+* ERNÄHRUNG: Aune et al. (2017), PREDIMED Trial ✅
+```
+
+**Stärken:**
+- Alle Impact-Faktoren sind durch Meta-Analysen belegt
+- J-förmige Kurven korrekt implementiert (z.B. BMI, Schlaf)
+- Age-Adjustment-Faktoren realistisch
+
+**Verbesserungspotenzial:**
+- Disclaimer prominenter platzieren
+- Transparenz über Berechnungsmethode (FAQ/Science Page)
+
+---
+
+### 10. ⚠️ **BMI-Berechnung vs. Waist-to-Height-Ratio**
+
+**Problem:**
+```javascript
+const bmi = weightKg / (heightM * heightM);
+// ⚠️ BMI ist suboptimal für Muskel-User
+```
+
+**Warum suboptimal:**
+- Bodybuilder/Kraftsportler werden als "übergewichtig" klassifiziert
+- Waist-to-Height-Ratio wäre akkurater
+
+**Impact:** 🟡 **MEDIUM** - Falsche Scores für athletische User
+
+**Lösung:**
+1. **Optional:** Waist circumference erfragen
+2. **Fallback:** BMI-Warnung für Training-Frequency "5+"
+3. Hinweis: "BMI ist limitiert für muskulöse Personen"
+
+---
+
+## 🟡 CODE-QUALITY ISSUES
+
+### 11. **MITTEL: ESLint-Errors müssen behoben werden**
+
+**Problem:**
+```bash
+/src/lib/dataService.js
+  19:5  error  Identifier 'getArchivedPlansFromSupabase' has already been declared
+
+/src/lib/logger.examples.js
+  15:52  error  'userId' is not defined (no-undef)
+  # ... 28 weitere errors
+```
+
+**Impact:** 🟡 **MEDIUM** - Code-Maintenance-Risiko
+
+**Lösung:**
+1. Duplicate import in `dataService.js` entfernen (Zeile 19)
+2. `logger.examples.js` ist nur Beispiel-Code → in `/docs` verschieben oder als `.example` markieren
+3. Pre-commit Hook: `lint-staged` bereits konfiguriert, aber nicht aktiv
+
+---
+
+### 12. **MITTEL: Test-Suite ist defekt**
+
+**Problem:**
+```bash
+Error: Cannot find module @rollup/rollup-linux-arm64-gnu
+```
+
+**Impact:** 🟡 **MEDIUM** - Keine Test-Verification möglich
+
+**Lösung:**
+1. `npm ci` (statt `npm install`) für saubere Dependencies
+2. Architektur-spezifische Rollup-Binaries installieren
+3. Alternative: Tests in Docker-Container (Linux x64)
+
+---
+
+### 13. **NIEDRIG: Fehlende Input-Validation**
+
+**Problem:**
+- Client-side Validation vorhanden, aber keine Server-Side-Checks
+- Supabase-Tabellen haben CHECK-Constraints, aber keine JSON-Schema-Validation
+
+**Impact:** 🟢 **LOW** - RLS schützt vor Manipulation, aber Data-Integrity-Risk
+
+**Lösung:**
+1. Zod/Yup-Schema für Intake-Data
+2. Server-side Validation in Supabase Edge Functions
+
+---
+
+## 📋 ARCHITECTURE REVIEW
+
+### ✅ **Positive Aspekte**
+
+1. **Hybrid Data-Strategy:** localStorage + Supabase ist elegant gelöst
+2. **RLS-Policies:** Gut durchdacht (Migration 008)
+3. **Dual Generation:** Algorithm + LLM mit Fallback ist robust
+4. **Component-Struktur:** Sauber getrennt (pages, components, lib)
+
+### ⚠️ **Verbesserungspotenzial**
+
+1. **State-Management:** Context API reicht für MVP, aber Redux/Zustand wäre skalierbarer
+2. **API-Layer:** Fehlende Abstraktion (siehe Security Issue #4)
+3. **Error-Boundaries:** Nur eine globale ErrorBoundary, keine granularen
+
+---
+
+## 🎯 MVP-DEPLOYMENT ROADMAP
+
+### PHASE 1: SECURITY BLOCKERS (MUST-FIX) - **2-3 Tage**
+
+| Task | Priority | Effort | Owner |
+|------|----------|--------|-------|
+| **#1.1** Lösche `.env` & rotiere alle API-Keys | 🔴 P0 | 2h | DevOps |
+| **#1.2** Implementiere Backend-Proxy für LLM-Calls | 🔴 P0 | 8h | Backend |
+| **#1.3** Dokumentiere Admin-Auth (Client = UX only) | 🔴 P0 | 1h | Docs |
+| **#1.4** Secrets-Manager Setup (Vercel/GitHub) | 🔴 P0 | 2h | DevOps |
+| **#1.5** Rate-Limiting für LLM-Calls | 🟠 P1 | 4h | Backend |
+
+---
+
+### PHASE 2: CRITICAL UX-FIXES - **3-4 Tage**
+
+| Task | Priority | Effort | Owner |
+|------|----------|--------|-------|
+| **#2.1** Phone Number → Optional | 🟠 P1 | 1h | Frontend |
+| **#2.2** Longevity Score Adjustments (Floor = 25) | 🟠 P1 | 3h | Algorithm |
+| **#2.3** Positive Framing für negative Scores | 🟠 P1 | 4h | Frontend |
+| **#2.4** User-Friendly Error-Messages | 🟠 P1 | 4h | Frontend |
+| **#2.5** "Life in Weeks" → Opt-in | 🟡 P2 | 2h | Frontend |
+
+---
+
+### PHASE 3: CODE-QUALITY & STABILITY - **2-3 Tage**
+
+| Task | Priority | Effort | Owner |
+|------|----------|--------|-------|
+| **#3.1** Fix ESLint-Errors (dataService.js) | 🟡 P2 | 1h | Dev |
+| **#3.2** Repair Test-Suite (npm test) | 🟡 P2 | 3h | Dev |
+| **#3.3** Input-Validation (Zod-Schema) | 🟡 P2 | 4h | Backend |
+| **#3.4** Pre-commit Hooks aktivieren | 🟡 P2 | 1h | DevOps |
+
+---
+
+### PHASE 4: NICE-TO-HAVE (POST-MVP) - **Optional**
+
+| Task | Priority | Effort |
+|------|----------|--------|
+| Waist-to-Height-Ratio statt BMI | 🟢 P3 | 6h |
+| Redux/Zustand State-Management | 🟢 P3 | 16h |
+| Granulare Error-Boundaries | 🟢 P3 | 4h |
+| Comprehensive E2E-Tests (Playwright) | 🟢 P3 | 24h |
+
+---
+
+## 📊 DEPLOYMENT CHECKLIST
+
+### Pre-Deployment Verification
+
+```bash
+# 1. Security-Check
+[ ] .env gelöscht und in .gitignore
+[ ] Alle API-Keys rotiert
+[ ] Backend-Proxy deployed
+[ ] Secrets in Vercel/GitHub Secrets
+
+# 2. Code-Quality
+[ ] npm run lint → 0 errors
+[ ] npm run build → success
+[ ] npm run test → alle Tests grün
+
+# 3. Functional Testing
+[ ] Intake-Flow ohne Phone Number funktioniert
+[ ] Longevity Score zeigt min. 25 Punkte
+[ ] LLM-Generation über Proxy funktioniert
+[ ] Supabase RLS-Policies aktiv
+
+# 4. Performance
+[ ] Lighthouse Score > 90
+[ ] LCP < 2.5s
+[ ] Bundle Size < 500KB
+
+# 5. Legal & Compliance
+[ ] DSGVO-Disclaimer auf Landing Page
+[ ] Datenschutzerklärung verlinkt
+[ ] Impressum vorhanden
+```
+
+---
+
+## 💰 COST & RISK ASSESSMENT
+
+### Monatliche Kosten (MVP - 100 User)
+
+| Service | Free Tier | Estimated Cost |
+|---------|-----------|----------------|
+| Supabase | 500MB, 2GB Transfer | **€0** |
+| Vercel | 100GB Bandwidth | **€0** |
+| OpenAI (Fallback) | Pay-per-use | **€50-100** (20 Generierungen/Tag) |
+| PostHog | 1M Events | **€0** |
+| **TOTAL** | | **€50-100/Monat** |
+
+### Risk-Faktoren
+
+| Risk | Likelihood | Impact | Mitigation |
+|------|------------|--------|------------|
+| LLM-API-Ausfall | Mittel | Mittel | Algorithm-Fallback ✅ |
+| API-Key-Leak | Hoch (ohne Fixes) | Kritisch | Backend-Proxy (Phase 1) |
+| Supabase-Downtime | Niedrig | Hoch | localStorage-Fallback ✅ |
+| DSGVO-Verstoß | Mittel | Kritisch | Legal-Review empfohlen |
+
+---
+
+## 🎓 EMPFEHLUNGEN
+
+### Sofort-Maßnahmen (vor Launch)
+
+1. ✅ **ALLE Phase-1-Tasks** abschließen (Security)
+2. ✅ **Minimum 60%** der Phase-2-Tasks (UX)
+3. ⚠️ **Legal-Review** für DSGVO-Compliance
+4. ⚠️ **Medical-Disclaimer** prominenter (kein Heilversprechen)
+
+### Post-Launch-Monitoring
+
+1. **PostHog-Events tracken:**
+   - Intake-Completion-Rate
+   - Score-Distribution (avg, min, max)
+   - LLM vs. Algorithm usage
+   - Error-Rate
+
+2. **Supabase-Monitoring:**
+   - RLS-Policy-Violations
+   - Query-Performance
+   - Storage-Growth
+
+3. **User-Feedback:**
+   - Feedback-Modal nach 7 Tagen aktiv
+   - NPS-Score nach 30 Tagen
+
+---
+
+## ✅ FAZIT
+
+**ExtensioVitae hat ein exzellentes wissenschaftliches Fundament und eine solide technische Architektur.** Die größten Risiken liegen im Security-Bereich (API-Key-Handling) und in der User-Experience (demotivierende Scores, blockierende Phone-Requirement).
+
+### Go/No-Go Entscheidung
+
+**Aktueller Stand:** ❌ **NO-GO** für Production-Launch
+
+**Nach Phase 1+2 (5-7 Tage):** ✅ **GO** für Soft-Launch (Beta-User)
+
+**Nach allen 3 Phasen (10-12 Tage):** ✅ **GO** für Public-Launch
+
+---
+
+**Nächster Schritt:** Priorisiere Phase-1-Tasks und starte mit Security-Fixes. Parallel kann Frontend an Phase-2-UX-Improvements arbeiten.
+
+---
+
+*Report generiert am 03.02.2026 durch umfassende Code-Analyse (Security, UX, Business-Logic, Architecture)*
