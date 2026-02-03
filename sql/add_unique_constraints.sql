@@ -22,10 +22,4 @@ ALTER TABLE user_profiles ADD CONSTRAINT user_profiles_user_id_key UNIQUE (user_
 ALTER TABLE health_profiles DROP CONSTRAINT IF EXISTS health_profiles_user_id_key;
 ALTER TABLE health_profiles ADD CONSTRAINT health_profiles_user_id_key UNIQUE (user_id);
 
--- =============================================
--- DAILY_PROGRESS - Add composite unique constraint
--- =============================================
-ALTER TABLE daily_progress DROP CONSTRAINT IF EXISTS daily_progress_plan_day_key;
-ALTER TABLE daily_progress ADD CONSTRAINT daily_progress_plan_day_key UNIQUE (plan_id, day_number);
-
 SELECT 'Constraints added successfully!' as status;
