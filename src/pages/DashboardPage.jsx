@@ -692,15 +692,18 @@ export default function DashboardPage() {
         <InitialFeedbackModal
           onSubmit={async (feedbackData) => {
             try {
-              await submitFeedback({
+              // Only include plan_id if it exists
+              const feedback = {
                 ...feedbackData,
-                plan_id: plan.supabase_plan_id,
-              });
+                ...(plan?.supabase_plan_id && { plan_id: plan.supabase_plan_id }),
+              };
+              await submitFeedback(feedback);
               setShowInitialFeedback(false);
               setFeedbackSubmitted(true);
+              addToast('Vielen Dank für dein Feedback! 🎉', 'success');
             } catch (error) {
               logger.error('[Dashboard] Failed to submit initial feedback:', error);
-              addToast('Fehler beim Senden des Feedbacks. Bitte versuche es später erneut.', 'error');
+              addToast(`Fehler: ${error.message || 'Unbekannter Fehler'}`, 'error');
             }
           }}
           onSkip={() => {
