@@ -52,19 +52,29 @@ export default function AdminPage() {
                 return;
             }
 
-            // Client-side optimizing: Check env var if available, but relying on RLS is safer/better source of truth.
-            // We removed the hard strict check to avoid leaking emails efficiently, 
-            // relying instead on the database call below to fail if unauthorized.
+            // Admin email list (simple approach without RLS function)
+            const ADMIN_EMAILS = [
+                'michael@extensiovitae.com',
+                'mahlerhutter@gmail.com',
+                'admin@extensiovitae.com',
+                // Add more admin emails here
+            ];
 
-            // Try to load data. If this fails, we know we aren't admin (RLS).
-            const success = await loadAdminData();
-            if (success) {
-                setIsAdmin(true);
-            } else {
-                // RLS prevented access or other error
-                logger.warn('[Admin] Access denied or data load failed');
+            const userEmail = user.email?.toLowerCase();
+            const isAdminEmail = ADMIN_EMAILS.some(email =>
+                email.toLowerCase() === userEmail
+            );
+
+            if (!isAdminEmail) {
+                logger.warn('[Admin] Access denied for:', userEmail);
+                addToast('Zugriff verweigert - Nur für Admins', 'error');
                 navigate('/dashboard');
+                return;
             }
+
+            logger.info('[Admin] Admin access granted for:', userEmail);
+            setIsAdmin(true);
+            await loadAdminData();
 
         } catch (error) {
             console.error('Admin check failed:', error);
