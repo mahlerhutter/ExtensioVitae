@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { build30DayBlueprint, TASKS_EXAMPLE } from '../lib/planBuilder';
+import { generatePlan } from '../lib/planGenerator';
 import { savePlan, shouldUseSupabase } from '../lib/dataService';
 import { calculatePlanOverview, savePlanOverview } from '../lib/planOverviewService';
 import { getHealthProfile, createPlanSnapshot } from '../lib/profileService';
@@ -47,7 +48,7 @@ export default function GeneratingPage() {
 
   // Check for plan completion (poll or webhook)
   useEffect(() => {
-    const generatePlan = async () => {
+    const generateAndSavePlan = async () => {
       try {
         // Artificial delay for UX
         await new Promise((resolve) => setTimeout(resolve, 3000));
@@ -81,29 +82,38 @@ export default function GeneratingPage() {
           logger.warn('[Generating] Could not fetch health profile:', error);
         }
 
-        // 3. Build plan with health profile integration (v2.1)
+        // 3. Generate plan (LLM or deterministic)
         logger.info('[Generating] Building plan for:', intake);
-        const result = build30DayBlueprint(intake, TASKS_EXAMPLE, {}, healthProfile);
+
+        // Use unified plan generator (tries LLM first, falls back to deterministic)
+        const plan = await generatePlan(intake, {
+          healthProfile,
+          forceAlgorithm: false // Allow LLM if available
+        });
+
+        // Log generation method used
+        logger.info(`[Generating] ✅ Plan generated using: ${plan.generation_method}${plan.llm_provider ? ` (${plan.llm_provider})` : ''}`);
+
 
         // Log health adaptations
-        if (result.json.meta?.health?.hasProfile) {
+        if (plan.meta?.health?.hasProfile) {
           logger.info('[Generating] Plan adapted for health profile:', {
-            tasksFiltered: result.json.meta.health.tasksFiltered,
-            intensityCap: result.json.meta.health.intensityCap,
-            warnings: result.json.meta.health.warnings?.length || 0
+            tasksFiltered: plan.meta.health.tasksFiltered,
+            intensityCap: plan.meta.health.intensityCap,
+            warnings: plan.meta.health.warnings?.length || 0
           });
         }
 
         // 4. Calculate plan overview
         logger.debug('[Generating] Calculating plan overview...');
-        const overview = calculatePlanOverview(result.json, intake);
+        const overview = calculatePlanOverview(plan, intake);
 
         if (!overview) {
           logger.error('[Generating] Failed to calculate overview');
         }
 
         // 5. Save to storage
-        const savedPlan = await savePlan(result.json);
+        const savedPlan = await savePlan(plan);
         logger.info('[Generating] Plan saved:', savedPlan.id);
 
         // 6. Save overview to Supabase if authenticated
@@ -126,9 +136,9 @@ export default function GeneratingPage() {
               healthProfile,
               intake.primary_goal,
               {
-                excludedActivities: result.json.meta.health?.summary?.topWarnings || [],
-                intensityCap: result.json.meta.health?.intensityCap,
-                notes: result.json.meta.health?.warnings?.join('; ')
+                excludedActivities: plan.meta.health?.summary?.topWarnings || [],
+                intensityCap: plan.meta.health?.intensityCap,
+                notes: plan.meta.health?.warnings?.join('; ')
               }
             );
             logger.info('[Generating] Plan snapshot created');
@@ -148,7 +158,7 @@ export default function GeneratingPage() {
       }
     };
 
-    generatePlan();
+    generateAndSavePlan();
   }, []);
 
   // Handle plan confirmation

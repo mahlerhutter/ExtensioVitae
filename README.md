@@ -1,147 +1,177 @@
-# ExtensioVitae
+# Supabase CLI
 
-**Your Personalized 30-Day Longevity Blueprint**
+[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
+](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
 
-Science-informed. Delivered daily. Under 30 minutes.
+[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
 
----
+This repository contains all the functionality for Supabase CLI.
 
-## Overview
+- [x] Running Supabase locally
+- [x] Managing database migrations
+- [x] Creating and deploying Supabase Functions
+- [x] Generating types directly from your database schema
+- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
 
-ExtensioVitae is a sophisticated longevity lifestyle optimization platform that generates personalized 30-day blueprints based on scientific pillars. It uses advanced algorithms and optional AI (LLM) to craft daily routines tailored to user goals, time constraints, and health profiles.
+## Getting started
 
-## Key Features
+### Install the CLI
 
--   **Personalized Blueprints**: 30-day plans based on 6 core longevity pillars.
--   **Health Profile Integration**: Adapts plans for chronic conditions, injuries, and limitations.
--   **Hybrid Generation Engine**:
-    -   **Deterministic**: Robust, rule-based generation (Default).
-    -   **AI-Enhanced**: Optional LLM integration (OpenAI/Claude) for hyper-personalized content.
--   **Longevity Score**: Real-time scoring based on scientific literature (Cappuccio, Walker, Yin).
--   **Progress Tracking**: Daily check-ins and completion analytics.
--   **Flexible Architecture**:
-    -   **Privacy-First**: Works entirely client-side with localStorage.
-    -   **Cloud-Sync**: Optional Supabase integration for cross-device sync and authentication.
-
----
-
-## The 6 Longevity Pillars
-
-| Pillar | Focus | Scientific Basis |
-| :--- | :--- | :--- |
-| 🌙 **Sleep & Recovery** | Hygiene, duration, environment | *Walker (2017), Cappuccio (2010)* |
-| ☀️ **Circadian Rhythm** | Light exposure, timing | *Satchin Panda, Huberman* |
-| 🧠 **Mental Resilience** | Breathwork, meditation | *Steptoe & Kivimäki (2012)* |
-| 🥗 **Nutrition & Metabolism** | Protein timing, glucose control | *Valter Longo, Peter Attia* |
-| 💪 **Movement & Muscle** | NEAT, Zone-2, Strength | *Study references on sarcopenia* |
-| 💊 **Supplements** | Targeted protocols | *Evidence-based supplementation* |
-
----
-
-## Tech Stack
-
--   **Frontend**: React 18, Vite, Tailwind CSS
--   **State Management**: React Context + Custom Hooks
--   **Data Persistence**: Hybrid (localStorage + Supabase)
--   **AI/LLM**: OpenAI GPT-4 / Anthropic Claude (via API proxy)
--   **Analytics**: PostHog (Privacy-focused)
--   **Logging**: Centralized Logger with environment awareness
-
----
-
-## Quick Start
-
-### 1. Installation
+Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
 
 ```bash
-# Install dependencies
-npm install
+npm i supabase --save-dev
 ```
 
-### 2. Environment Setup
+When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
 
-Copy `.env.example` to `.env` (or create one):
+```
+NODE_OPTIONS=--no-experimental-fetch yarn add supabase
+```
+
+> **Note**
+For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
+
+<details>
+  <summary><b>macOS</b></summary>
+
+  Available via [Homebrew](https://brew.sh). To install:
+
+  ```sh
+  brew install supabase/tap/supabase
+  ```
+
+  To install the beta release channel:
+  
+  ```sh
+  brew install supabase/tap/supabase-beta
+  brew link --overwrite supabase-beta
+  ```
+  
+  To upgrade:
+
+  ```sh
+  brew upgrade supabase
+  ```
+</details>
+
+<details>
+  <summary><b>Windows</b></summary>
+
+  Available via [Scoop](https://scoop.sh). To install:
+
+  ```powershell
+  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+  scoop install supabase
+  ```
+
+  To upgrade:
+
+  ```powershell
+  scoop update supabase
+  ```
+</details>
+
+<details>
+  <summary><b>Linux</b></summary>
+
+  Available via [Homebrew](https://brew.sh) and Linux packages.
+
+  #### via Homebrew
+
+  To install:
+
+  ```sh
+  brew install supabase/tap/supabase
+  ```
+
+  To upgrade:
+
+  ```sh
+  brew upgrade supabase
+  ```
+
+  #### via Linux packages
+
+  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
+
+  ```sh
+  sudo apk add --allow-untrusted <...>.apk
+  ```
+
+  ```sh
+  sudo dpkg -i <...>.deb
+  ```
+
+  ```sh
+  sudo rpm -i <...>.rpm
+  ```
+
+  ```sh
+  sudo pacman -U <...>.pkg.tar.zst
+  ```
+</details>
+
+<details>
+  <summary><b>Other Platforms</b></summary>
+
+  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
+
+  ```sh
+  go install github.com/supabase/cli@latest
+  ```
+
+  Add a symlink to the binary in `$PATH` for easier access:
+
+  ```sh
+  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
+  ```
+
+  This works on other non-standard Linux distros.
+</details>
+
+<details>
+  <summary><b>Community Maintained Packages</b></summary>
+
+  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
+  To install in your working directory:
+
+  ```bash
+  pkgx install supabase
+  ```
+
+  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
+</details>
+
+### Run the CLI
 
 ```bash
-cp .env.example .env
+supabase bootstrap
 ```
 
-**Required Variables for Full Feature Set:**
-
-```env
-# Supabase (Required for Auth, Sync & LLM Proxy)
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# Analytics (Optional)
-VITE_POSTHOG_API_KEY=your_posthog_key
-VITE_POSTHOG_HOST=https://eu.i.posthog.com
-
-# Logging
-VITE_LOG_LEVEL=info
-```
-
-**Note:** LLM API Keys (OpenAI/Anthropic) are now managed securely via Supabase Edge Functions and are NOT stored in the frontend `.env` file.
-
-### 3. Development
+Or using npx:
 
 ```bash
-npm run dev
+npx supabase bootstrap
 ```
 
-### 4. Production Build
+The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
 
-```bash
-npm run build
+## Docs
+
+Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
+
+## Breaking changes
+
+We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
+
+However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
+
+## Developing
+
+To run from source:
+
+```sh
+# Go >= 1.22
+go run . help
 ```
-
----
-
-## Project Structure
-
-```
-extensiovitae/
-├── src/
-│   ├── lib/                 # Core Logic
-│   │   ├── planBuilder.js   # Deterministic algorithm
-│   │   ├── llmPlanGenerator.js # AI generation logic
-│   │   ├── longevityScore.js # Scoring algorithm
-│   │   ├── healthConstraints.js # Medical/Health logic
-│   │   └── supabase.js      # Database client
-│   ├── pages/               # Route Components
-│   │   ├── IntakePage.jsx   # Questionnaire
-│   │   ├── GeneratingPage.jsx # Loading/Processing
-│   │   └── DashboardPage.jsx # Main User Interface
-│   └── components/          # UI Components
-├── sql/
-│   ├── complete_database_setup.sql # Single source of truth
-│   ├── CHANGELOG.md         # Database version history
-│   └── archive/             # Old fix scripts
-├── docs/
-│   ├── README.md            # Documentation index
-│   ├── tasks.md             # Current priorities
-│   ├── POST_DATABASE_SETUP.md # Setup guide
-│   └── archive/             # Resolved documentation
-└── CLEANUP_SUMMARY.md       # Recent cleanup (2026-02-03)
-```
-
-**📚 For detailed documentation, see [`docs/README.md`](docs/README.md)**
-
----
-
-## Scoring System
-
-The **Longevity Score** (0-100) is calculated using a weighted algorithm derived from meta-analyses on mortality risk factors.
-
--   **Baseline**: 50 points
--   **Multipliers**: Sleep duration, stress levels, VO2 max proxies (activity), diet quality.
--   **Penalties**: Smoking, inactivity, poor social connection.
-
-*Note: This is a motivational metric, not a medical diagnosis.*
-
----
-
-## License
-
-Proprietary. All rights reserved by ExtensioVitae.
-Built with focus by the ExtensioVitae team.

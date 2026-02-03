@@ -24,7 +24,7 @@ export async function generatePlan(intakeData, options = {}) {
     // Force algorithm mode
     if (forceAlgorithm) {
         logger.info('[PlanGenerator] Using deterministic algorithm (forced)');
-        return generateWithAlgorithm(intakeData);
+        return generateWithAlgorithm(intakeData, options);
     }
 
     // Force LLM mode
@@ -33,23 +33,23 @@ export async function generatePlan(intakeData, options = {}) {
             throw new Error('LLM generation requested but no API keys configured');
         }
         logger.info('[PlanGenerator] Using LLM (forced)');
-        return await generateWithLLMWithFallback(intakeData, false);
+        return await generateWithLLMWithFallback(intakeData, false, options);
     }
 
     // Auto mode: try LLM first, fallback to algorithm
     if (isLLMAvailable()) {
         logger.info(`[PlanGenerator] LLM available (${getLLMProvider()}), attempting LLM generation...`);
-        return await generateWithLLMWithFallback(intakeData, true);
+        return await generateWithLLMWithFallback(intakeData, true, options);
     } else {
         logger.info('[PlanGenerator] No LLM configured, using deterministic algorithm');
-        return generateWithAlgorithm(intakeData);
+        return generateWithAlgorithm(intakeData, options);
     }
 }
 
 /**
  * Generate plan with LLM, optionally falling back to algorithm on error
  */
-async function generateWithLLMWithFallback(intakeData, allowFallback) {
+async function generateWithLLMWithFallback(intakeData, allowFallback, options = {}) {
     try {
         const plan = await generatePlanWithLLM(intakeData);
 
@@ -68,7 +68,7 @@ async function generateWithLLMWithFallback(intakeData, allowFallback) {
 
         if (allowFallback) {
             logger.info('[PlanGenerator] Falling back to deterministic algorithm...');
-            const plan = generateWithAlgorithm(intakeData);
+            const plan = generateWithAlgorithm(intakeData, options);
             plan.llm_error = error.message;
             return plan;
         }
@@ -80,8 +80,9 @@ async function generateWithLLMWithFallback(intakeData, allowFallback) {
 /**
  * Generate plan using deterministic algorithm
  */
-function generateWithAlgorithm(intakeData) {
-    const result = build30DayBlueprint(intakeData, TASKS_EXAMPLE);
+function generateWithAlgorithm(intakeData, options = {}) {
+    const { healthProfile } = options;
+    const result = build30DayBlueprint(intakeData, TASKS_EXAMPLE, {}, healthProfile);
     const plan = result.json;
 
     // Normalize structure to match LLM output format
