@@ -19,6 +19,7 @@ import {
 
 } from './supabase';
 import { logger } from './logger';
+import { encryptData, decryptData, migrateToEncrypted } from './encryptionService';
 
 // ============================================
 // Data Source Detection
@@ -58,8 +59,11 @@ export async function saveIntake(intakeData) {
         ...intakeData,
         submitted_at: intakeData.submitted_at || new Date().toISOString(),
     };
-    localStorage.setItem('intake_data', JSON.stringify(dataWithTimestamp));
-    logger.debug('[DataService] Intake saved to localStorage');
+
+    // Encrypt before storing
+    const encrypted = await encryptData(dataWithTimestamp, userId);
+    localStorage.setItem('intake_data', encrypted);
+    logger.debug('[DataService] Intake saved to localStorage (encrypted)');
 
     // Also save to Supabase if authenticated
     if (userId) {
@@ -70,7 +74,8 @@ export async function saveIntake(intakeData) {
             // Sync ID back to localStorage
             if (savedIntake?.id) {
                 const updatedData = { ...dataWithTimestamp, id: savedIntake.id };
-                localStorage.setItem('intake_data', JSON.stringify(updatedData));
+                const encryptedUpdated = await encryptData(updatedData, userId);
+                localStorage.setItem('intake_data', encryptedUpdated);
                 return updatedData;
             }
         } catch (error) {
@@ -95,8 +100,9 @@ export async function getIntake() {
             const supabaseData = await getIntakeFromSupabase(userId);
             if (supabaseData) {
                 logger.debug('[DataService] Intake loaded from Supabase');
-                // Sync to localStorage
-                localStorage.setItem('intake_data', JSON.stringify(supabaseData));
+                // Sync to localStorage (encrypted)
+                const encrypted = await encryptData(supabaseData, userId);
+                localStorage.setItem('intake_data', encrypted);
                 return supabaseData;
             }
         } catch (error) {
@@ -107,8 +113,25 @@ export async function getIntake() {
     // Fall back to localStorage
     const localData = localStorage.getItem('intake_data');
     if (localData) {
-        logger.debug('[DataService] Intake loaded from localStorage');
-        return JSON.parse(localData);
+        try {
+            // Attempt to decrypt
+            const decrypted = await decryptData(localData, userId);
+            if (decrypted) {
+                logger.debug('[DataService] Intake loaded from localStorage (decrypted)');
+
+                // If data was migrated from unencrypted, re-save as encrypted
+                if (userId) {
+                    await migrateToEncrypted('intake_data', userId);
+                }
+
+                return decrypted;
+            }
+        } catch (error) {
+            logger.error('[DataService] Failed to decrypt intake data:', error);
+            // Clear corrupted data
+            localStorage.removeItem('intake_data');
+            return null;
+        }
     }
 
     return null;
@@ -125,9 +148,10 @@ export async function getIntake() {
 export async function savePlan(plan) {
     const userId = await getUserId();
 
-    // Always save to localStorage
-    localStorage.setItem('generated_plan', JSON.stringify(plan));
-    logger.debug('[DataService] Plan saved to localStorage');
+    // Always save to localStorage (encrypted)
+    const encrypted = await encryptData(plan, userId);
+    localStorage.setItem('generated_plan', encrypted);
+    logger.debug('[DataService] Plan saved to localStorage (encrypted)');
 
     // Also save to Supabase if authenticated
     if (userId) {
@@ -139,7 +163,8 @@ export async function savePlan(plan) {
             const savedPlan = await savePlanToSupabase(plan, userId, intakeId);
             // Add Supabase plan ID to local storage
             const planWithId = { ...plan, supabase_plan_id: savedPlan.id };
-            localStorage.setItem('generated_plan', JSON.stringify(planWithId));
+            const encryptedWithId = await encryptData(planWithId, userId);
+            localStorage.setItem('generated_plan', encryptedWithId);
             logger.info('[DataService] Plan saved to Supabase:', savedPlan.id);
             return planWithId;
         } catch (error) {
@@ -171,12 +196,23 @@ export async function getPlan() {
         }
     }
 
-    // Get local plan
+    // Get local plan (decrypt)
     const localPlanJson = localStorage.getItem('generated_plan');
-    let localPlan = localPlanJson ? JSON.parse(localPlanJson) : null;
-
-    if (localPlan) {
-        logger.debug('[DataService] Plan loaded from localStorage');
+    let localPlan = null;
+    if (localPlanJson) {
+        try {
+            localPlan = await decryptData(localPlanJson, userId);
+            if (localPlan) {
+                logger.debug('[DataService] Plan loaded from localStorage (decrypted)');
+                // Migrate if needed
+                if (userId) {
+                    await migrateToEncrypted('generated_plan', userId);
+                }
+            }
+        } catch (error) {
+            logger.error('[DataService] Failed to decrypt plan:', error);
+            localStorage.removeItem('generated_plan');
+        }
     }
 
     // Conflict Resolution:
@@ -199,8 +235,9 @@ export async function getPlan() {
             return localPlan;
         }
 
-        // Otherwise, trust Supabase as the source of truth
-        localStorage.setItem('generated_plan', JSON.stringify(supabasePlan));
+        // Otherwise, trust Supabase as the source of truth (encrypt and save)
+        const encrypted = await encryptData(supabasePlan, userId);
+        localStorage.setItem('generated_plan', encrypted);
         return supabasePlan;
     }
 
@@ -262,11 +299,23 @@ export async function getProgress(supabasePlanId = null) {
         }
     }
 
-    // Fall back to localStorage
+    // Fall back to localStorage (decrypt)
     const localProgress = localStorage.getItem('plan_progress');
     if (localProgress) {
-        logger.debug('[DataService] Progress loaded from localStorage');
-        return JSON.parse(localProgress);
+        try {
+            const decrypted = await decryptData(localProgress, userId);
+            if (decrypted) {
+                logger.debug('[DataService] Progress loaded from localStorage (decrypted)');
+                // Migrate if needed
+                if (userId) {
+                    await migrateToEncrypted('plan_progress', userId);
+                }
+                return decrypted;
+            }
+        } catch (error) {
+            logger.error('[DataService] Failed to decrypt progress:', error);
+            localStorage.removeItem('plan_progress');
+        }
     }
 
     return {};
@@ -278,13 +327,22 @@ export async function getProgress(supabasePlanId = null) {
 export async function updateProgress(day, taskId, completed, totalTasks, supabasePlanId = null) {
     const userId = await getUserId();
 
-    // Update localStorage
-    const localProgress = JSON.parse(localStorage.getItem('plan_progress') || '{}');
+    // Update localStorage (decrypt, modify, encrypt)
+    const localProgressStr = localStorage.getItem('plan_progress');
+    let localProgress = {};
+    if (localProgressStr) {
+        try {
+            localProgress = await decryptData(localProgressStr, userId) || {};
+        } catch (error) {
+            logger.warn('[DataService] Could not decrypt progress, starting fresh');
+        }
+    }
     const dayProgress = localProgress[day] || {};
     dayProgress[taskId] = completed;
     localProgress[day] = dayProgress;
-    localStorage.setItem('plan_progress', JSON.stringify(localProgress));
-    logger.debug('[DataService] Progress saved to localStorage');
+    const encrypted = await encryptData(localProgress, userId);
+    localStorage.setItem('plan_progress', encrypted);
+    logger.debug('[DataService] Progress saved to localStorage (encrypted)');
 
     // Also update Supabase if authenticated
     if (userId && supabasePlanId) {
