@@ -22,7 +22,7 @@ function ScoreMiniItem({ icon, label, score }) {
 }
 
 // Main LongevityScoreWidget Component
-export default function LongevityScoreWidget({ intakeData, userName, compact = false }) {
+export default function LongevityScoreWidget({ intakeData, userName, compact = false, variant = 'default' }) {
     const scoreData = useMemo(() => {
         if (!intakeData) return null;
         try {
@@ -101,6 +101,48 @@ export default function LongevityScoreWidget({ intakeData, userName, compact = f
 
     const circumference = 2 * Math.PI * 32;
     const strokeDashoffset = circumference - (score / 100) * circumference;
+
+    // INLINE MODE for top bar (most compact)
+    if (variant === 'inline') {
+        const smallCircumference = 2 * Math.PI * 16;
+        const smallStrokeDashoffset = smallCircumference - (score / 100) * smallCircumference;
+
+        return (
+            <div className="flex items-center gap-3 bg-slate-900/80 backdrop-blur border border-slate-800 rounded-xl px-3 py-2">
+                {/* Mini Score Circle */}
+                <div className="relative flex-shrink-0">
+                    <svg className="w-10 h-10" viewBox="0 0 40 40">
+                        <circle cx="20" cy="20" r="16" fill="none" stroke="#334155" strokeWidth="4" />
+                        <circle
+                            cx="20" cy="20" r="16"
+                            fill="none"
+                            stroke={scoreLabel.color}
+                            strokeWidth="4"
+                            strokeLinecap="round"
+                            strokeDasharray={smallCircumference}
+                            strokeDashoffset={smallStrokeDashoffset}
+                            transform="rotate(-90 20 20)"
+                            className="transition-all duration-700"
+                        />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-sm font-bold text-white">{score}</span>
+                    </div>
+                </div>
+
+                {/* Compact Info */}
+                <div className="hidden sm:block">
+                    <div className="flex items-center gap-1">
+                        <span className="text-xs">{scoreLabel.emoji}</span>
+                        <span className="text-xs font-medium text-slate-300">Longevity Score</span>
+                    </div>
+                    <p className="text-xs text-slate-500">
+                        Bio. Alter: <span className={biologicalAgeDiff <= 0 ? 'text-green-400' : 'text-red-400'}>{biologicalAge}</span>
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     // COMPACT MODE for sidebar
     if (compact) {
