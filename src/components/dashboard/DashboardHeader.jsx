@@ -1,17 +1,44 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 /**
  * Dashboard Header Component
- * Top navigation bar with branding and user actions
+ * Top navigation bar with branding and expandable user menu
  */
 export default function DashboardHeader({ userName, onSignOut, onProfileClick, isAdmin }) {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const menuRef = useRef(null);
+    const navigate = useNavigate();
+
+    // Close menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setIsMenuOpen(false);
+            }
+        };
+
+        if (isMenuOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isMenuOpen]);
+
+    const handleMenuItemClick = (action) => {
+        setIsMenuOpen(false);
+        if (action) action();
+    };
+
     return (
         <header className="border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-0 z-10">
             <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
                 <a href="/" className="text-xl font-semibold text-white tracking-tight">
                     Extensio<span className="text-amber-400">Vitae</span>
                 </a>
+
                 <div className="flex items-center gap-4">
                     {isAdmin && (
                         <Link
@@ -25,21 +52,88 @@ export default function DashboardHeader({ userName, onSignOut, onProfileClick, i
                             <span>Admin</span>
                         </Link>
                     )}
-                    <button
-                        onClick={onProfileClick}
-                        className="text-slate-400 hover:text-white text-sm transition-colors flex items-center gap-2 hover:bg-slate-800 px-2 py-1 rounded"
-                    >
-                        {userName}
-                    </button>
-                    <button
-                        onClick={onSignOut}
-                        className="text-slate-400 hover:text-white transition-colors flex items-center gap-2 text-sm"
-                    >
-                        <span>Sign Out</span>
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
-                    </button>
+
+                    {/* User Menu Dropdown */}
+                    <div className="relative" ref={menuRef}>
+                        <button
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="text-slate-400 hover:text-white text-sm transition-colors flex items-center gap-2 hover:bg-slate-800 px-3 py-2 rounded-lg"
+                        >
+                            <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-amber-600 rounded-full flex items-center justify-center text-slate-900 font-semibold text-sm">
+                                {userName?.charAt(0)?.toUpperCase() || 'U'}
+                            </div>
+                            <span className="hidden sm:inline">{userName}</span>
+                            <svg
+                                className={`w-4 h-4 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`}
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        {isMenuOpen && (
+                            <div className="absolute right-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
+                                {/* User Info */}
+                                <div className="px-4 py-3 border-b border-slate-700">
+                                    <p className="text-sm font-medium text-white">{userName}</p>
+                                    <p className="text-xs text-slate-400 mt-0.5">Dein Longevity Dashboard</p>
+                                </div>
+
+                                {/* Menu Items */}
+                                <div className="py-1">
+                                    {/* Startseite */}
+                                    <button
+                                        onClick={() => handleMenuItemClick(() => navigate('/'))}
+                                        className="w-full px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-3 transition-colors"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                        </svg>
+                                        <span>Startseite</span>
+                                    </button>
+
+                                    {/* Profil bearbeiten */}
+                                    <button
+                                        onClick={() => handleMenuItemClick(onProfileClick)}
+                                        className="w-full px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-3 transition-colors"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                        <span>Profil bearbeiten</span>
+                                    </button>
+
+                                    {/* Gesundheitsprofil */}
+                                    <button
+                                        onClick={() => handleMenuItemClick(() => navigate('/health-profile'))}
+                                        className="w-full px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-3 transition-colors"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <span>🩺 Gesundheitsprofil</span>
+                                    </button>
+
+                                    {/* Divider */}
+                                    <div className="border-t border-slate-700 my-1"></div>
+
+                                    {/* Logout */}
+                                    <button
+                                        onClick={() => handleMenuItemClick(onSignOut)}
+                                        className="w-full px-4 py-2 text-sm text-red-400 hover:bg-slate-700 hover:text-red-300 flex items-center gap-3 transition-colors"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                        </svg>
+                                        <span>Abmelden</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </header>
