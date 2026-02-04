@@ -61,3 +61,17 @@ SECURITY_AUDIT.md
 REMEDIATION_PROMPTS.md
 GEMINI.md
 CLAUDE.MD
+
+# Internal Documentation & Audits (development only)
+docs/audit_*.json
+docs/DAILY_WORKFLOW_SUMMARY_*.md
+docs/DEPLOYMENT_SUCCESS_*.md
+docs/WHATS_NEXT.md
+docs/REMINDER_*.md
+docs/EDGE_FUNCTION_VERIFICATION.md
+docs/EDGE_FUNCTION_DEPLOYMENT.md
+docs/BACKUP_CONFIGURATION.md
+docs/BETA_READINESS_ASSESSMENT.md
+docs/PRODUCT_VISION_SYNTHESIS.md
+docs/FEATURES.md
+scripts/deploy-edge-function.sh
