@@ -53,6 +53,13 @@ import ModeSelector from '../components/ModeSelector';
 import CalendarConnect from '../components/calendar/CalendarConnect';
 import ModeIndicator from '../components/ModeIndicator';
 
+// Modular Tracking System (Phase 1 & 2)
+import { DailyView, ModuleHub, ModuleActivationFlow } from '../components/modules';
+import { getUserModules } from '../lib/moduleService';
+
+// New Unified Dashboard (Phase 4)
+import TodayDashboard from '../components/dashboard/TodayDashboard';
+
 
 // Pillar configuration
 const PILLARS = {
@@ -141,6 +148,11 @@ export default function DashboardPage() {
 
   // Commitment Contract State
   const [showCommitmentModal, setShowCommitmentModal] = useState(false);
+
+  // Module Management State
+  const [showModuleHub, setShowModuleHub] = useState(false);
+  const [showModuleActivation, setShowModuleActivation] = useState(false);
+  const [hasActiveModules, setHasActiveModules] = useState(null); // null = loading, true/false = checked
 
   const navigate = useNavigate();
   const { planId, day } = useParams(); // Get URL parameters
@@ -378,6 +390,37 @@ export default function DashboardPage() {
     }
   }, [user, navigate, planId]); // Re-run when user changes (login/logout) or planId changes
 
+  // Check if user has active modules (for new user onboarding)
+  useEffect(() => {
+    async function checkModules() {
+      if (!user?.id) {
+        setHasActiveModules(false);
+        return;
+      }
+
+      try {
+        const modules = await getUserModules(user.id);
+        const activeCount = modules?.filter(m => m.status === 'active' || m.status === 'paused').length || 0;
+        setHasActiveModules(activeCount > 0);
+
+        // Show activation flow for users without modules (after plan is loaded)
+        if (activeCount === 0 && !localStorage.getItem('module_onboarding_dismissed')) {
+          // Delay to let other modals (commitment) appear first
+          setTimeout(() => {
+            setShowModuleActivation(true);
+          }, 2000);
+        }
+      } catch (err) {
+        logger.warn('[Dashboard] Failed to check module status:', err);
+        setHasActiveModules(false);
+      }
+    }
+
+    if (!loading && user?.id) {
+      checkModules();
+    }
+  }, [loading, user?.id]);
+
   // Set selected day from URL parameter when plan is loaded
   useEffect(() => {
     if (day && plan && !loading) {
@@ -566,13 +609,18 @@ export default function DashboardPage() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            <TodayCard
-              day={displayDay}
-              dayData={dayData}
-              progress={dayProgress}
+            {/* Today Dashboard - Unified view showing all active modules */}
+            <TodayDashboard
+              userId={user?.id}
+              language="de"
+              onShowModuleHub={() => setShowModuleHub(true)}
+              hasPlan={!!(plan?.supabase_plan_id || plan?.days?.length > 0)}
+              plan={plan}
+              planProgress={progress}
+              currentPlanDay={currentDay}
               onTaskToggle={handleTaskToggle}
-              startDate={plan.start_date}
             />
+
             <PlanSummary
               plan={plan}
               onShowFullPlan={() => setShowFullPlanModal(true)}
@@ -655,6 +703,7 @@ export default function DashboardPage() {
               currentDay={currentDay}
               onDayClick={handleDayClick}
               startDate={plan.start_date}
+              userId={user?.id}
             />
 
             {/* History */}
@@ -825,6 +874,47 @@ export default function DashboardPage() {
 
       {user && (
         <FloatingFeedbackButton onClick={() => setShowFeedbackPanel(true)} />
+      )}
+
+      {/* Module Activation Flow (New User Onboarding) */}
+      {showModuleActivation && user?.id && (
+        <ModuleActivationFlow
+          userId={user.id}
+          intakeData={intakeData}
+          language="de"
+          onComplete={() => {
+            setShowModuleActivation(false);
+            setHasActiveModules(true);
+            // Refresh the page to show the new modules
+            window.location.reload();
+            addToast('🧩 Module aktiviert! Dein Daily Tracking ist bereit.', 'success');
+          }}
+          onSkip={() => {
+            setShowModuleActivation(false);
+            localStorage.setItem('module_onboarding_dismissed', 'true');
+          }}
+        />
+      )}
+
+      {/* Module Hub Modal */}
+      {showModuleHub && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70"
+            onClick={() => setShowModuleHub(false)}
+          />
+          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setShowModuleHub(false)}
+              className="absolute top-4 right-4 z-10 p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <ModuleHub userId={user?.id} language="de" />
+          </div>
+        </div>
       )}
     </div>
   );

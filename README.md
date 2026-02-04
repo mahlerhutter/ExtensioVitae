@@ -60,29 +60,30 @@ VITE_SUPABASE_ANON_KEY=your_anon_key
 ```
 src/
 ├── components/
-│   ├── CommitmentModal.jsx          # Signature modal
-│   ├── ScoreGauge.tsx               # Animated score visualization
-│   ├── ShareScoreCard.jsx           # Social sharing
-│   ├── WhatsAppButton.jsx           # Self-loop messaging
-│   └── dashboard/
-│       ├── EvidenceText.jsx         # Science tooltips
-│       ├── LongevityScoreWidget.jsx # Score display
-│       ├── TaskItem.jsx             # Task rendering
-│       └── TodayCard.jsx            # Focus Mode UI
-├── utils/
-│   ├── confetti.js                  # Confetti animation
-│   ├── icsGenerator.js              # Calendar export
-│   ├── scienceData.js               # Evidence database
-│   ├── scoring.ts                   # Longevity algorithm
-│   └── time.js                      # Time block utilities
+│   ├── dashboard/           # Dashboard components
+│   ├── modules/             # Module system (DailyView, ModuleHub, etc.)
+│   ├── bloodcheck/          # Blood check UI (Panel, Upload, BiomarkerCard)
+│   ├── analytics/           # Progress dashboard (Streaks, Charts)
+│   ├── notifications/       # Notification settings & history
+│   ├── marketplace/         # Module marketplace
+│   └── common/              # Shared (ErrorBoundary, LoadingFallback)
 ├── lib/
-│   ├── planGenerator.js             # Plan generation logic
-│   └── planOverviewService.js       # Overview calculations
-└── pages/
-    ├── LandingPage.jsx              # Marketing page
-    ├── IntakePage.jsx               # User onboarding
-    ├── GeneratingPage.jsx           # Plan generation
-    └── DashboardPage.jsx            # Main app interface
+│   ├── moduleService.js         # Module registry & instances
+│   ├── dailyTrackingService.js  # Daily aggregation
+│   ├── bloodCheckService.js     # Lab OCR integration
+│   ├── readinessService.js      # Readiness scoring
+│   ├── analyticsService.js      # Progress & achievements
+│   ├── notificationService.js   # Push notifications
+│   ├── offlineService.js        # Service worker management
+│   └── [more services]
+├── hooks/
+│   └── useOptimizedQuery.js     # Cached data fetching
+├── pages/
+│   └── [12 pages]
+├── supabase/functions/
+│   └── parse-lab-report/        # OCR Edge Function
+└── public/
+    └── sw.js                    # Service worker
 ```
 
 ---
@@ -159,20 +160,33 @@ git commit --no-verify -m "your message"
 
 ## 🎯 Roadmap
 
-### Phase 2 (Planned)
-- [ ] Push notifications for protocol reminders
-- [ ] Streak tracking and gamification
-- [ ] Community features (social proof)
-- [ ] Advanced analytics dashboard
-- [ ] Multi-language support (DE/EN)
+### ✅ Phase 2 (Complete - 2026-02-04)
+- [x] Modular Tracking System (Module Registry, Daily Aggregation)
+- [x] 30-Day Plan → Module Conversion
+- [x] Fasting Modules (5:2, OMAD, Extended)
+- [x] Module Activation Flow (Onboarding)
 
-### Technical Improvements
+### ✅ Phase 3 (Complete - 2026-02-04)
+- [x] Blood Check OCR (Claude Vision API via Edge Function)
+- [x] Readiness-based Task Swapping (5 intensity levels)
+- [x] Progress Analytics (Streaks, Achievements)
+- [x] Notification Engine (Push + Quiet Hours)
+
+### ✅ Phase 4 (Complete - 2026-02-04)
+- [x] Blood Check UI Components
+- [x] Progress Dashboard UI
+- [x] Notification Settings UI
+- [x] Module Marketplace UI
+- [x] Error Boundaries and Fallbacks
+- [x] Code Splitting / Lazy Loading
+- [x] Service Worker (Offline Support)
+
+### Phase 5 (Planned)
+- [ ] One-Tap Protocol Packs
+- [ ] Circadian Light Protocol
+- [ ] Wearable Integration (Oura, Whoop)
+- [ ] Multi-language support (DE/EN)
 - [ ] Full TypeScript migration
-- [ ] Comprehensive test suite (Vitest + Testing Library)
-- [ ] Error boundaries and fallbacks
-- [ ] Bundle size optimization
-- [ ] Accessibility audit (WCAG 2.1 AA)
-- [ ] SEO optimization
 
 ---
 
