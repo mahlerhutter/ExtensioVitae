@@ -46,6 +46,10 @@ import { logger } from '../lib/logger';
 import { generateICS, downloadICS } from '../utils/icsGenerator';
 import { checkAdminStatus } from '../lib/adminService';
 
+// Emergency Mode Components
+import ModeSelector from '../components/ModeSelector';
+import ModeIndicator from '../components/ModeIndicator';
+
 
 // Pillar configuration
 const PILLARS = {
@@ -542,6 +546,10 @@ export default function DashboardPage() {
       />
 
       <main className="max-w-6xl mx-auto px-6 py-8">
+        {/* Emergency Mode Indicator (if active) */}
+        <div className="mb-4">
+          <ModeIndicator showDuration={true} size="md" />
+        </div>
         <UserProfileSection intakeData={intakeData} email={userEmail} onEdit={() => setShowEditModal(true)} />
 
         {/* Longevity Score Widget */}
@@ -589,6 +597,8 @@ export default function DashboardPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Emergency Mode Selector */}
+            <ModeSelector />
             {/* New Plan Button */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
               <button
