@@ -21,10 +21,10 @@ export default function WhatsAppButton() {
         const currentUrl = window.location.href;
         const text = encodeURIComponent(`My ExtensioVitae Protocol: ${currentUrl} — Pin this chat to keep your plan accessible.`);
 
-        // Mobile: Use // hack to open contact picker for "Message Yourself"
+        // Mobile: Use single slash to open contact picker for "Message Yourself"
         // Desktop: Use web.whatsapp.com with text parameter (works without contact)
         const url = isMobile
-            ? `https://wa.me//?text=${text}`
+            ? `https://wa.me/?text=${text}`
             : `https://web.whatsapp.com/send?text=${text}`;
 
         window.open(url, '_blank');

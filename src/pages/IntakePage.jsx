@@ -152,11 +152,16 @@ function NumberField({ question, value, onChange, placeholder, helper, min, max 
         {question}
       </label>
       <input
-        type="number"
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
         value={value || ''}
         onChange={(e) => {
           const val = e.target.value;
-          onChange(val); // Allow typing, validation happens on blur/submit check
+          // Only allow numeric input
+          if (val === '' || /^\d+$/.test(val)) {
+            onChange(val);
+          }
         }}
         min={min}
         max={max}
@@ -352,7 +357,7 @@ function ConsentCheckbox({ checked, onChange }) {
           type="checkbox"
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
-          className="mt-1 w-5 h-5 rounded border-slate-600 bg-slate-800 text-amber-400 focus:ring-amber-400 focus:ring-offset-slate-900"
+          className="mt-1 w-11 h-11 rounded border-slate-600 bg-slate-800 text-amber-400 focus:ring-amber-400 focus:ring-offset-slate-900"
         />
         <span className="text-slate-300 text-sm leading-relaxed">
           I agree to receive notifications about my longevity plan. I can unsubscribe anytime.
