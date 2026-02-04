@@ -5,6 +5,7 @@ import LogViewer from '../components/LogViewer';
 import logger from '../lib/logger';
 import { getAllFeedback, getFeedbackStats, markFeedbackReviewed } from '../lib/feedbackService';
 import { useToast } from '../components/Toast';
+import { checkAdminStatus } from '../lib/adminService';
 
 
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -52,27 +53,26 @@ export default function AdminPage() {
                 return;
             }
 
-            // Admin email list (simple approach without RLS function)
-            const ADMIN_EMAILS = [
-                'michael@extensiovitae.com',
-                'manuelmahlerhutter@gmail.com',
-                'admin@extensiovitae.com',
-                // Add more admin emails here
-            ];
+            // Get current session for Edge Function auth
+            const { data: { session } } = await supabase.auth.getSession();
 
-            const userEmail = user.email?.toLowerCase();
-            const isAdminEmail = ADMIN_EMAILS.some(email =>
-                email.toLowerCase() === userEmail
-            );
+            if (!session) {
+                logger.warn('[Admin] No session found');
+                navigate('/auth');
+                return;
+            }
+
+            // Server-side admin check via Edge Function
+            const isAdminEmail = await checkAdminStatus(session);
 
             if (!isAdminEmail) {
-                logger.warn('[Admin] Access denied for:', userEmail);
+                logger.warn('[Admin] Access denied for:', user.email);
                 addToast('Zugriff verweigert - Nur für Admins', 'error');
                 navigate('/dashboard');
                 return;
             }
 
-            logger.info('[Admin] Admin access granted for:', userEmail);
+            logger.info('[Admin] Admin access granted for:', user.email);
             setIsAdmin(true);
             await loadAdminData();
 

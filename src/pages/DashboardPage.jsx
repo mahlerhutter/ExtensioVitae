@@ -44,6 +44,7 @@ import WhatsAppButton from '../components/WhatsAppButton';
 import { trackTaskCompleted, trackDayCompleted, trackFeatureUsed } from '../lib/analytics';
 import { logger } from '../lib/logger';
 import { generateICS, downloadICS } from '../utils/icsGenerator';
+import { checkAdminStatus } from '../lib/adminService';
 
 
 // Pillar configuration
@@ -154,11 +155,17 @@ export default function DashboardPage() {
         if (user) {
           setUserEmail(user.email);
 
-          // Check if user is admin
-          const adminEmails = import.meta.env.VITE_ADMIN_EMAILS
-            ? import.meta.env.VITE_ADMIN_EMAILS.split(',').map(email => email.trim()).filter(Boolean)
-            : [];
-          setIsAdmin(adminEmails.includes(user.email));
+          // Check if user is admin via server-side Edge Function
+          try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+              const isAdminUser = await checkAdminStatus(session);
+              setIsAdmin(isAdminUser);
+            }
+          } catch (error) {
+            logger.warn('[Dashboard] Failed to check admin status:', error);
+            setIsAdmin(false);
+          }
         }
 
 
