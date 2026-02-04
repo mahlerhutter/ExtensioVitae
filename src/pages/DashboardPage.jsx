@@ -593,11 +593,11 @@ export default function DashboardPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Emergency Mode Selector */}
-            <ModeSelector />
-            
             {/* Longevity Score - Compact */}
             <LongevityScoreWidget intakeData={intakeData} userName={intakeData?.name} compact={true} />
+            
+            {/* Emergency Mode Selector */}
+            <ModeSelector />
             {/* New Plan Button */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
               <button
