@@ -102,6 +102,69 @@ export default function LongevityScoreWidget({ intakeData, userName, compact = f
     const circumference = 2 * Math.PI * 32;
     const strokeDashoffset = circumference - (score / 100) * circumference;
 
+    // COMPACT MODE for sidebar
+    if (compact) {
+        return (
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-white font-semibold text-sm">Longevity Score</h3>
+                    <span className="text-xs text-slate-500">Profil-basiert</span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                    {/* Compact Score Circle */}
+                    <div className="relative flex-shrink-0">
+                        <svg className="w-16 h-16" viewBox="0 0 72 72">
+                            <circle cx="36" cy="36" r="32" fill="none" stroke="#334155" strokeWidth="6" />
+                            <circle
+                                cx="36" cy="36" r="32"
+                                fill="none"
+                                stroke={scoreLabel.color}
+                                strokeWidth="6"
+                                strokeLinecap="round"
+                                strokeDasharray={circumference}
+                                strokeDashoffset={strokeDashoffset}
+                                transform="rotate(-90 36 36)"
+                                className="transition-all duration-700"
+                            />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <span className="text-lg font-bold text-white">{score}</span>
+                        </div>
+                    </div>
+
+                    {/* Compact Info */}
+                    <div className="flex-1">
+                        <div className="flex items-center gap-1.5 mb-1">
+                            <span>{scoreLabel.emoji}</span>
+                            <span className="font-semibold text-sm" style={{ color: scoreLabel.color }}>{scoreLabel.text}</span>
+                        </div>
+                        <p className="text-xs text-slate-400">
+                            Bio. Alter: <span className={biologicalAgeDiff <= 0 ? 'text-green-400' : 'text-red-400'}>{biologicalAge}</span>
+                            <span className="text-slate-500 ml-1">({biologicalAgeDiff <= 0 ? '' : '+'}{biologicalAgeDiff})</span>
+                        </p>
+                        {potentialGainYears > 0 && (
+                            <p className="text-amber-400 text-xs font-medium mt-1">
+                                +{potentialGainYears} Jahre möglich
+                            </p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Compact Breakdown */}
+                {breakdown && (
+                    <div className="grid grid-cols-2 gap-1.5 mt-3">
+                        <ScoreMiniItem icon="🌙" label="Schlaf" score={breakdown.sleep.score} />
+                        <ScoreMiniItem icon="🧘" label="Stress" score={breakdown.stress.score} />
+                        <ScoreMiniItem icon="🏃" label="Bewegung" score={breakdown.movement.score} />
+                        <ScoreMiniItem icon="🥗" label="Ernährung" score={breakdown.nutrition.score} />
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // FULL MODE (original)
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6">
             <div className="flex items-center justify-between mb-4">
