@@ -600,7 +600,7 @@ export default function DashboardPage() {
             <LongevityScoreWidget intakeData={intakeData} userName={intakeData?.name} compact={true} />
 
             {/* Emergency Mode Selector */}
-            <ModeSelector />
+            <ModeSelector variant="collapsible" />
 
             {/* Calendar Integration */}
             <CalendarConnect variant="compact" />
