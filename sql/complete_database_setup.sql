@@ -1,9 +1,10 @@
 -- =====================================================
 -- ExtensioVitae - Complete Database Setup
 -- =====================================================
--- Version: 2.1.1
--- Date: 2026-02-03
+-- Version: 2.1.2
+-- Date: 2026-02-04
 -- Purpose: Fresh Supabase database initialization
+-- Note: Admin policies use auth.jwt() to avoid recursion
 -- =====================================================
 
 -- =====================================================
@@ -303,18 +304,14 @@ DROP POLICY IF EXISTS "Users can update own profile" ON user_profiles;
 CREATE POLICY "Users can update own profile" ON user_profiles
     FOR UPDATE USING (auth.uid() = user_id);
 
--- Admin can view all profiles
+-- Admin can view all profiles (using jwt to avoid recursion)
 DROP POLICY IF EXISTS "Admins can view all profiles" ON user_profiles;
 CREATE POLICY "Admins can view all profiles" ON user_profiles
     FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM user_profiles up
-            WHERE up.user_id = auth.uid()
-            AND up.email IN (
-                SELECT jsonb_array_elements_text(value)
-                FROM admin_config
-                WHERE key = 'admin_emails'
-            )
+        auth.jwt() ->> 'email' IN (
+            SELECT jsonb_array_elements_text(value)
+            FROM admin_config
+            WHERE key = 'admin_emails'
         )
     );
 
@@ -333,6 +330,17 @@ DROP POLICY IF EXISTS "Users can update own intake" ON intake_responses;
 CREATE POLICY "Users can update own intake" ON intake_responses
     FOR UPDATE USING (auth.uid() = user_id);
 
+-- Admin can view all intake responses (using jwt to avoid recursion)
+DROP POLICY IF EXISTS "Admins can view all intake" ON intake_responses;
+CREATE POLICY "Admins can view all intake" ON intake_responses
+    FOR SELECT USING (
+        auth.jwt() ->> 'email' IN (
+            SELECT jsonb_array_elements_text(value)
+            FROM admin_config
+            WHERE key = 'admin_emails'
+        )
+    );
+
 -- -----------------------------------------------------
 -- 4.3 Health Profiles Policies
 -- -----------------------------------------------------
@@ -347,6 +355,17 @@ CREATE POLICY "Users can insert own health profile" ON health_profiles
 DROP POLICY IF EXISTS "Users can update own health profile" ON health_profiles;
 CREATE POLICY "Users can update own health profile" ON health_profiles
     FOR UPDATE USING (auth.uid() = user_id);
+
+-- Admin can view all health profiles (using jwt to avoid recursion)
+DROP POLICY IF EXISTS "Admins can view all health profiles" ON health_profiles;
+CREATE POLICY "Admins can view all health profiles" ON health_profiles
+    FOR SELECT USING (
+        auth.jwt() ->> 'email' IN (
+            SELECT jsonb_array_elements_text(value)
+            FROM admin_config
+            WHERE key = 'admin_emails'
+        )
+    );
 
 -- -----------------------------------------------------
 -- 4.4 Plans Policies
@@ -367,33 +386,25 @@ DROP POLICY IF EXISTS "Users can delete own plans" ON plans;
 CREATE POLICY "Users can delete own plans" ON plans
     FOR DELETE USING (auth.uid() = user_id);
 
--- Admin can view all plans
+-- Admin can view all plans (using jwt to avoid recursion)
 DROP POLICY IF EXISTS "Admins can view all plans" ON plans;
 CREATE POLICY "Admins can view all plans" ON plans
     FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM user_profiles up
-            WHERE up.user_id = auth.uid()
-            AND up.email IN (
-                SELECT jsonb_array_elements_text(value)
-                FROM admin_config
-                WHERE key = 'admin_emails'
-            )
+        auth.jwt() ->> 'email' IN (
+            SELECT jsonb_array_elements_text(value)
+            FROM admin_config
+            WHERE key = 'admin_emails'
         )
     );
 
--- Admin can delete any plan
+-- Admin can delete any plan (using jwt to avoid recursion)
 DROP POLICY IF EXISTS "Admins can delete any plan" ON plans;
 CREATE POLICY "Admins can delete any plan" ON plans
     FOR DELETE USING (
-        EXISTS (
-            SELECT 1 FROM user_profiles up
-            WHERE up.user_id = auth.uid()
-            AND up.email IN (
-                SELECT jsonb_array_elements_text(value)
-                FROM admin_config
-                WHERE key = 'admin_emails'
-            )
+        auth.jwt() ->> 'email' IN (
+            SELECT jsonb_array_elements_text(value)
+            FROM admin_config
+            WHERE key = 'admin_emails'
         )
     );
 
@@ -412,6 +423,17 @@ DROP POLICY IF EXISTS "Users can update own progress" ON daily_progress;
 CREATE POLICY "Users can update own progress" ON daily_progress
     FOR UPDATE USING (auth.uid() = user_id);
 
+-- Admin can view all progress (using jwt to avoid recursion)
+DROP POLICY IF EXISTS "Admins can view all progress" ON daily_progress;
+CREATE POLICY "Admins can view all progress" ON daily_progress
+    FOR SELECT USING (
+        auth.jwt() ->> 'email' IN (
+            SELECT jsonb_array_elements_text(value)
+            FROM admin_config
+            WHERE key = 'admin_emails'
+        )
+    );
+
 -- -----------------------------------------------------
 -- 4.6 Plan Snapshots Policies
 -- -----------------------------------------------------
@@ -422,6 +444,17 @@ CREATE POLICY "Users can view own snapshots" ON plan_snapshots
 DROP POLICY IF EXISTS "Users can insert own snapshots" ON plan_snapshots;
 CREATE POLICY "Users can insert own snapshots" ON plan_snapshots
     FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Admin can view all snapshots (using jwt to avoid recursion)
+DROP POLICY IF EXISTS "Admins can view all snapshots" ON plan_snapshots;
+CREATE POLICY "Admins can view all snapshots" ON plan_snapshots
+    FOR SELECT USING (
+        auth.jwt() ->> 'email' IN (
+            SELECT jsonb_array_elements_text(value)
+            FROM admin_config
+            WHERE key = 'admin_emails'
+        )
+    );
 
 -- -----------------------------------------------------
 -- 4.7 Feedback Policies
@@ -434,33 +467,25 @@ DROP POLICY IF EXISTS "Users can insert feedback" ON feedback;
 CREATE POLICY "Users can insert feedback" ON feedback
     FOR INSERT WITH CHECK (auth.uid() = user_id);
 
--- Admin can view all feedback
+-- Admin can view all feedback (using jwt to avoid recursion)
 DROP POLICY IF EXISTS "Admins can view all feedback" ON feedback;
 CREATE POLICY "Admins can view all feedback" ON feedback
     FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM user_profiles up
-            WHERE up.user_id = auth.uid()
-            AND up.email IN (
-                SELECT jsonb_array_elements_text(value)
-                FROM admin_config
-                WHERE key = 'admin_emails'
-            )
+        auth.jwt() ->> 'email' IN (
+            SELECT jsonb_array_elements_text(value)
+            FROM admin_config
+            WHERE key = 'admin_emails'
         )
     );
 
--- Admin can update feedback (mark as reviewed)
+-- Admin can update feedback (mark as reviewed, using jwt to avoid recursion)
 DROP POLICY IF EXISTS "Admins can update feedback" ON feedback;
 CREATE POLICY "Admins can update feedback" ON feedback
     FOR UPDATE USING (
-        EXISTS (
-            SELECT 1 FROM user_profiles up
-            WHERE up.user_id = auth.uid()
-            AND up.email IN (
-                SELECT jsonb_array_elements_text(value)
-                FROM admin_config
-                WHERE key = 'admin_emails'
-            )
+        auth.jwt() ->> 'email' IN (
+            SELECT jsonb_array_elements_text(value)
+            FROM admin_config
+            WHERE key = 'admin_emails'
         )
     );
 
@@ -531,18 +556,14 @@ CREATE TRIGGER on_auth_user_created
 -- 7. ADMIN HELPER FUNCTIONS
 -- =====================================================
 
--- Only admins can read config (bootstrapping: first user becomes admin)
+-- Only admins can read config (using jwt to avoid recursion)
 DROP POLICY IF EXISTS "Admins can view config" ON admin_config;
 CREATE POLICY "Admins can view config" ON admin_config
     FOR SELECT USING (
-        EXISTS (
-            SELECT 1 FROM user_profiles up
-            WHERE up.user_id = auth.uid()
-            AND up.email IN (
-                SELECT jsonb_array_elements_text(value)
-                FROM admin_config
-                WHERE key = 'admin_emails'
-            )
+        auth.jwt() ->> 'email' IN (
+            SELECT jsonb_array_elements_text(value)
+            FROM admin_config
+            WHERE key = 'admin_emails'
         )
     );
 

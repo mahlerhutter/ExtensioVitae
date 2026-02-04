@@ -49,10 +49,14 @@ node_modules
 .env
 
 # Strategic & Confidential Documents (not for public repo)
+VISION.md
 docs/VISION.md
+docs/VISION_COMPLETE.md
 docs/FUTURE.md
 docs/tasks.md
 docs/AUDIT.md
+docs/WORKFLOW.md
+docs/WORKFLOW_PROMPT.md
 SECURITY_AUDIT.md
 REMEDIATION_PROMPTS.md
 GEMINI.md
