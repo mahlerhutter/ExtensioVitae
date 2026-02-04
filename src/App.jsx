@@ -198,7 +198,6 @@ export default function App() {
           >
             {nightModeOverride ? '🌙 Enable Night Mode' : '☀️ Override Night Mode'}
           </button>
-      </CalendarProvider>
         )}
 
         {/* Night Mode CSS */}
@@ -207,6 +206,7 @@ export default function App() {
           filter: sepia(100%) hue-rotate(-50deg) saturate(400%) contrast(0.9);
         }
       `}</style>
+      </CalendarProvider>
     </ModeProvider>
   );
 }
