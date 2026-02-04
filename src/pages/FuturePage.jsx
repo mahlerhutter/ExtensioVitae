@@ -1,9 +1,312 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Sun, Moon, Brain, Dumbbell, Pill, Utensils, Plane, Thermometer, Sparkles, Watch, Package, ChevronRight, Check, AlertCircle } from 'lucide-react';
 
-/**
- * FuturePage - Hidden page for presenting the ExtensioVitae vision to close users
- * Access: /future (not linked anywhere, shared with trusted users only)
- */
+// ============================================
+// Interactive Dashboard Mockups
+// ============================================
+
+const mockupHorizons = [
+    { id: 'mvp', name: 'Current MVP', months: '0', color: 'gray' },
+    { id: 'h1', name: 'Horizon 1', months: '0-6', color: 'blue' },
+    { id: 'h2', name: 'Horizon 2', months: '6-12', color: 'purple' },
+    { id: 'h3', name: 'Horizon 3', months: '12-24', color: 'emerald' },
+];
+
+const modes = [
+    { id: 'travel', name: 'Travel', icon: Plane, focus: 'Jetlag, Light Timing, Melatonin' },
+    { id: 'sick', name: 'Sick', icon: Thermometer, focus: 'Recovery, Sleep, Zinc' },
+    { id: 'detox', name: 'Detox', icon: Sparkles, focus: 'Electrolytes, Sauna, Reset' },
+    { id: 'deep', name: 'Deep Work', icon: Brain, focus: 'Nootropics, Focus, Flow' },
+];
+
+const pillars = [
+    { id: 'sleep', name: 'Schlaf', icon: Moon, color: 'bg-indigo-500', need: 73 },
+    { id: 'circadian', name: 'Circadian', icon: Sun, color: 'bg-amber-500', need: 78 },
+    { id: 'mental', name: 'Mental', icon: Brain, color: 'bg-purple-500', need: 82 },
+    { id: 'nutrition', name: 'Ernährung', icon: Utensils, color: 'bg-orange-500', need: 58 },
+    { id: 'movement', name: 'Bewegung', icon: Dumbbell, color: 'bg-emerald-500', need: 45 },
+    { id: 'supplements', name: 'Supplements', icon: Pill, color: 'bg-cyan-500', need: 30 },
+];
+
+function MVPDashboard() {
+    const [tasks, setTasks] = useState([
+        { id: 1, done: false, pillar: 'circadian', text: '2-3 Min Tageslicht draußen', time: 3 },
+        { id: 2, done: true, pillar: 'sleep', text: 'Blaulichtbrille ab 20:00', time: 2 },
+        { id: 3, done: false, pillar: 'mental', text: '5 Min Atemübung', time: 5 },
+    ]);
+
+    const toggleTask = (id) => {
+        setTasks(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
+    };
+
+    const completedCount = tasks.filter(t => t.done).length;
+
+    return (
+        <div className="bg-slate-50 rounded-xl p-4 space-y-4">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h3 className="text-lg font-semibold text-slate-800">Heute</h3>
+                    <p className="text-sm text-slate-500">Tag 4 von 30</p>
+                </div>
+                <div className="w-14 h-14 rounded-full border-4 border-slate-200 flex items-center justify-center">
+                    <span className="text-lg font-bold text-slate-700">{completedCount}/{tasks.length}</span>
+                </div>
+            </div>
+            <div className="space-y-2">
+                {tasks.map(task => {
+                    const pillar = pillars.find(p => p.id === task.pillar);
+                    const Icon = pillar?.icon || Sun;
+                    return (
+                        <div
+                            key={task.id}
+                            onClick={() => toggleTask(task.id)}
+                            className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${task.done ? 'bg-emerald-50' : 'bg-white'}`}
+                        >
+                            <div className={`w-5 h-5 rounded-full flex items-center justify-center ${task.done ? 'bg-emerald-500' : 'border-2 border-slate-300'}`}>
+                                {task.done && <Check className="w-3 h-3 text-white" />}
+                            </div>
+                            <div className={`p-1.5 rounded-lg ${pillar?.color}`}>
+                                <Icon className="w-3 h-3 text-white" />
+                            </div>
+                            <span className={`flex-1 text-sm ${task.done ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+                                {task.text}
+                            </span>
+                            <span className="text-xs text-slate-400">{task.time}m</span>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+function H1Dashboard() {
+    const [activeMode, setActiveMode] = useState('travel');
+
+    return (
+        <div className="bg-slate-50 rounded-xl p-4 space-y-4">
+            <div className="bg-blue-500 text-white rounded-lg p-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Plane className="w-4 h-4" />
+                    <span className="font-medium text-sm">TRAVEL MODE</span>
+                </div>
+                <span className="text-xs opacity-80">Flug erkannt</span>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+                {modes.map(mode => {
+                    const Icon = mode.icon;
+                    return (
+                        <button
+                            key={mode.id}
+                            onClick={() => setActiveMode(mode.id)}
+                            className={`p-2 rounded-xl text-center transition-all ${activeMode === mode.id ? 'bg-blue-100 border-2 border-blue-500' : 'bg-white border-2 border-transparent'}`}
+                        >
+                            <Icon className={`w-5 h-5 mx-auto mb-1 ${activeMode === mode.id ? 'text-blue-600' : 'text-slate-500'}`} />
+                            <span className={`text-xs ${activeMode === mode.id ? 'text-blue-700' : 'text-slate-600'}`}>{mode.name}</span>
+                        </button>
+                    );
+                })}
+            </div>
+            <div className="bg-slate-100 rounded-lg p-3">
+                <p className="text-xs text-slate-600 mb-2">Wearables verbinden</p>
+                <div className="flex gap-2">
+                    <button className="px-2 py-1 bg-white rounded text-xs text-slate-600">+ Oura</button>
+                    <button className="px-2 py-1 bg-white rounded text-xs text-slate-600">+ Whoop</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function H2Dashboard() {
+    const readiness = 34;
+
+    return (
+        <div className="bg-slate-50 rounded-xl p-4 space-y-4">
+            <div className="bg-white rounded-xl p-4 text-center">
+                <p className="text-xs text-slate-500 mb-2">MORGEN-READINESS</p>
+                <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center mb-2">
+                    <span className="text-2xl font-bold text-white">{readiness}</span>
+                </div>
+                <p className="text-slate-700 text-sm font-medium">"Erholungstag empfohlen"</p>
+            </div>
+            <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-3">
+                <div className="flex items-center gap-2 text-purple-700 font-medium mb-2 text-sm">
+                    <AlertCircle className="w-4 h-4" />
+                    AUTO-SWAP
+                </div>
+                <div className="space-y-1 text-xs">
+                    <div className="flex items-center gap-2">
+                        <span className="text-red-500">❌</span>
+                        <span className="line-through text-slate-400">HIIT Training</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="text-emerald-500">✅</span>
+                        <span className="text-slate-700">Yoga Nidra + Walk</span>
+                    </div>
+                </div>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+                <Watch className="w-3 h-3" />
+                <span>Oura • Whoop</span>
+            </div>
+        </div>
+    );
+}
+
+function H3Dashboard() {
+    return (
+        <div className="bg-slate-50 rounded-xl p-4 space-y-4">
+            <div className="flex items-center justify-between bg-white rounded-lg p-3">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center">
+                        <span className="text-sm font-bold text-white">78</span>
+                    </div>
+                    <div>
+                        <p className="font-medium text-slate-800 text-sm">Guter Tag</p>
+                        <p className="text-xs text-slate-500">Volle Intensität</p>
+                    </div>
+                </div>
+            </div>
+            <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl p-3 text-white">
+                <div className="flex items-center gap-2 mb-2">
+                    <Package className="w-4 h-4" />
+                    <span className="font-semibold text-sm">DEIN STACK</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                    <div>
+                        <p className="text-emerald-200 text-xs mb-1">MORGENS</p>
+                        <p>• D3+K2 • Omega-3</p>
+                    </div>
+                    <div>
+                        <p className="text-emerald-200 text-xs mb-1">ABENDS</p>
+                        <p>• Magnesium • Apigenin</p>
+                    </div>
+                </div>
+                <div className="bg-white/20 rounded-lg p-2 flex justify-between items-center">
+                    <span className="text-xs">Lieferung: 15. Feb</span>
+                    <ChevronRight className="w-4 h-4" />
+                </div>
+            </div>
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-3">
+                <div className="flex items-center gap-2 text-blue-700 font-medium mb-1 text-sm">
+                    <Plane className="w-4 h-4" />
+                    REISE ERKANNT
+                </div>
+                <p className="text-xs text-slate-600 mb-2">London • 7 Tage</p>
+                <button className="w-full py-2 bg-blue-600 text-white rounded-lg text-xs font-medium">
+                    Travel-Pack zum Hotel
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function InteractiveMockup() {
+    const [activeHorizon, setActiveHorizon] = useState('mvp');
+
+    const renderDashboard = () => {
+        switch (activeHorizon) {
+            case 'mvp': return <MVPDashboard />;
+            case 'h1': return <H1Dashboard />;
+            case 'h2': return <H2Dashboard />;
+            case 'h3': return <H3Dashboard />;
+            default: return <MVPDashboard />;
+        }
+    };
+
+    const getHorizonDescription = () => {
+        switch (activeHorizon) {
+            case 'mvp': return { title: 'Current MVP', desc: 'Static 30-day plans with manual task tracking' };
+            case 'h1': return { title: 'Context Awareness', desc: 'Emergency Modes + Calendar auto-detection' };
+            case 'h2': return { title: 'Zero-Input Layer', desc: 'Wearable-driven readiness + automatic swaps' };
+            case 'h3': return { title: 'Concierge Loop', desc: 'Lab integration + supplement fulfillment' };
+            default: return { title: '', desc: '' };
+        }
+    };
+
+    const info = getHorizonDescription();
+
+    return (
+        <div className="max-w-sm mx-auto">
+            {/* Horizon Selector */}
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+                {mockupHorizons.map(h => (
+                    <button
+                        key={h.id}
+                        onClick={() => setActiveHorizon(h.id)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${activeHorizon === h.id ? 'bg-white text-slate-900' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}
+                    >
+                        {h.name}
+                    </button>
+                ))}
+            </div>
+
+            {/* Info */}
+            <div className="bg-slate-800 rounded-xl p-3 mb-4">
+                <h3 className="text-sm font-semibold text-white mb-1">{info.title}</h3>
+                <p className="text-slate-400 text-xs">{info.desc}</p>
+            </div>
+
+            {/* Phone Mockup */}
+            <div className="bg-slate-800 rounded-3xl p-2">
+                <div className="bg-slate-100 rounded-2xl overflow-hidden">
+                    <div className="bg-slate-200 px-4 py-1.5 flex justify-between items-center text-xs text-slate-600">
+                        <span>9:41</span>
+                        <span>ExtensioVitae</span>
+                        <span>100%</span>
+                    </div>
+                    <div className="p-3">
+                        {renderDashboard()}
+                    </div>
+                </div>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="mt-4">
+                <div className="flex justify-between text-xs text-slate-400 mb-1">
+                    <span>North Star Progress</span>
+                    <span>{activeHorizon === 'mvp' ? '15%' : activeHorizon === 'h1' ? '40%' : activeHorizon === 'h2' ? '70%' : '100%'}</span>
+                </div>
+                <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                        className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-emerald-500 transition-all duration-500"
+                        style={{
+                            width: activeHorizon === 'mvp' ? '15%' : activeHorizon === 'h1' ? '40%' : activeHorizon === 'h2' ? '70%' : '100%'
+                        }}
+                    />
+                </div>
+            </div>
+
+            {/* Key Metrics */}
+            <div className="grid grid-cols-3 gap-2 mt-4">
+                <div className="bg-slate-800 rounded-xl p-2 text-center">
+                    <p className="text-lg font-bold text-white">
+                        {activeHorizon === 'mvp' ? '5-10' : activeHorizon === 'h1' ? '3-5' : activeHorizon === 'h2' ? '<3' : '<1'}
+                    </p>
+                    <p className="text-xs text-slate-400">min/Tag</p>
+                </div>
+                <div className="bg-slate-800 rounded-xl p-2 text-center">
+                    <p className="text-lg font-bold text-white">
+                        {activeHorizon === 'mvp' ? '0%' : activeHorizon === 'h1' ? '30%' : activeHorizon === 'h2' ? '90%' : '95%'}
+                    </p>
+                    <p className="text-xs text-slate-400">Auto-Input</p>
+                </div>
+                <div className="bg-slate-800 rounded-xl p-2 text-center">
+                    <p className="text-lg font-bold text-white">
+                        {activeHorizon === 'mvp' ? '€0' : activeHorizon === 'h1' ? '€10' : activeHorizon === 'h2' ? '€30' : '€247'}
+                    </p>
+                    <p className="text-xs text-slate-400">ARPU</p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ============================================
+// Main FuturePage Component
+// ============================================
+
 export default function FuturePage() {
     const horizons = [
         {
@@ -98,6 +401,15 @@ export default function FuturePage() {
                 </div>
             </section>
 
+            {/* Interactive Dashboard Preview */}
+            <section className="py-16 px-6 border-t border-slate-800 bg-slate-900/50">
+                <div className="max-w-6xl mx-auto">
+                    <h2 className="text-3xl font-bold text-center mb-4">Live Dashboard Evolution</h2>
+                    <p className="text-slate-400 text-center mb-12">Klicke durch die Horizonte und erlebe die UI-Evolution interaktiv</p>
+                    <InteractiveMockup />
+                </div>
+            </section>
+
             {/* Core Axioms */}
             <section className="py-16 px-6 border-t border-slate-800">
                 <div className="max-w-6xl mx-auto">
@@ -132,13 +444,11 @@ export default function FuturePage() {
                                 key={horizon.number}
                                 className="relative group"
                             >
-                                {/* Connection Line */}
                                 {idx < horizons.length - 1 && (
                                     <div className="absolute left-12 top-full h-12 w-0.5 bg-gradient-to-b from-slate-600 to-transparent"></div>
                                 )}
 
                                 <div className="bg-slate-800/50 rounded-2xl border border-slate-700 overflow-hidden hover:border-slate-500 transition-colors">
-                                    {/* Header */}
                                     <div className={`bg-gradient-to-r ${horizon.color} p-6`}>
                                         <div className="flex items-center justify-between flex-wrap gap-4">
                                             <div className="flex items-center gap-4">
@@ -155,8 +465,8 @@ export default function FuturePage() {
                                                     {horizon.timeline}
                                                 </span>
                                                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${horizon.status === 'IN PROGRESS' ? 'bg-green-500/30 text-green-200' :
-                                                        horizon.status === 'PLANNING' ? 'bg-blue-500/30 text-blue-200' :
-                                                            'bg-purple-500/30 text-purple-200'
+                                                    horizon.status === 'PLANNING' ? 'bg-blue-500/30 text-blue-200' :
+                                                        'bg-purple-500/30 text-purple-200'
                                                     }`}>
                                                     {horizon.status}
                                                 </span>
@@ -164,11 +474,9 @@ export default function FuturePage() {
                                         </div>
                                     </div>
 
-                                    {/* Content */}
                                     <div className="p-6">
                                         <p className="text-slate-300 text-lg mb-6">{horizon.description}</p>
 
-                                        {/* Features */}
                                         <div className="grid md:grid-cols-3 gap-4 mb-6">
                                             {horizon.features.map((feature) => (
                                                 <div
@@ -182,7 +490,6 @@ export default function FuturePage() {
                                             ))}
                                         </div>
 
-                                        {/* Metrics */}
                                         <div className="flex flex-wrap gap-2">
                                             {horizon.metrics.map((metric, i) => (
                                                 <span
@@ -201,7 +508,7 @@ export default function FuturePage() {
                 </div>
             </section>
 
-            {/* Quick Wins - What's Next */}
+            {/* Quick Wins */}
             <section className="py-20 px-6 border-t border-slate-800 bg-slate-900/50">
                 <div className="max-w-6xl mx-auto">
                     <h2 className="text-3xl font-bold text-center mb-4">Quick Wins — Was kommt als Nächstes</h2>
@@ -213,23 +520,16 @@ export default function FuturePage() {
                                 key={module.name}
                                 className="relative p-5 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-emerald-500/50 transition-all hover:-translate-y-1"
                             >
-                                {/* Rank Badge */}
                                 <div className="absolute -top-3 -left-3 w-8 h-8 bg-emerald-500 rounded-full flex items-center justify-center text-sm font-bold shadow-lg shadow-emerald-500/30">
                                     {idx + 1}
                                 </div>
-
-                                {/* Score */}
                                 <div className="text-right mb-3">
                                     <span className="text-2xl font-bold text-emerald-400">{module.score}</span>
                                     <span className="text-xs text-slate-500">/25</span>
                                 </div>
-
                                 <h4 className="font-semibold text-white mb-2">{module.name}</h4>
                                 <p className="text-xs text-slate-400 mb-3">{module.desc}</p>
-
-                                <div className="text-xs text-slate-500">
-                                    ⏱ {module.time}
-                                </div>
+                                <div className="text-xs text-slate-500">⏱ {module.time}</div>
                             </div>
                         ))}
                     </div>
@@ -305,7 +605,7 @@ export default function FuturePage() {
             <footer className="py-12 px-6 border-t border-slate-800 text-center">
                 <div className="text-slate-500 text-sm">
                     <p className="mb-2">🔒 Dieses Dokument ist vertraulich und nur für ausgewählte Partner bestimmt.</p>
-                    <p>ExtensioVitae Vision Kernel v2.0 | Last Update: 2026-02-03</p>
+                    <p>ExtensioVitae Vision Kernel v2.0 | Last Update: 2026-02-04</p>
                 </div>
             </footer>
         </div>

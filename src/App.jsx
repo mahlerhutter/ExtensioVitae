@@ -13,7 +13,6 @@ import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import ImprintPage from './pages/ImprintPage';
 import FuturePage from './pages/FuturePage';
-import ProductEvolutionMockup from './pages/ProductEvolutionMockup';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import BetaBadge from './components/BetaBadge';
@@ -121,13 +120,6 @@ export default function App() {
           <Route path="/future" element={
             <ErrorBoundary>
               <FuturePage />
-            </ErrorBoundary>
-          } />
-
-          {/* Product Evolution Mockup (dev preview) */}
-          <Route path="/evolution" element={
-            <ErrorBoundary>
-              <ProductEvolutionMockup />
             </ErrorBoundary>
           } />
 
