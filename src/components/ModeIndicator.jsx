@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMode } from '../contexts/ModeContext';
 import { MODES } from '../lib/modeTypes';
 
@@ -9,6 +9,18 @@ import { MODES } from '../lib/modeTypes';
  */
 export default function ModeIndicator({ showDuration = true, size = 'md' }) {
     const { currentMode, modeConfig, getModeDuration, deactivateMode, isEmergencyModeActive } = useMode();
+    const [, forceUpdate] = useState(0);
+
+    // Update duration every minute
+    useEffect(() => {
+        if (!isEmergencyModeActive()) return;
+
+        const interval = setInterval(() => {
+            forceUpdate(n => n + 1); // Force re-render to update duration
+        }, 60000); // Every minute
+
+        return () => clearInterval(interval);
+    }, [isEmergencyModeActive]);
 
     // Don't show indicator if in normal mode
     if (!isEmergencyModeActive()) {
@@ -96,6 +108,18 @@ export function CompactModeIndicator() {
  */
 export function ModeInfoCard() {
     const { currentMode, modeConfig, getModeDuration, deactivateMode, isEmergencyModeActive } = useMode();
+    const [, forceUpdate] = useState(0);
+
+    // Update duration every minute
+    useEffect(() => {
+        if (!isEmergencyModeActive()) return;
+
+        const interval = setInterval(() => {
+            forceUpdate(n => n + 1);
+        }, 60000);
+
+        return () => clearInterval(interval);
+    }, [isEmergencyModeActive]);
 
     if (!isEmergencyModeActive()) {
         return null;

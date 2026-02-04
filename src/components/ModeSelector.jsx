@@ -27,6 +27,27 @@ export default function ModeSelector({ compact = false }) {
         }
     };
 
+    // Static color classes for Tailwind (dynamic classes don't work)
+    const getActiveClasses = (color) => {
+        const classes = {
+            blue: 'bg-blue-500 text-white shadow-md scale-105',
+            red: 'bg-red-500 text-white shadow-md scale-105',
+            green: 'bg-green-500 text-white shadow-md scale-105',
+            purple: 'bg-purple-500 text-white shadow-md scale-105'
+        };
+        return classes[color] || classes.blue;
+    };
+
+    const getInactiveClasses = (color) => {
+        const classes = {
+            blue: 'bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200',
+            red: 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200',
+            green: 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200',
+            purple: 'bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200'
+        };
+        return classes[color] || classes.blue;
+    };
+
     if (compact) {
         return (
             <div className="flex gap-2 flex-wrap">
@@ -39,10 +60,7 @@ export default function ModeSelector({ compact = false }) {
                             className={`
                 px-3 py-1.5 rounded-lg text-sm font-medium
                 transition-all duration-200
-                ${isActive
-                                    ? `bg-${mode.color}-500 text-white shadow-md scale-105`
-                                    : `bg-${mode.color}-50 text-${mode.color}-700 hover:bg-${mode.color}-100 border border-${mode.color}-200`
-                                }
+                ${isActive ? getActiveClasses(mode.color) : getInactiveClasses(mode.color)}
               `}
                             title={mode.description}
                         >
