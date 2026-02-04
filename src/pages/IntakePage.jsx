@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { getUserProfile } from '../lib/supabase';
 import { trackIntakeCompleted } from '../lib/analytics';
 import { useToast } from '../components/Toast';
+import { logger } from '../lib/logger';
 
 const QUESTIONS = {
   mandatory: [
@@ -388,22 +389,22 @@ export default function IntakePage() {
     async function loadUserData() {
       // If we don't have a user yet, show all fields
       if (!user) {
-        console.log('[Intake] No user detected, showing all fields');
+        logger.debug('[Intake] No user detected, showing all fields');
         return;
       }
 
       // Start loading user data for authenticated users
       setIsLoadingUserData(true);
-      console.log('[Intake] Authenticated user detected, loading profile data...', { userId: user.id });
+      logger.debug('[Intake] Authenticated user detected, loading profile data...', { userId: user.id });
 
       try {
         // Get user profile
         const profile = await getUserProfile(user.id);
-        console.log('[Intake] User profile:', profile);
+        logger.debug('[Intake] User profile:', profile);
 
         // Get previous intake data
         const previousIntake = await getIntake();
-        console.log('[Intake] Previous intake:', previousIntake);
+        logger.debug('[Intake] Previous intake:', previousIntake);
 
         const preFillData = {};
         const fieldsToSkip = [];
@@ -412,25 +413,25 @@ export default function IntakePage() {
         if (profile?.name && profile.name.trim().length > 0) {
           preFillData.name = profile.name;
           fieldsToSkip.push('name');
-          console.log('[Intake] Pre-filling name from profile:', profile.name);
+          logger.debug('[Intake] Pre-filling name from profile:', profile.name);
         } else if (previousIntake?.name && previousIntake.name.trim().length > 0) {
           preFillData.name = previousIntake.name;
           fieldsToSkip.push('name');
-          console.log('[Intake] Pre-filling name from previous intake:', previousIntake.name);
+          logger.debug('[Intake] Pre-filling name from previous intake:', previousIntake.name);
         }
 
         // Pre-fill sex from previous intake if available
         if (previousIntake?.sex && previousIntake.sex.trim().length > 0) {
           preFillData.sex = previousIntake.sex;
           fieldsToSkip.push('sex');
-          console.log('[Intake] Pre-filling sex from previous intake:', previousIntake.sex);
+          logger.debug('[Intake] Pre-filling sex from previous intake:', previousIntake.sex);
         }
 
         // Pre-fill age and phone_number from previous intake if available
         if (previousIntake?.age) {
           preFillData.age = previousIntake.age;
           fieldsToSkip.push('age');
-          console.log('[Intake] Pre-filling age from previous intake:', previousIntake.age);
+          logger.debug('[Intake] Pre-filling age from previous intake:', previousIntake.age);
         }
 
 
@@ -438,10 +439,10 @@ export default function IntakePage() {
         if (Object.keys(preFillData).length > 0) {
           setFormData(prev => ({ ...prev, ...preFillData }));
           setSkipFields(fieldsToSkip);
-          console.log('[Intake] ✅ Pre-filled fields:', fieldsToSkip);
-          console.log('[Intake] ✅ Pre-filled data:', preFillData);
+          logger.debug('[Intake] ✅ Pre-filled fields:', fieldsToSkip);
+          logger.debug('[Intake] ✅ Pre-filled data:', preFillData);
         } else {
-          console.log('[Intake] ⚠️ No data to pre-fill (profile or previous intake missing)');
+          logger.debug('[Intake] ⚠️ No data to pre-fill (profile or previous intake missing)');
         }
       } catch (error) {
         console.error('[Intake] ❌ Error loading user data:', error);
@@ -483,7 +484,7 @@ export default function IntakePage() {
     for (const q of QUESTIONS.mandatory) {
       // Skip validation for pre-filled fields (for authenticated users)
       if (skipFields.includes(q.id)) {
-        console.log(`[Intake] Skipping validation for pre-filled field: ${q.id}`);
+        logger.debug(`[Intake] Skipping validation for pre-filled field: ${q.id}`);
         continue;
       }
 
@@ -562,7 +563,7 @@ export default function IntakePage() {
     try {
       // Save using DataService (auto Supabase/localStorage)
       await saveIntake(payload);
-      console.log('[Intake] Data saved successfully');
+      logger.debug('[Intake] Data saved successfully');
 
       // Track analytics event
       trackIntakeCompleted(payload);

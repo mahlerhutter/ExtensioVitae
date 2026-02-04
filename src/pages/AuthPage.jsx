@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase, signInWithGoogle } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import { logger } from '../lib/logger';
 
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
@@ -77,21 +78,21 @@ export default function AuthPage() {
   };
 
   const handleGoogleLogin = async () => {
-    console.log('[DEBUG] Google login clicked');
+    logger.debug('[DEBUG] Google login clicked');
     setGoogleLoading(true);
     setError(null);
 
     try {
-      console.log('[DEBUG] Calling signInWithGoogle...');
+      logger.debug('[DEBUG] Calling signInWithGoogle...');
       const { error } = await signInWithGoogle();
-      console.log('[DEBUG] signInWithGoogle result:', { error });
+      logger.debug('[DEBUG] signInWithGoogle result:', { error });
 
       if (error) {
         console.error('[DEBUG] OAuth error:', error);
         setError(error.message);
         setGoogleLoading(false);
       } else {
-        console.log('[DEBUG] OAuth initiated successfully');
+        logger.debug('[DEBUG] OAuth initiated successfully');
       }
       // If successful, the page will redirect to Google OAuth
     } catch (err) {

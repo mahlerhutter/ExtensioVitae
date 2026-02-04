@@ -9,30 +9,35 @@ import AdminPage from './pages/AdminPage';
 import HealthProfilePage from './pages/HealthProfilePage';
 import SciencePage from './pages/SciencePage';
 import NotFoundPage from './pages/NotFoundPage';
+import ModuleHubPage from './pages/ModuleHubPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import ImprintPage from './pages/ImprintPage';
 import FuturePage from './pages/FuturePage';
+import FeaturesPage from './pages/FeaturesPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import BetaBadge from './components/BetaBadge';
 import { ModeProvider } from './contexts/ModeContext';
 import { CalendarProvider } from './contexts/CalendarContext';
 import CalendarCallbackPage from './pages/CalendarCallbackPage';
+import { getCircadianIntelligence, shouldActivateMelatoninGuard } from './lib/circadianService';
 
 
 
 export default function App() {
   const [nightModeOverride, setNightModeOverride] = useState(false);
+  const [nightModeActive, setNightModeActive] = useState(false);
 
-  // HACK 1: Melatonin Guard - Red Shift after 9 PM
+  // HACK 1: Melatonin Guard - Adaptive Red Shift based on circadian rhythm
   useEffect(() => {
     const checkNightMode = () => {
-      const hour = new Date().getHours();
-      const isNightTime = hour >= 21 || hour < 6;
       const override = localStorage.getItem('night_mode_override') === 'true';
+      const shouldActivate = shouldActivateMelatoninGuard();
 
-      if (isNightTime && !override) {
+      setNightModeActive(shouldActivate);
+
+      if (shouldActivate && !override) {
         document.body.classList.add('night-mode');
       } else {
         document.body.classList.remove('night-mode');
@@ -42,7 +47,7 @@ export default function App() {
     };
 
     checkNightMode();
-    const interval = setInterval(checkNightMode, 60000); // Check every minute
+    const interval = setInterval(checkNightMode, 300000); // Check every 5 minutes
 
     return () => clearInterval(interval);
   }, []);
@@ -134,6 +139,13 @@ export default function App() {
               </ErrorBoundary>
             } />
 
+            {/* Hidden Features Roadmap Page */}
+            <Route path="/features" element={
+              <ErrorBoundary>
+                <FeaturesPage />
+              </ErrorBoundary>
+            } />
+
             {/* Protected Dashboard Routes with Error Boundary */}
             <Route path="/dashboard" element={
               <ErrorBoundary>
@@ -173,6 +185,15 @@ export default function App() {
               </ErrorBoundary>
             } />
 
+            {/* Module Hub (Protected) */}
+            <Route path="/modules" element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <ModuleHubPage />
+                </ProtectedRoute>
+              </ErrorBoundary>
+            } />
+
             {/* Admin Dashboard (email-restricted) */}
             <Route path="/admin" element={
               <ErrorBoundary>
@@ -190,8 +211,8 @@ export default function App() {
           </Routes>
         </BrowserRouter>
 
-        {/* Night Mode Override Button */}
-        {(new Date().getHours() >= 21 || new Date().getHours() < 6) && (
+        {/* Night Mode Override Button - Shows when Melatonin Guard is active */}
+        {nightModeActive && (
           <button
             onClick={toggleNightMode}
             className="fixed bottom-4 right-4 z-50 px-3 py-1.5 bg-slate-800/90 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"

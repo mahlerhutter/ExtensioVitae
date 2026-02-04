@@ -35,9 +35,9 @@ export default function DashboardHeader({ userName, onSignOut, onProfileClick, i
     return (
         <header className="border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-0 z-10">
             <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-                <a href="/" className="text-xl font-semibold text-white tracking-tight">
+                <Link to="/dashboard" className="text-xl font-semibold text-white tracking-tight">
                     Extensio<span className="text-amber-400">Vitae</span>
-                </a>
+                </Link>
 
                 <div className="flex items-center gap-4">
                     {isAdmin && (
@@ -86,7 +86,7 @@ export default function DashboardHeader({ userName, onSignOut, onProfileClick, i
                                 <div className="py-1">
                                     {/* Startseite */}
                                     <button
-                                        onClick={() => handleMenuItemClick(() => navigate('/'))}
+                                        onClick={() => handleMenuItemClick(() => navigate('/dashboard'))}
                                         className="w-full px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-3 transition-colors"
                                     >
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -115,6 +115,17 @@ export default function DashboardHeader({ userName, onSignOut, onProfileClick, i
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                         <span>🩺 Gesundheitsprofil</span>
+                                    </button>
+
+                                    {/* Module Hub */}
+                                    <button
+                                        onClick={() => handleMenuItemClick(() => navigate('/modules'))}
+                                        className="w-full px-4 py-2 text-sm text-slate-300 hover:bg-slate-700 hover:text-white flex items-center gap-3 transition-colors"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                        </svg>
+                                        <span>🧩 Module Hub</span>
                                     </button>
 
                                     {/* Divider */}

@@ -388,3 +388,201 @@ export async function getStorageInfo() {
         hasLocalProgress,
     };
 }
+
+// ============================================
+// Protocol Packs (v0.4.0)
+// ============================================
+
+/**
+ * Activate a protocol pack
+ */
+export async function activateProtocol(protocolData) {
+    const userId = await getUserId();
+
+    if (!userId || !supabase) {
+        // Store in localStorage as fallback
+        const localProtocols = JSON.parse(localStorage.getItem('active_protocols') || '[]');
+        localProtocols.push({
+            ...protocolData,
+            id: `local_${Date.now()}`,
+            activated_at: new Date().toISOString()
+        });
+        localStorage.setItem('active_protocols', JSON.stringify(localProtocols));
+        logger.debug('[DataService] Protocol saved to localStorage');
+        return localProtocols[localProtocols.length - 1];
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('active_protocols')
+            .insert({
+                user_id: userId,
+                protocol_id: protocolData.id,
+                protocol_name: protocolData.title,
+                protocol_icon: protocolData.icon,
+                protocol_category: protocolData.category,
+                tasks: protocolData.tasks,
+                duration_hours: protocolData.duration_hours,
+                impact_score: protocolData.impact_score,
+                science_ref: protocolData.science_ref,
+                tasks_total: protocolData.tasks.length,
+                tasks_completed: 0,
+                expires_at: new Date(Date.now() + protocolData.duration_hours * 60 * 60000).toISOString(),
+                status: 'active'
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        logger.info('[DataService] Protocol activated in Supabase:', data.id);
+        return data;
+    } catch (error) {
+        logger.error('[DataService] Failed to activate protocol:', error);
+        throw error;
+    }
+}
+
+/**
+ * Get active protocols for a user
+ */
+export async function getActiveProtocols() {
+    const userId = await getUserId();
+
+    if (!userId || !supabase) {
+        // Load from localStorage
+        const localProtocols = JSON.parse(localStorage.getItem('active_protocols') || '[]');
+        const activeProtocols = localProtocols.filter(p => {
+            const expires = new Date(p.expires_at);
+            return p.status === 'active' && expires > new Date();
+        });
+        logger.debug('[DataService] Loaded protocols from localStorage:', activeProtocols.length);
+        return activeProtocols;
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('active_protocols')
+            .select('*')
+            .eq('user_id', userId)
+            .eq('status', 'active')
+            .gt('expires_at', new Date().toISOString())
+            .order('activated_at', { ascending: false });
+
+        if (error) throw error;
+
+        logger.debug('[DataService] Loaded protocols from Supabase:', data?.length || 0);
+        return data || [];
+    } catch (error) {
+        logger.error('[DataService] Failed to load protocols:', error);
+        return [];
+    }
+}
+
+/**
+ * Update protocol task completion status
+ */
+export async function updateProtocolTaskStatus(protocolId, taskId, completed) {
+    const userId = await getUserId();
+
+    if (!userId || !supabase) {
+        // Update localStorage
+        const localProtocols = JSON.parse(localStorage.getItem('active_protocols') || '[]');
+        const protocol = localProtocols.find(p => p.id === protocolId);
+        if (protocol) {
+            protocol.task_completion_status = protocol.task_completion_status || {};
+            protocol.task_completion_status[taskId] = {
+                completed,
+                completed_at: completed ? new Date().toISOString() : null
+            };
+            protocol.tasks_completed = Object.values(protocol.task_completion_status).filter(t => t.completed).length;
+            localStorage.setItem('active_protocols', JSON.stringify(localProtocols));
+            logger.debug('[DataService] Protocol task updated in localStorage');
+            return protocol;
+        }
+        return null;
+    }
+
+    try {
+        // Get current protocol
+        const { data: protocol, error: fetchError } = await supabase
+            .from('active_protocols')
+            .select('*')
+            .eq('id', protocolId)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        // Update task completion status
+        const taskCompletionStatus = protocol.task_completion_status || {};
+        taskCompletionStatus[taskId] = {
+            completed,
+            completed_at: completed ? new Date().toISOString() : null
+        };
+
+        const tasksCompleted = Object.values(taskCompletionStatus).filter(t => t.completed).length;
+
+        const { data, error } = await supabase
+            .from('active_protocols')
+            .update({
+                task_completion_status: taskCompletionStatus,
+                tasks_completed: tasksCompleted,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', protocolId)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        logger.debug('[DataService] Protocol task updated in Supabase');
+        return data;
+    } catch (error) {
+        logger.error('[DataService] Failed to update protocol task:', error);
+        throw error;
+    }
+}
+
+/**
+ * Deactivate a protocol
+ */
+export async function deactivateProtocol(protocolId, reason = 'User deactivated') {
+    const userId = await getUserId();
+
+    if (!userId || !supabase) {
+        // Update localStorage
+        const localProtocols = JSON.parse(localStorage.getItem('active_protocols') || '[]');
+        const protocol = localProtocols.find(p => p.id === protocolId);
+        if (protocol) {
+            protocol.status = 'deactivated';
+            protocol.deactivated_at = new Date().toISOString();
+            protocol.deactivation_reason = reason;
+            localStorage.setItem('active_protocols', JSON.stringify(localProtocols));
+            logger.debug('[DataService] Protocol deactivated in localStorage');
+            return protocol;
+        }
+        return null;
+    }
+
+    try {
+        const { data, error } = await supabase
+            .from('active_protocols')
+            .update({
+                status: 'deactivated',
+                deactivated_at: new Date().toISOString(),
+                deactivation_reason: reason,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', protocolId)
+            .select()
+            .single();
+
+        if (error) throw error;
+
+        logger.info('[DataService] Protocol deactivated in Supabase');
+        return data;
+    } catch (error) {
+        logger.error('[DataService] Failed to deactivate protocol:', error);
+        throw error;
+    }
+}

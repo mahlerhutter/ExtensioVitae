@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../components/Toast';
+import { useMode } from '../contexts/ModeContext';
+import { useCalendar } from '../contexts/CalendarContext';
 import { generatePlan, getPlanGeneratorInfo } from '../lib/planGenerator';
 import { calculateLongevityScore } from '../lib/longevityScore';
 import {
@@ -12,10 +14,12 @@ import {
   getProgress,
   updateProgress,
   getStorageInfo,
-  shouldUseSupabase,
-  clearLocalData,
   saveIntake,
-  getArchivedPlans
+  getArchivedPlans,
+  activateProtocol,
+  getActiveProtocols,
+  updateProtocolTaskStatus,
+  deactivateProtocol
 } from '../lib/dataService';
 
 // Dashboard Components
@@ -60,6 +64,13 @@ import { getUserModules } from '../lib/moduleService';
 // New Unified Dashboard (Phase 4)
 import TodayDashboard from '../components/dashboard/TodayDashboard';
 
+import ProtocolLibrary from '../components/dashboard/ProtocolLibrary';
+import { PROTOCOL_PACKS } from '../lib/protocolPacks';
+import CircadianWidget from '../components/dashboard/CircadianWidget';
+import { useConfirm } from '../components/ui/ConfirmModal';
+import ConciergeCard from '../components/dashboard/ConciergeCard';
+import { getPredictiveIntelligence } from '../lib/predictiveService';
+import BiologicalSuppliesWidget from '../components/dashboard/BiologicalSuppliesWidget';
 
 // Pillar configuration
 const PILLARS = {
@@ -154,12 +165,27 @@ export default function DashboardPage() {
   const [showModuleActivation, setShowModuleActivation] = useState(false);
   const [hasActiveModules, setHasActiveModules] = useState(null); // null = loading, true/false = checked
 
+  // Protocol Pack State (v0.4.0) - Now persistent via DB
+  const [activePack, setActivePack] = useState(null);
+  const [activePackDbId, setActivePackDbId] = useState(null); // Track DB record ID
+  const { showConfirm, ConfirmDialog } = useConfirm();
+
   const navigate = useNavigate();
   const { planId, day } = useParams(); // Get URL parameters
 
 
   // Get auth state from context
   const { user, signOut: authSignOut } = useAuth();
+
+  // Get emergency mode from ModeContext (v0.5.0)
+  const { currentMode: activeMode } = useMode();
+
+  // Get calendar events from CalendarContext (v0.5.0)
+  const { todayEvents } = useCalendar();
+
+  // Predictive Intelligence State (v0.7.0)
+  const [predictions, setPredictions] = useState([]);
+  const [loadingPredictions, setLoadingPredictions] = useState(false);
 
   useEffect(() => {
     // Load or generate plan using DataService
@@ -176,10 +202,12 @@ export default function DashboardPage() {
 
           // Check if user is admin via server-side Edge Function
           try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-              const isAdminUser = await checkAdminStatus(session);
-              setIsAdmin(isAdminUser);
+            if (supabase) {
+              const { data: { session } } = await supabase.auth.getSession();
+              if (session) {
+                const isAdminUser = await checkAdminStatus(session);
+                setIsAdmin(isAdminUser);
+              }
             }
           } catch (error) {
             logger.warn('[Dashboard] Failed to check admin status:', error);
@@ -390,6 +418,38 @@ export default function DashboardPage() {
     }
   }, [user, navigate, planId]); // Re-run when user changes (login/logout) or planId changes
 
+  // Load active protocol packs from DB
+  useEffect(() => {
+    async function loadActiveProtocols() {
+      if (!user?.id) return;
+
+      try {
+        const protocols = await getActiveProtocols();
+        if (protocols.length > 0) {
+          // Load the first active protocol
+          const activeProtocol = protocols[0];
+          // Map DB record back to PROTOCOL_PACKS format
+          const packData = PROTOCOL_PACKS.find(p => p.id === activeProtocol.protocol_id);
+          if (packData) {
+            setActivePack({
+              ...packData,
+              // Merge with DB data (task completion status)
+              task_completion_status: activeProtocol.task_completion_status || {}
+            });
+            setActivePackDbId(activeProtocol.id);
+            logger.info('[Dashboard] Active protocol loaded from DB:', activeProtocol.protocol_name);
+          }
+        }
+      } catch (error) {
+        logger.error('[Dashboard] Failed to load active protocols:', error);
+      }
+    }
+
+    if (!loading) {
+      loadActiveProtocols();
+    }
+  }, [user?.id, loading]);
+
   // Check if user has active modules (for new user onboarding)
   useEffect(() => {
     async function checkModules() {
@@ -458,6 +518,32 @@ export default function DashboardPage() {
     }
   }, [loading, plan]);
 
+  // Predictive Intelligence Scanning (v0.7.0)
+  useEffect(() => {
+    async function scanForPredictions() {
+      if (!user?.id || !todayEvents || todayEvents.length === 0) {
+        return;
+      }
+      setLoadingPredictions(true);
+      try {
+        const intel = await getPredictiveIntelligence(todayEvents, user.id);
+        if (intel.hasPredictions) {
+          setPredictions(intel.predictions);
+          logger.info('[Dashboard] Predictions loaded:', intel.predictions.length);
+        }
+      } catch (error) {
+        logger.error('[Dashboard] Failed to scan predictions:', error);
+      } finally {
+        setLoadingPredictions(false);
+      }
+    }
+    // Scan on mount and when events change
+    scanForPredictions();
+    // Refresh every 30 minutes
+    const interval = setInterval(scanForPredictions, 30 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [user?.id, todayEvents]);
+
   const handleTaskToggle = async (day, taskId) => {
     const dayData = plan.days[day - 1];
     const totalTasks = dayData?.tasks?.length || 0;
@@ -520,6 +606,119 @@ export default function DashboardPage() {
         navigate(`/d/${plan.supabase_plan_id}/${day}`, { replace: true });
       }
     }
+  };
+
+  // Protocol Pack Activation (v0.4.0) - Now with persistent DB sync
+  const handleActivatePack = async (pack) => {
+    // If clicking the already active pack, ask to deactivate
+    if (activePack?.id === pack.id) {
+      const confirmed = await showConfirm({
+        title: 'Protokoll beenden?',
+        message: `${pack.title} wird deaktiviert. Dein normaler Plan bleibt erhalten.`,
+        confirmText: 'Beenden',
+        cancelText: 'Weiterlaufen lassen',
+        confirmVariant: 'danger',
+        icon: '⏹️'
+      });
+
+      if (confirmed) {
+        // Deactivate in DB
+        try {
+          if (activePackDbId) {
+            await deactivateProtocol(activePackDbId, 'User deactivated');
+            logger.info('[Dashboard] Protocol deactivated in DB');
+          }
+          setActivePack(null);
+          setActivePackDbId(null);
+          addToast(`${pack.title} deaktiviert.`, 'info');
+        } catch (error) {
+          logger.error('[Dashboard] Failed to deactivate protocol:', error);
+          addToast('Fehler beim Deaktivieren', 'error');
+        }
+      }
+      return;
+    }
+
+    // New activation
+    const confirmed = await showConfirm({
+      title: `${pack.title} aktivieren?`,
+      message: `${pack.description}\n\nDieses Protokoll hat Vorrang vor deinem täglichen Plan für die nächsten ${pack.duration_hours} Stunden.`,
+      confirmText: 'Jetzt Aktivieren',
+      cancelText: 'Abbrechen',
+      confirmVariant: 'primary',
+      icon: pack.icon
+    });
+
+    if (confirmed) {
+      try {
+        // Deactivate any existing protocol first
+        if (activePackDbId) {
+          await deactivateProtocol(activePackDbId, 'Replaced by new protocol');
+        }
+
+        // Activate in DB
+        const dbRecord = await activateProtocol(pack);
+        setActivePackDbId(dbRecord.id);
+        setActivePack({
+          ...pack,
+          task_completion_status: {}
+        });
+
+        addToast(`${pack.title} ist jetzt aktiv!`, 'success');
+        trackFeatureUsed('protocol_pack_activated', { pack_id: pack.id });
+
+        logger.info('[Dashboard] Protocol activated in DB:', dbRecord.id);
+
+        // Smooth scroll to top to see active pack
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (error) {
+        logger.error('[Dashboard] Failed to activate protocol:', error);
+        addToast('Fehler beim Aktivieren', 'error');
+      }
+    }
+  };
+
+  const handleProtocolTaskToggle = async (taskId, completed) => {
+    if (!activePackDbId) return;
+
+    try {
+      const updatedProtocol = await updateProtocolTaskStatus(activePackDbId, taskId, completed);
+      setActivePack(prev => ({
+        ...prev,
+        task_completion_status: updatedProtocol.task_completion_status,
+        tasks_completed: updatedProtocol.tasks_completed
+      }));
+
+      if (completed) {
+        addToast('Aufgabe erledigt!', 'success');
+      }
+    } catch (error) {
+      logger.error('[Dashboard] Failed to update protocol task:', error);
+      addToast('Fehler beim Speichern', 'error');
+    }
+  };
+
+  // Predictive Intelligence Handlers (v0.7.0)
+  const handleActivatePrediction = (prediction, result) => {
+    // Remove prediction from list
+    setPredictions(prev => prev.filter(p => p.id !== prediction.id));
+
+    // Show success toast (Family Office Briefing)
+    addToast(result.message, 'success', { duration: 8000 });
+
+    // Update activePack state
+    setActivePack(result.protocol);
+
+    // Track analytics
+    trackFeatureUsed('predictive_protocol_activated', {
+      type: prediction.type,
+      protocol: result.protocol.id
+    });
+  };
+
+  const handleDismissPrediction = (prediction) => {
+    setPredictions(prev => prev.filter(p => p.id !== prediction.id));
+    addToast('Vorhersage verworfen', 'info');
   };
 
   const handleSignOut = async () => {
@@ -612,6 +811,16 @@ export default function DashboardPage() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Concierge Card - Priority Inbox (v0.7.0) */}
+            {predictions.length > 0 && (
+              <ConciergeCard
+                predictions={predictions}
+                userId={user?.id}
+                onActivate={handleActivatePrediction}
+                onDismiss={handleDismissPrediction}
+              />
+            )}
+
             {/* Today Dashboard - Unified view showing all active modules */}
             <TodayDashboard
               userId={user?.id}
@@ -622,6 +831,10 @@ export default function DashboardPage() {
               planProgress={progress}
               currentPlanDay={currentDay}
               onTaskToggle={handleTaskToggle}
+              activePack={activePack}
+              onProtocolTaskToggle={handleProtocolTaskToggle}
+              activeMode={activeMode || 'normal'}
+              calendarEvents={todayEvents || []}
             />
 
             <PlanSummary
@@ -653,7 +866,19 @@ export default function DashboardPage() {
             {/* Calendar Integration */}
             <CalendarConnect variant="compact" />
 
-            {/* Actions Card */}
+            {/* Premium Widgets */}
+            <div className="space-y-4 mb-6">
+              <CircadianWidget />
+              <BiologicalSuppliesWidget
+                userId={user?.id}
+                activeProtocols={activePack ? [{ protocol_id: activePack.id }] : []}
+                onReorderComplete={() => {
+                  addToast('Nachbestellung erfolgreich erstellt!', 'success');
+                }}
+              />
+            </div>
+
+            {/* Quick Actions */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
               {/* Primary Action - New Plan */}
               <button
@@ -675,6 +900,15 @@ export default function DashboardPage() {
                 >
                   <span className="text-lg">🩺</span>
                   <span>Mein Gesundheitsprofil</span>
+                </button>
+
+                {/* Module Hub Button */}
+                <button
+                  onClick={() => navigate('/modules')}
+                  className="w-full py-2.5 bg-slate-800/70 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-all border border-slate-700/50 hover:border-slate-600 flex items-center gap-3 px-4"
+                >
+                  <span className="text-lg">🧩</span>
+                  <span>Module Hub</span>
                 </button>
               </div>
 
@@ -819,6 +1053,26 @@ export default function DashboardPage() {
           } else {
             setCurrentDay(1);
           }
+
+          // v0.4.0: Load Active Protocols
+          try {
+            const activeProtocols = await getActiveProtocols();
+            if (activeProtocols && activeProtocols.length > 0) {
+              const firstActive = activeProtocols[0];
+              const packTemplate = PROTOCOL_PACKS.find(p => p.id === firstActive.protocol_id);
+
+              if (packTemplate) {
+                setActivePack({
+                  ...packTemplate,
+                  task_completion_status: firstActive.task_completion_status || {},
+                  tasks_completed: firstActive.tasks_completed || 0
+                });
+                setActivePackDbId(firstActive.id);
+              }
+            }
+          } catch (error) {
+            logger.warn('[Dashboard] Failed to load protocols:', error);
+          }
           handleSelectDay(null);
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
@@ -919,6 +1173,8 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+      {/* Confirmation Dialog */}
+      <ConfirmDialog />
     </div>
   );
 }

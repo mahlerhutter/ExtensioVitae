@@ -6,6 +6,75 @@
  */
 
 import { supabase } from './supabase';
+import { logger } from './logger';
+
+// =====================================================
+// LOCAL FALLBACK MODULE DEFINITIONS
+// Used when database migrations haven't been run
+// =====================================================
+
+const FALLBACK_MODULES = [
+  {
+    id: 'fallback-fasting-16-8',
+    slug: 'fasting-16-8',
+    name_de: '⏰ Intervallfasten 16:8',
+    name_en: 'Intermittent Fasting 16:8',
+    icon: '⏰',
+    category: 'nutrition',
+    pillars: ['nutrition'],
+    duration_days: 30,
+    is_active: true,
+    is_premium: false,
+    description_de: '16 Stunden fasten, 8 Stunden Essensfenster.',
+    description_en: '16 hours fasting, 8 hours eating window.',
+    priority_weight: 90
+  },
+  {
+    id: 'fallback-sleep-protocol',
+    slug: 'sleep-protocol',
+    name_de: '😴 Schlaf-Protokoll',
+    name_en: 'Sleep Protocol',
+    icon: '😴',
+    category: 'sleep',
+    pillars: ['sleep'],
+    duration_days: 21,
+    is_active: true,
+    is_premium: false,
+    description_de: 'Optimiere deinen Schlaf für mehr Energie.',
+    description_en: 'Optimize your sleep for more energy.',
+    priority_weight: 95
+  },
+  {
+    id: 'fallback-morning-routine',
+    slug: 'morning-routine',
+    name_de: '🌅 Morgenroutine',
+    name_en: 'Morning Routine',
+    icon: '🌅',
+    category: 'lifestyle',
+    pillars: ['circadian', 'movement'],
+    duration_days: 14,
+    is_active: true,
+    is_premium: false,
+    description_de: 'Starte jeden Tag mit einer energetisierenden Routine.',
+    description_en: 'Start every day with an energizing routine.',
+    priority_weight: 85
+  },
+  {
+    id: 'fallback-stress-reset',
+    slug: 'stress-reset',
+    name_de: '🧘 Stress Reset',
+    name_en: 'Stress Reset',
+    icon: '🧘',
+    category: 'stress',
+    pillars: ['stress', 'mental'],
+    duration_days: 7,
+    is_active: true,
+    is_premium: false,
+    description_de: '7 Tage für mehr innere Ruhe.',
+    description_en: '7 days for more inner peace.',
+    priority_weight: 80
+  }
+];
 
 // =====================================================
 // HELPER: Transform module instances for UI compatibility
@@ -79,11 +148,31 @@ export async function getAvailableModules({ category = null, includePremium = tr
 
     const { data, error } = await query;
 
-    if (error) throw error;
-    return data || [];
+    if (error) {
+      console.warn('[ModuleService] Database error, using fallback modules:', error.message);
+      // Return fallback modules if database query fails (migrations not run)
+      let fallback = [...FALLBACK_MODULES];
+      if (category) {
+        fallback = fallback.filter(m => m.category === category);
+      }
+      return fallback;
+    }
+
+    // If no modules in database, return fallbacks
+    if (!data || data.length === 0) {
+      console.warn('[ModuleService] No modules in database, using fallback modules. Run migrations: 012, 013, 014');
+      let fallback = [...FALLBACK_MODULES];
+      if (category) {
+        fallback = fallback.filter(m => m.category === category);
+      }
+      return fallback;
+    }
+
+    return data;
   } catch (error) {
-    console.error('Error fetching modules:', error);
-    return [];
+    console.error('[ModuleService] Error fetching modules:', error);
+    // Return fallback modules on any error
+    return [...FALLBACK_MODULES];
   }
 }
 
@@ -101,11 +190,23 @@ export async function getModuleBySlug(slug) {
       .eq('is_active', true)
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.warn(`[ModuleService] Module '${slug}' not found in database, checking fallbacks`);
+      // Try to find in fallback modules
+      const fallback = FALLBACK_MODULES.find(m => m.slug === slug);
+      if (fallback) {
+        logger.info(`[ModuleService] Using fallback module for '${slug}'`);
+        return fallback;
+      }
+      return null;
+    }
+
     return data;
   } catch (error) {
     console.error('Error fetching module:', error);
-    return null;
+    // Try fallback on error
+    const fallback = FALLBACK_MODULES.find(m => m.slug === slug);
+    return fallback || null;
   }
 }
 

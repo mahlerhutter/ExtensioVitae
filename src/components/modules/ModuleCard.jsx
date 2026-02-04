@@ -34,7 +34,8 @@ export default function ModuleCard({
   onActivate,
   onPause,
   onResume,
-  onDeactivate
+  onDeactivate,
+  onShowDetails
 }) {
   const icon = module.icon || CATEGORY_ICONS[module.category] || '📦';
   const typeLabel = TYPE_LABELS[module.type] || TYPE_LABELS.recurring;
@@ -91,17 +92,33 @@ export default function ModuleCard({
           </div>
         </div>
 
-        {/* Status indicator */}
-        {isActive && (
-          <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded">
-            {language === 'de' ? 'Aktiv' : 'Active'}
-          </span>
-        )}
-        {isPaused && (
-          <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs font-medium rounded">
-            {language === 'de' ? 'Pausiert' : 'Paused'}
-          </span>
-        )}
+        {/* Status indicator & Details */}
+        <div className="flex flex-col items-end gap-2">
+          <div className="flex items-center gap-2">
+            {isActive && (
+              <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs font-medium rounded">
+                {language === 'de' ? 'Aktiv' : 'Active'}
+              </span>
+            )}
+            {isPaused && (
+              <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs font-medium rounded">
+                {language === 'de' ? 'Pausiert' : 'Paused'}
+              </span>
+            )}
+          </div>
+
+          {onShowDetails && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onShowDetails(); }}
+              className="text-[10px] text-amber-500/70 hover:text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1 transition-colors group/link"
+            >
+              <span>{language === 'de' ? 'Details' : 'Details'}</span>
+              <svg className="w-3 h-3 transform group-hover/link:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Description */}

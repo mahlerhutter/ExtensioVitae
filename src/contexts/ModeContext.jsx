@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { MODES, getModeConfig } from '../lib/modeTypes';
+import { logger } from '../lib/logger';
 
 const ModeContext = createContext();
 
@@ -17,7 +18,7 @@ export const ModeProvider = ({ children }) => {
                 return mode;
             }
         } catch (error) {
-            console.error('Error loading mode from localStorage:', error);
+            logger.error('Error loading mode from localStorage:', error);
         }
         return MODES.NORMAL;
     });
@@ -33,7 +34,7 @@ export const ModeProvider = ({ children }) => {
                 timestamp: new Date().toISOString()
             }));
         } catch (error) {
-            console.error('Error saving mode to localStorage:', error);
+            logger.error('Error saving mode to localStorage:', error);
         }
     }, [currentMode]);
 
@@ -71,7 +72,7 @@ export const ModeProvider = ({ children }) => {
             });
         }
 
-        console.log(`🎯 Emergency Mode Activated: ${modeId}`, {
+        logger.debug(`🎯 Emergency Mode Activated: ${modeId}`, {
             from: previousMode,
             config: getModeConfig(modeId),
             metadata

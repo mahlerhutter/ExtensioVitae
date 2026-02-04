@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
 import {
     getGoogleAuthUrl,
@@ -487,12 +487,26 @@ export const CalendarProvider = ({ children }) => {
         }
     };
 
+    // Filter events for today (v0.5.0)
+    const todayEvents = useMemo(() => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        return events.filter(event => {
+            const eventDate = new Date(event.start_time);
+            return eventDate >= today && eventDate < tomorrow;
+        });
+    }, [events]);
+
     const value = {
         // State
         isConnected,
         isConnecting,
         connection,
         events,
+        todayEvents,
         detections,
         settings,
         lastSync,

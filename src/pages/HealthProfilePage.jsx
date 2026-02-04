@@ -3,21 +3,29 @@ import { useAuth } from '../contexts/AuthContext';
 import {
     getHealthProfile,
     updateExtendedHealthProfile,
+    getUserProfile,
+    upsertUserProfile,
     CHRONIC_CONDITIONS,
     INJURIES_LIMITATIONS,
     DIETARY_RESTRICTIONS,
     calculatePlanConstraints,
     generateConstraintsSummary
 } from '../lib/profileService';
+import { getIntake, saveIntake } from '../lib/dataService';
 import { useToast } from '../components/Toast';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
+import { logger } from '../lib/logger';
 
 /**
  * Health Profile Settings Page
- * Allows users to add extended health information for personalized plans
+ * Comprehensive health data management including:
+ * - Core metrics (weight, height, goals, sleep, stress, training)
+ * - Lifestyle factors (smoking, alcohol)
+ * - Medical conditions and limitations
+ * - Dietary restrictions
  */
 export default function HealthProfilePage() {
-    useDocumentTitle('Health Profile - ExtensioVitae');
+    useDocumentTitle('Gesundheitsprofil - ExtensioVitae');
     const { user } = useAuth();
     const { addToast } = useToast();
     const [loading, setLoading] = useState(true);
@@ -26,7 +34,18 @@ export default function HealthProfilePage() {
     const [healthProfile, setHealthProfile] = useState(null);
     const [constraints, setConstraints] = useState(null);
 
-    // Form state
+    // Core health metrics form state
+    const [coreData, setCoreData] = useState({
+        height_cm: '',
+        weight_kg: '',
+        primary_goal: 'energy',
+        sleep_hours_bucket: '7-7.5',
+        stress_1_10: 5,
+        training_frequency: '1-2',
+        daily_time_budget: 15
+    });
+
+    // Extended health form state
     const [formData, setFormData] = useState({
         is_smoker: false,
         smoking_frequency: 'never',
@@ -39,12 +58,13 @@ export default function HealthProfilePage() {
         medication_notes: ''
     });
 
-    // Load existing health profile
+    // Load existing health profile and core data
     useEffect(() => {
         async function loadProfile() {
             if (!user) return;
 
             try {
+                // Load extended health profile
                 const profile = await getHealthProfile(user.id);
                 if (profile) {
                     setHealthProfile(profile);
@@ -64,8 +84,36 @@ export default function HealthProfilePage() {
                     const calc = calculatePlanConstraints(profile);
                     setConstraints(generateConstraintsSummary(calc));
                 }
+
+                // Load core health metrics from intake data
+                const intakeData = await getIntake();
+                if (intakeData) {
+                    setCoreData({
+                        height_cm: intakeData.height_cm || '',
+                        weight_kg: intakeData.weight_kg || '',
+                        primary_goal: intakeData.primary_goal || 'energy',
+                        sleep_hours_bucket: intakeData.sleep_hours_bucket || '7-7.5',
+                        stress_1_10: intakeData.stress_1_10 || 5,
+                        training_frequency: intakeData.training_frequency || '1-2',
+                        daily_time_budget: intakeData.daily_time_budget || 15
+                    });
+                }
+
+                // Also try to load from user profile (as fallback for height/weight)
+                try {
+                    const userProfile = await getUserProfile(user.id);
+                    if (userProfile) {
+                        setCoreData(prev => ({
+                            ...prev,
+                            height_cm: prev.height_cm || userProfile.height_cm || '',
+                            weight_kg: prev.weight_kg || userProfile.weight_kg || ''
+                        }));
+                    }
+                } catch (err) {
+                    logger.warn('Could not load user profile:', err);
+                }
             } catch (error) {
-                console.error('Error loading health profile:', error);
+                logger.error('Error loading health profile:', error);
             } finally {
                 setLoading(false);
             }
@@ -85,26 +133,81 @@ export default function HealthProfilePage() {
         });
     };
 
-    // Handle form submission
+    // Handle core data changes
+    const handleCoreChange = (e) => {
+        const { name, value } = e.target;
+        setCoreData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    // Handle form submission - saves both core and extended data
     const handleSave = async () => {
         if (!user) return;
 
         setSaving(true);
         setSaveSuccess(false);
+        let savedSomething = false;
 
         try {
-            await updateExtendedHealthProfile(user.id, formData);
+            // 1. Save core health metrics to intake data (always works - localStorage fallback)
+            const currentIntake = await getIntake() || {};
+            const updatedIntake = {
+                ...currentIntake,
+                height_cm: coreData.height_cm,
+                weight_kg: coreData.weight_kg,
+                primary_goal: coreData.primary_goal,
+                sleep_hours_bucket: coreData.sleep_hours_bucket,
+                stress_1_10: parseInt(coreData.stress_1_10) || 5,
+                training_frequency: coreData.training_frequency,
+                daily_time_budget: parseInt(coreData.daily_time_budget) || 15,
+                // Also store lifestyle data in intake for fallback
+                is_smoker: formData.is_smoker,
+                smoking_frequency: formData.smoking_frequency,
+                alcohol_frequency: formData.alcohol_frequency
+            };
+            await saveIntake(updatedIntake);
+            savedSomething = true;
+            logger.debug('[HealthProfile] Intake data saved');
+
+            // 2. Try to update user profile with height/weight (may fail if table doesn't exist)
+            try {
+                await upsertUserProfile(user.id, {
+                    height_cm: coreData.height_cm ? parseInt(coreData.height_cm) : null,
+                    weight_kg: coreData.weight_kg ? parseInt(coreData.weight_kg) : null
+                });
+                logger.debug('[HealthProfile] User profile updated');
+            } catch (err) {
+                logger.warn('[HealthProfile] Could not update user profile (table may not exist):', err.message);
+            }
+
+            // 3. Try to save extended health profile (may fail if table doesn't exist)
+            try {
+                await updateExtendedHealthProfile(user.id, formData);
+                logger.debug('[HealthProfile] Extended health profile saved');
+
+                // Recalculate constraints if extended save worked
+                const profile = await getHealthProfile(user.id);
+                if (profile) {
+                    const calc = calculatePlanConstraints(profile);
+                    setConstraints(generateConstraintsSummary(calc));
+                }
+            } catch (err) {
+                logger.warn('[HealthProfile] Could not save extended health profile (migration may be pending):', err.message);
+                // This is not a fatal error - intake data was saved
+            }
+
             setSaveSuccess(true);
-
-            // Recalculate constraints
-            const profile = await getHealthProfile(user.id);
-            const calc = calculatePlanConstraints(profile);
-            setConstraints(generateConstraintsSummary(calc));
-
+            addToast('Gesundheitsprofil gespeichert!', 'success');
             setTimeout(() => setSaveSuccess(false), 3000);
         } catch (error) {
-            console.error('Error saving health profile:', error);
-            addToast('Fehler beim Speichern. Bitte versuche es erneut.', 'error');
+            logger.error('Error saving health profile:', error);
+            if (savedSomething) {
+                addToast('Teilweise gespeichert. Manche Daten konnten nicht gespeichert werden.', 'warning');
+            } else {
+                addToast('Fehler beim Speichern. Bitte versuche es erneut.', 'error');
+            }
         } finally {
             setSaving(false);
         }
@@ -167,6 +270,143 @@ export default function HealthProfilePage() {
                 )}
 
                 <div className="space-y-10">
+                    {/* Core Health Metrics Section */}
+                    <Section title="Basis-Daten" icon="📊">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            {/* Height & Weight */}
+                            <div>
+                                <label className="block text-white font-medium mb-2">Größe (cm)</label>
+                                <input
+                                    name="height_cm"
+                                    type="number"
+                                    value={coreData.height_cm}
+                                    onChange={handleCoreChange}
+                                    placeholder="175"
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-white font-medium mb-2">Gewicht (kg)</label>
+                                <input
+                                    name="weight_kg"
+                                    type="number"
+                                    value={coreData.weight_kg}
+                                    onChange={handleCoreChange}
+                                    placeholder="70"
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                                />
+                            </div>
+
+                            {/* Primary Goal */}
+                            <div className="sm:col-span-2">
+                                <label className="block text-white font-medium mb-2">Hauptziel</label>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    {[
+                                        { value: 'energy', label: '⚡ Mehr Energie' },
+                                        { value: 'sleep', label: '😴 Besserer Schlaf' },
+                                        { value: 'stress', label: '🧘 Weniger Stress' },
+                                        { value: 'fat_loss', label: '🔥 Fettabbau' },
+                                        { value: 'strength_fitness', label: '💪 Kraft & Fitness' },
+                                        { value: 'focus_clarity', label: '🧠 Fokus & Klarheit' }
+                                    ].map(opt => (
+                                        <button
+                                            key={opt.value}
+                                            type="button"
+                                            onClick={() => setCoreData(prev => ({ ...prev, primary_goal: opt.value }))}
+                                            className={`p-3 rounded-lg border text-sm text-left transition-all ${coreData.primary_goal === opt.value
+                                                ? 'bg-amber-400/10 border-amber-400 text-amber-400'
+                                                : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
+                                                }`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Sleep Hours */}
+                            <div>
+                                <label className="block text-white font-medium mb-2">Schlaf (Stunden/Nacht)</label>
+                                <select
+                                    name="sleep_hours_bucket"
+                                    value={coreData.sleep_hours_bucket}
+                                    onChange={handleCoreChange}
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-amber-400"
+                                >
+                                    <option value="<6">Unter 6 Stunden</option>
+                                    <option value="6-6.5">6 - 6.5 Stunden</option>
+                                    <option value="6.5-7">6.5 - 7 Stunden</option>
+                                    <option value="7-7.5">7 - 7.5 Stunden</option>
+                                    <option value="7.5-8">7.5 - 8 Stunden</option>
+                                    <option value=">8">Über 8 Stunden</option>
+                                </select>
+                            </div>
+
+                            {/* Stress Level */}
+                            <div>
+                                <label className="block text-white font-medium mb-2">Stress-Level (1-10)</label>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        name="stress_1_10"
+                                        type="range"
+                                        min="1"
+                                        max="10"
+                                        value={coreData.stress_1_10}
+                                        onChange={handleCoreChange}
+                                        className="flex-1 accent-amber-400"
+                                    />
+                                    <span className={`w-8 text-center font-bold ${coreData.stress_1_10 <= 3 ? 'text-green-400' :
+                                            coreData.stress_1_10 <= 6 ? 'text-amber-400' :
+                                                'text-red-400'
+                                        }`}>
+                                        {coreData.stress_1_10}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Training Frequency */}
+                            <div>
+                                <label className="block text-white font-medium mb-2">Training / Woche</label>
+                                <div className="grid grid-cols-4 gap-2">
+                                    {[
+                                        { value: '0', label: '0x' },
+                                        { value: '1-2', label: '1-2x' },
+                                        { value: '3-4', label: '3-4x' },
+                                        { value: '5+', label: '5+' }
+                                    ].map(opt => (
+                                        <button
+                                            key={opt.value}
+                                            type="button"
+                                            onClick={() => setCoreData(prev => ({ ...prev, training_frequency: opt.value }))}
+                                            className={`p-2.5 rounded-lg border text-sm transition-all ${coreData.training_frequency === opt.value
+                                                ? 'bg-amber-400/10 border-amber-400 text-amber-400'
+                                                : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600'
+                                                }`}
+                                        >
+                                            {opt.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Time Budget */}
+                            <div>
+                                <label className="block text-white font-medium mb-2">Zeitbudget pro Tag (Minuten)</label>
+                                <input
+                                    name="daily_time_budget"
+                                    type="number"
+                                    min="5"
+                                    max="120"
+                                    value={coreData.daily_time_budget}
+                                    onChange={handleCoreChange}
+                                    placeholder="15"
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                                />
+                                <p className="text-slate-500 text-xs mt-1">Wie viel Zeit hast du täglich für Gesundheitsroutinen?</p>
+                            </div>
+                        </div>
+                    </Section>
+
                     {/* Lifestyle Section */}
                     <Section title="Lifestyle" icon="🚬">
                         {/* Smoking */}

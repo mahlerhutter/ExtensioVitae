@@ -4,6 +4,8 @@
  * Manages service worker registration, offline detection, and sync queue.
  */
 
+import { logger } from './logger';
+
 // =====================================================
 // SERVICE WORKER REGISTRATION
 // =====================================================
@@ -14,7 +16,7 @@
  */
 export async function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) {
-    console.warn('Service Worker not supported');
+    logger.warn('Service Worker not supported');
     return null;
   }
 
@@ -23,7 +25,7 @@ export async function registerServiceWorker() {
       scope: '/'
     });
 
-    console.log('Service Worker registered:', registration.scope);
+    logger.info('Service Worker registered:', registration.scope);
 
     // Handle updates
     registration.addEventListener('updatefound', () => {
@@ -40,7 +42,7 @@ export async function registerServiceWorker() {
 
     return registration;
   } catch (error) {
-    console.error('Service Worker registration failed:', error);
+    logger.error('Service Worker registration failed:', error);
     return null;
   }
 }
@@ -156,12 +158,12 @@ export async function queueForSync(requestData) {
       request.onerror = () => reject(request.error);
     });
 
-    console.log('Request queued for sync:', requestData.url);
+    logger.info('Request queued for sync:', requestData.url);
 
     // Register for background sync
     triggerSync('sync-task-completions');
   } catch (error) {
-    console.error('Failed to queue request:', error);
+    logger.error('Failed to queue request:', error);
   }
 }
 
@@ -180,7 +182,7 @@ export async function getQueuedRequests() {
       request.onerror = () => reject(request.error);
     });
   } catch (error) {
-    console.error('Failed to get queued requests:', error);
+    logger.error('Failed to get queued requests:', error);
     return [];
   }
 }
@@ -195,7 +197,7 @@ export async function clearSyncQueue() {
     const store = tx.objectStore(STORE_NAME);
     store.clear();
   } catch (error) {
-    console.error('Failed to clear sync queue:', error);
+    logger.error('Failed to clear sync queue:', error);
   }
 }
 
@@ -216,9 +218,9 @@ async function triggerSync(tag) {
   try {
     const registration = await navigator.serviceWorker.ready;
     await registration.sync.register(tag);
-    console.log('Background sync registered:', tag);
+    logger.info('Background sync registered:', tag);
   } catch (error) {
-    console.warn('Background sync not available, using fallback:', error);
+    logger.warn('Background sync not available, using fallback:', error);
     await manualSync();
   }
 }
@@ -232,7 +234,7 @@ async function manualSync() {
   const requests = await getQueuedRequests();
   if (requests.length === 0) return;
 
-  console.log('Running manual sync for', requests.length, 'requests');
+  logger.info('Running manual sync for', requests.length, 'requests');
 
   const db = await openDB();
 
@@ -247,9 +249,9 @@ async function manualSync() {
       // Remove from queue on success
       const tx = db.transaction(STORE_NAME, 'readwrite');
       tx.objectStore(STORE_NAME).delete(item.id);
-      console.log('Synced request:', item.url);
+      logger.info('Synced request:', item.url);
     } catch (error) {
-      console.error('Sync failed for:', item.url, error);
+      logger.error('Sync failed for:', item.url, error);
     }
   }
 }

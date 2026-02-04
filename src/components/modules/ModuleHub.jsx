@@ -12,6 +12,7 @@ import { useToast } from '../Toast';
 import { useConfirm } from '../ui/ConfirmModal';
 import ModuleCard from './ModuleCard';
 import ModuleConfigModal from './ModuleConfigModal';
+import ModuleDetailSheet from '../dashboard/ModuleDetailSheet';
 
 /**
  * Module Hub Component
@@ -27,6 +28,7 @@ export default function ModuleHub({ userId, language = 'de' }) {
   const [view, setView] = useState('active'); // 'active' | 'discover'
   const [loading, setLoading] = useState(true);
   const [configModal, setConfigModal] = useState(null); // Module to configure
+  const [selectedDetailModule, setSelectedDetailModule] = useState(null); // Module for detail sheet
   const { addToast } = useToast();
   const { showConfirm, ConfirmDialog } = useConfirm();
 
@@ -194,11 +196,10 @@ export default function ModuleHub({ userId, language = 'de' }) {
           <div className="flex bg-slate-800 rounded-lg p-1">
             <button
               onClick={() => setView('active')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                view === 'active'
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${view === 'active'
                   ? 'bg-amber-500 text-slate-900'
                   : 'text-slate-400 hover:text-white'
-              }`}
+                }`}
             >
               {language === 'de' ? 'Aktiv' : 'Active'}
               {activeModules.length > 0 && (
@@ -207,11 +208,10 @@ export default function ModuleHub({ userId, language = 'de' }) {
             </button>
             <button
               onClick={() => setView('discover')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                view === 'discover'
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${view === 'discover'
                   ? 'bg-amber-500 text-slate-900'
                   : 'text-slate-400 hover:text-white'
-              }`}
+                }`}
             >
               {language === 'de' ? 'Entdecken' : 'Discover'}
             </button>
@@ -259,6 +259,7 @@ export default function ModuleHub({ userId, language = 'de' }) {
                           language={language}
                           onPause={() => handlePause(instance.id, instance.module.name_de)}
                           onDeactivate={() => handleDeactivate(instance.id, instance.module.name_de)}
+                          onShowDetails={() => setSelectedDetailModule(instance)}
                         />
                       ))}
                     </div>
@@ -281,6 +282,7 @@ export default function ModuleHub({ userId, language = 'de' }) {
                           isPaused
                           onResume={() => handleResume(instance.id, instance.module.name_de)}
                           onDeactivate={() => handleDeactivate(instance.id, instance.module.name_de)}
+                          onShowDetails={() => setSelectedDetailModule(instance)}
                         />
                       ))}
                     </div>
@@ -296,11 +298,10 @@ export default function ModuleHub({ userId, language = 'de' }) {
             <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
               <button
                 onClick={() => setSelectedCategory('all')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                  selectedCategory === 'all'
+                className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === 'all'
                     ? 'bg-amber-500 text-slate-900'
                     : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
+                  }`}
               >
                 {language === 'de' ? 'Alle' : 'All'}
               </button>
@@ -308,11 +309,10 @@ export default function ModuleHub({ userId, language = 'de' }) {
                 <button
                   key={cat.id}
                   onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
-                    selectedCategory === cat.id
+                  className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${selectedCategory === cat.id
                       ? 'bg-amber-500 text-slate-900'
                       : 'bg-slate-800 text-slate-400 hover:text-white'
-                  }`}
+                    }`}
                 >
                   <span className="mr-1.5">{cat.icon}</span>
                   {language === 'de' ? cat.name_de : cat.name_en}
@@ -340,6 +340,7 @@ export default function ModuleHub({ userId, language = 'de' }) {
                     onActivate={() => handleActivate(module)}
                     onPause={() => instance && handlePause(instance.id, module.name_de)}
                     onResume={() => instance && handleResume(instance.id, module.name_de)}
+                    onShowDetails={() => setSelectedDetailModule({ module })}
                   />
                 );
               })}
@@ -365,6 +366,15 @@ export default function ModuleHub({ userId, language = 'de' }) {
           language={language}
           onActivate={(config) => handleActivateWithConfig(configModal, config)}
           onClose={() => setConfigModal(null)}
+        />
+      )}
+
+      {/* Module Detail Sheet */}
+      {selectedDetailModule && (
+        <ModuleDetailSheet
+          module={selectedDetailModule}
+          language={language}
+          onClose={() => setSelectedDetailModule(null)}
         />
       )}
 

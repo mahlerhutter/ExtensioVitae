@@ -206,7 +206,7 @@ export function isAuthAvailable() {
  */
 export async function saveIntakeToSupabase(intakeData, userId) {
   if (!supabase || !userId) {
-    console.log('[Supabase] Not available, using localStorage only');
+    logger.info('[Supabase] Not available, using localStorage only');
     return null;
   }
 
@@ -276,7 +276,7 @@ export async function getIntakeFromSupabase(userId) {
  */
 export async function savePlanToSupabase(plan, userId, intakeId = null) {
   if (!supabase || !userId) {
-    console.log('[Supabase] Not available, using localStorage only');
+    logger.info('[Supabase] Not available, using localStorage only');
     return null;
   }
 

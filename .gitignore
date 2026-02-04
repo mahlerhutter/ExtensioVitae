@@ -49,21 +49,37 @@ node_modules
 .env
 
 # Strategic & Confidential Documents (not for public repo)
+# Core Strategy Documents
 VISION.md
 docs/VISION.md
 docs/VISION_COMPLETE.md
 docs/FUTURE.md
 docs/tasks.md
-docs/AUDIT.md
+docs/Ideas.md
 docs/WORKFLOW.md
 docs/WORKFLOW_PROMPT.md
+
+# Security & Audit Files
+docs/AUDIT.md
 SECURITY_AUDIT.md
 REMEDIATION_PROMPTS.md
+docs/REMEDIATION_PROMPTS.md
+BETA_READINESS_ASSESSMENT.md
+DEPLOYMENT.md
+LLM_TESTING.md
+LLM_TEST_RESULTS.md
+FEATURES.md
+TESTING.md
+
+# AI Prompt Files (contain internal prompts)
 GEMINI.md
 CLAUDE.MD
+docs/gemini.md
+docs/claude.md
 
-# Internal Documentation & Audits (development only)
+# Internal Documentation & Audits
 docs/audit_*.json
+docs/audits/
 docs/DAILY_WORKFLOW_SUMMARY_*.md
 docs/DEPLOYMENT_SUCCESS_*.md
 docs/WHATS_NEXT.md
@@ -74,4 +90,31 @@ docs/BACKUP_CONFIGURATION.md
 docs/BETA_READINESS_ASSESSMENT.md
 docs/PRODUCT_VISION_SYNTHESIS.md
 docs/FEATURES.md
+docs/TECHNICAL_CONCEPT_*.md
+docs/ExtensioVitae_Audit_Report.pdf
+
+# Session Logs (all development sessions)
+docs/sessions/
+docs/archive/sessions/
+
+# Implementation & Status Notes
+docs/implementation/
+docs/concepts/
+
+# Archive (historical internal docs)
+docs/archive/
+
+# Deployment Scripts
 scripts/deploy-edge-function.sh
+scripts/
+
+# Testing Docs (internal)
+docs/testing/
+
+# Implementation Guides (internal)
+docs/guides/
+
+# Any date-stamped files (usually internal)
+docs/*_2026-*.md
+docs/*_2026-*.json
+

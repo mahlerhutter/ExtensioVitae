@@ -4,6 +4,8 @@ import { getDailyTracking, completeTask as completeTaskApi } from '../../lib/dai
 import { getActiveUserModules, deactivateModule, pauseModule, resumeModule } from '../../lib/moduleService';
 import { useConfirm } from '../ui/ConfirmModal';
 import ModuleDetailSheet from './ModuleDetailSheet';
+import { optimizeDailyPlan } from '../../lib/optimizationEngine';
+import { getCircadianIntelligence } from '../../lib/circadianService';
 
 /**
  * Today Dashboard - Unified View
@@ -19,7 +21,11 @@ export default function TodayDashboard({
   plan = null,
   planProgress = {},
   currentPlanDay = 1,
-  onTaskToggle
+  onTaskToggle,
+  activePack = null,
+  onProtocolTaskToggle = () => { },
+  activeMode = 'normal',
+  calendarEvents = []
 }) {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -31,6 +37,7 @@ export default function TodayDashboard({
   const [expandPlan, setExpandPlan] = useState(true);
   const [moduleMenu, setModuleMenu] = useState(null); // For module action menu
   const { showConfirm, ConfirmDialog } = useConfirm();
+
 
   useEffect(() => {
     loadData();
@@ -129,7 +136,33 @@ export default function TodayDashboard({
 
   // Get plan tasks for today
   const planDayData = plan?.days?.[currentPlanDay - 1];
-  const planTasks = planDayData?.tasks || [];
+  let planTasks = planDayData?.tasks || [];
+
+  // Apply Chrono-Adaptive Optimization (v0.5.0)
+  if (planTasks.length > 0) {
+    try {
+      const circadianIntel = getCircadianIntelligence();
+      const totalCalendarMinutes = calendarEvents.reduce((sum, event) => sum + (event.duration_minutes || 60), 0);
+      const isBusyDay = totalCalendarMinutes >= 240;
+
+      const optimizedPlanDay = optimizeDailyPlan(
+        { ...planDayData, tasks: planTasks },
+        {
+          activeMode,
+          activePack,
+          circadianIntel,
+          isBusyDay,
+          busyThreshold: 240
+        }
+      );
+
+      planTasks = optimizedPlanDay.tasks;
+    } catch (error) {
+      console.error('[TodayDashboard] Optimization failed:', error);
+      // Fall back to original tasks if optimization fails
+    }
+  }
+
   const planDayProgress = planProgress?.[currentPlanDay] || {};
   const planCompletedTasks = planTasks.filter(t => planDayProgress[t.id]).length;
 
@@ -266,6 +299,47 @@ export default function TodayDashboard({
           <EmptyState language={language} onDiscover={onShowModuleHub} onCreatePlan={() => navigate('/intake')} />
         ) : (
           <div className="divide-y divide-slate-800/50">
+            {/* Active Protocol Pack Section (Horizon 1 Phase 2) */}
+            {activePack && (
+              <div className="bg-amber-400/5 border-b border-amber-500/20">
+                {/* Protocol Header */}
+                <div className="px-3 sm:px-5 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-amber-500/20 flex items-center justify-center text-xl sm:text-2xl flex-shrink-0 animate-pulse-slow">
+                    {activePack.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h3 className="text-amber-400 font-bold text-sm sm:text-base truncate">
+                        {activePack.title}
+                      </h3>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500 text-slate-900 uppercase tracking-wider">
+                        Active Protocol
+                      </span>
+                    </div>
+                    <p className="text-slate-400 text-[10px] sm:text-xs line-clamp-1 leading-relaxed">
+                      {activePack.description}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Protocol Tasks */}
+                <div className="px-3 sm:px-5 pb-4 space-y-2">
+                  {activePack.tasks?.map(task => (
+                    <ProtocolTaskItem
+                      key={task.id}
+                      task={task}
+                      isCompleted={!!activePack.task_completion_status?.[task.id]?.completed}
+                      language={language}
+                      onComplete={() => onProtocolTaskToggle(task.id, !activePack.task_completion_status?.[task.id]?.completed)}
+                    />
+                  ))}
+                </div>
+
+                {/* Subtle Glow Divider */}
+                <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-500/30 to-transparent" />
+              </div>
+            )}
+
             {/* 30-Day Plan Section */}
             {hasPlan && planTasks.length > 0 && (
               <div className="bg-slate-900/50">
@@ -490,21 +564,19 @@ function TaskItem({ task, language, onComplete }) {
 
   return (
     <div
-      className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg sm:rounded-xl transition-all ${
-        isCompleted
-          ? 'bg-green-500/10 border border-green-500/20'
-          : 'bg-slate-800/50 border border-slate-700/50 hover:border-slate-600 active:bg-slate-800'
-      }`}
+      className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg sm:rounded-xl transition-all ${isCompleted
+        ? 'bg-green-500/10 border border-green-500/20'
+        : 'bg-slate-800/50 border border-slate-700/50 hover:border-slate-600 active:bg-slate-800'
+        }`}
     >
       {/* Checkbox */}
       <button
         onClick={onComplete}
         disabled={isCompleted}
-        className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-          isCompleted
-            ? 'bg-green-500 border-green-500'
-            : 'border-slate-600 hover:border-amber-500'
-        }`}
+        className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${isCompleted
+          ? 'bg-green-500 border-green-500'
+          : 'border-slate-600 hover:border-amber-500'
+          }`}
       >
         {isCompleted && (
           <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -533,7 +605,7 @@ function TaskItem({ task, language, onComplete }) {
   );
 }
 
-// Plan Task Item Component (for 30-day plan tasks)
+// Plan Task Item Component (for 30-day plan tasks) - Now with Optimization Labels
 function PlanTaskItem({ task, isCompleted, onComplete }) {
   // Get pillar info
   const pillarConfig = {
@@ -554,13 +626,19 @@ function PlanTaskItem({ task, isCompleted, onComplete }) {
   // Duration can be in time_minutes or duration
   const duration = task.time_minutes || task.duration;
 
+  // Check if task is optimized
+  const isOptimized = task.optimized === true;
+  const showOriginalTask = task.originalTask && !isCompleted;
+
   return (
     <div
       className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg sm:rounded-xl transition-all ${
         isCompleted
           ? 'bg-green-500/10 border border-green-500/20'
+          : isOptimized
+          ? 'bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/30 hover:border-amber-500/50'
           : 'bg-slate-800/50 border border-slate-700/50 hover:border-slate-600 active:bg-slate-800'
-      }`}
+        }`}
     >
       {/* Checkbox */}
       <button
@@ -569,8 +647,10 @@ function PlanTaskItem({ task, isCompleted, onComplete }) {
         className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
           isCompleted
             ? 'bg-green-500 border-green-500'
+            : isOptimized
+            ? 'border-amber-500 hover:border-amber-400'
             : 'border-slate-600 hover:border-amber-500'
-        }`}
+          }`}
       >
         {isCompleted && (
           <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -584,19 +664,51 @@ function PlanTaskItem({ task, isCompleted, onComplete }) {
 
       {/* Task Content */}
       <div className="flex-1 min-w-0">
-        <p className={`text-xs sm:text-sm leading-tight ${isCompleted ? 'text-slate-500 line-through' : 'text-white'}`}>
-          {taskText}
-        </p>
-        {task.when && !isCompleted && (
+        <div className="flex items-start gap-2">
+          <p className={`text-xs sm:text-sm leading-tight ${isCompleted ? 'text-slate-500 line-through' : 'text-white'} flex-1`}>
+            {taskText}
+          </p>
+          {/* Optimization Badge */}
+          {isOptimized && !isCompleted && (
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30 whitespace-nowrap flex-shrink-0 animate-pulse-slow">
+              ⚡ Optimiert
+            </span>
+          )}
+        </div>
+
+        {/* Optimization Reason */}
+        {isOptimized && task.optimizationReason && !isCompleted && (
+          <p className="text-[10px] text-amber-400/70 italic mt-1 flex items-center gap-1">
+            <span className="flex-shrink-0">→</span>
+            <span>{task.optimizationReason}</span>
+          </p>
+        )}
+
+        {/* Original Task (strikethrough) */}
+        {showOriginalTask && (
+          <p className="text-[10px] text-slate-600 line-through mt-0.5">
+            {task.originalTask}
+          </p>
+        )}
+
+        {/* When */}
+        {task.when && !isCompleted && !task.optimizationReason && (
           <p className="text-[10px] sm:text-xs text-slate-500 capitalize mt-0.5">{task.when}</p>
         )}
       </div>
 
-      {/* Duration */}
+      {/* Duration (show original if modified) */}
       {duration > 0 && (
-        <span className="text-[10px] sm:text-xs text-slate-500 flex-shrink-0">
-          {duration}m
-        </span>
+        <div className="flex flex-col items-end flex-shrink-0">
+          <span className={`text-[10px] sm:text-xs ${isOptimized ? 'text-amber-400 font-semibold' : 'text-slate-500'}`}>
+            {duration}m
+          </span>
+          {task.originalTime && task.originalTime !== duration && !isCompleted && (
+            <span className="text-[9px] text-slate-600 line-through">
+              {task.originalTime}m
+            </span>
+          )}
+        </div>
       )}
     </div>
   );
@@ -659,6 +771,85 @@ function EmptyState({ language, onDiscover, onCreatePlan }) {
           {language === 'de' ? 'Module entdecken' : 'Explore Modules'}
         </button>
       </div>
+    </div>
+  );
+}
+
+// Protocol Task Item Component (for active protocol packs)
+function ProtocolTaskItem({ task, isCompleted, onComplete }) {
+  const pConfig = {
+    sleep: { icon: '😴', color: 'text-indigo-400', bg: 'bg-indigo-500/10' },
+    nutrition: { icon: '💊', color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+    movement: { icon: '🏃', color: 'text-orange-400', bg: 'bg-orange-500/10' },
+    stress: { icon: '🧘', color: 'text-purple-400', bg: 'bg-purple-500/10' },
+    environment: { icon: '🛡️', color: 'text-amber-400', bg: 'bg-amber-500/10' }
+  };
+  const category = pConfig[task.category] || { icon: '⚡', color: 'text-amber-400', bg: 'bg-amber-500/10' };
+
+  return (
+    <div
+      className={`flex items-center gap-2 sm:gap-3 p-3 sm:p-3.5 rounded-xl sm:rounded-2xl transition-all border ${isCompleted
+        ? 'bg-green-500/10 border-green-500/20 opacity-75'
+        : 'bg-slate-900/40 border-amber-500/20 hover:border-amber-500/40 active:bg-slate-800 shadow-sm'
+        }`}
+    >
+      {/* Checkbox */}
+      <button
+        onClick={onComplete}
+        className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${isCompleted
+          ? 'bg-green-500 border-green-500'
+          : 'border-amber-500/30 hover:border-amber-400 bg-slate-900/50'
+          }`}
+      >
+        {isCompleted && (
+          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+          </svg>
+        )}
+      </button>
+
+      {/* Category Icon */}
+      {!isCompleted && (
+        <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center ${category.bg} flex-shrink-0`}>
+          <span className="text-lg sm:text-xl">{category.icon}</span>
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <p className={`text-sm sm:text-base font-semibold leading-tight ${isCompleted ? 'text-slate-500 line-through font-normal' : 'text-white'}`}>
+            {task.title}
+          </p>
+          {task.priority === 'critical' && !isCompleted && (
+            <span className="bg-red-500/20 text-red-500 text-[8px] font-bold px-1 rounded uppercase tracking-tighter">Required</span>
+          )}
+        </div>
+        {(task.descr || task.description) && !isCompleted && (
+          <p className="text-[11px] sm:text-xs text-slate-400 mt-0.5 leading-relaxed">{task.descr || task.description}</p>
+        )}
+      </div>
+
+      {/* Duration */}
+      {(task.time_minutes > 0 || task.duration_minutes > 0) && !isCompleted && (
+        <span className="text-[10px] sm:text-xs text-amber-500/60 font-medium flex-shrink-0 flex items-center gap-1">
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {task.time_minutes || task.duration_minutes}m
+        </span>
+      )}
+
+      {/* Pulsing Style */}
+      <style>{`
+        @keyframes pulse-slow {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 3s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 }
