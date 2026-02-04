@@ -16,6 +16,7 @@ import FuturePage from './pages/FuturePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import BetaBadge from './components/BetaBadge';
+import { ModeProvider } from './contexts/ModeContext';
 
 
 
@@ -69,7 +70,7 @@ export default function App() {
   };
 
   return (
-    <>
+    <ModeProvider>
       <BrowserRouter>
         <BetaBadge />
         <Routes>
@@ -195,6 +196,6 @@ export default function App() {
           filter: sepia(100%) hue-rotate(-50deg) saturate(400%) contrast(0.9);
         }
       `}</style>
-    </>
+    </ModeProvider>
   );
 }
