@@ -17,6 +17,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import BetaBadge from './components/BetaBadge';
 import { ModeProvider } from './contexts/ModeContext';
+import { CalendarProvider } from './contexts/CalendarContext';
+import CalendarCallbackPage from './pages/CalendarCallbackPage';
 
 
 
@@ -71,127 +73,136 @@ export default function App() {
 
   return (
     <ModeProvider>
-      <BrowserRouter>
-        <BetaBadge />
-        <Routes>
-          <Route path="/" element={
-            <ErrorBoundary>
-              <LandingPage />
-            </ErrorBoundary>
-          } />
-          <Route path="/auth" element={
-            <ErrorBoundary>
-              <AuthPage />
-            </ErrorBoundary>
-          } />
-          <Route path="/intake" element={
-            <ErrorBoundary>
-              <IntakePage />
-            </ErrorBoundary>
-          } />
-          <Route path="/generating" element={
-            <ErrorBoundary>
-              <GeneratingPage />
-            </ErrorBoundary>
-          } />
-          <Route path="/science" element={
-            <ErrorBoundary>
-              <SciencePage />
-            </ErrorBoundary>
-          } />
+      <CalendarProvider>
+        <BrowserRouter>
+          <BetaBadge />
+          <Routes>
+            <Route path="/" element={
+              <ErrorBoundary>
+                <LandingPage />
+              </ErrorBoundary>
+            } />
+            <Route path="/auth" element={
+              <ErrorBoundary>
+                <AuthPage />
+              </ErrorBoundary>
+            } />
+            <Route path="/intake" element={
+              <ErrorBoundary>
+                <IntakePage />
+              </ErrorBoundary>
+            } />
+            <Route path="/generating" element={
+              <ErrorBoundary>
+                <GeneratingPage />
+              </ErrorBoundary>
+            } />
+            <Route path="/science" element={
+              <ErrorBoundary>
+                <SciencePage />
+              </ErrorBoundary>
+            } />
 
-          {/* Legal Pages */}
-          <Route path="/privacy" element={
-            <ErrorBoundary>
-              <PrivacyPage />
-            </ErrorBoundary>
-          } />
-          <Route path="/terms" element={
-            <ErrorBoundary>
-              <TermsPage />
-            </ErrorBoundary>
-          } />
-          <Route path="/imprint" element={
-            <ErrorBoundary>
-              <ImprintPage />
-            </ErrorBoundary>
-          } />
+            {/* Calendar OAuth Callback */}
+            <Route path="/calendar/callback" element={
+              <ErrorBoundary>
+                <CalendarCallbackPage />
+              </ErrorBoundary>
+            } />
 
-          {/* Hidden Future Vision Page (for trusted users only) */}
-          <Route path="/future" element={
-            <ErrorBoundary>
-              <FuturePage />
-            </ErrorBoundary>
-          } />
+            {/* Legal Pages */}
+            <Route path="/privacy" element={
+              <ErrorBoundary>
+                <PrivacyPage />
+              </ErrorBoundary>
+            } />
+            <Route path="/terms" element={
+              <ErrorBoundary>
+                <TermsPage />
+              </ErrorBoundary>
+            } />
+            <Route path="/imprint" element={
+              <ErrorBoundary>
+                <ImprintPage />
+              </ErrorBoundary>
+            } />
 
-          {/* Protected Dashboard Routes with Error Boundary */}
-          <Route path="/dashboard" element={
-            <ErrorBoundary>
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            </ErrorBoundary>
-          } />
-          <Route path="/d/:planId" element={
-            <ErrorBoundary>
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            </ErrorBoundary>
-          } />
-          <Route path="/d/:planId/:day" element={
-            <ErrorBoundary>
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            </ErrorBoundary>
-          } />
+            {/* Hidden Future Vision Page (for trusted users only) */}
+            <Route path="/future" element={
+              <ErrorBoundary>
+                <FuturePage />
+              </ErrorBoundary>
+            } />
 
-          {/* Health Profile (Protected) */}
-          <Route path="/health-profile" element={
-            <ErrorBoundary>
-              <ProtectedRoute>
-                <HealthProfilePage />
-              </ProtectedRoute>
-            </ErrorBoundary>
-          } />
-          <Route path="/settings/health" element={
-            <ErrorBoundary>
-              <ProtectedRoute>
-                <HealthProfilePage />
-              </ProtectedRoute>
-            </ErrorBoundary>
-          } />
+            {/* Protected Dashboard Routes with Error Boundary */}
+            <Route path="/dashboard" element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              </ErrorBoundary>
+            } />
+            <Route path="/d/:planId" element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              </ErrorBoundary>
+            } />
+            <Route path="/d/:planId/:day" element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              </ErrorBoundary>
+            } />
 
-          {/* Admin Dashboard (email-restricted) */}
-          <Route path="/admin" element={
-            <ErrorBoundary>
-              <AdminPage />
-            </ErrorBoundary>
-          } />
+            {/* Health Profile (Protected) */}
+            <Route path="/health-profile" element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <HealthProfilePage />
+                </ProtectedRoute>
+              </ErrorBoundary>
+            } />
+            <Route path="/settings/health" element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <HealthProfilePage />
+                </ProtectedRoute>
+              </ErrorBoundary>
+            } />
+
+            {/* Admin Dashboard (email-restricted) */}
+            <Route path="/admin" element={
+              <ErrorBoundary>
+                <AdminPage />
+              </ErrorBoundary>
+            } />
 
 
-          {/* 404 Catch-all Route */}
-          <Route path="*" element={
-            <ErrorBoundary>
-              <NotFoundPage />
-            </ErrorBoundary>
-          } />
-        </Routes>
-      </BrowserRouter>
+            {/* 404 Catch-all Route */}
+            <Route path="*" element={
+              <ErrorBoundary>
+                <NotFoundPage />
+              </ErrorBoundary>
+            } />
+          </Routes>
+        </BrowserRouter>
 
-      {/* Night Mode Override Button */}
-      {(new Date().getHours() >= 21 || new Date().getHours() < 6) && (
-        <button
-          onClick={toggleNightMode}
-          className="fixed bottom-4 right-4 z-50 px-3 py-1.5 bg-slate-800/90 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"
-        >
-          {nightModeOverride ? '🌙 Enable Night Mode' : '☀️ Override Night Mode'}
-        </button>
-      )}
+        {/* Night Mode Override Button */}
+        {(new Date().getHours() >= 21 || new Date().getHours() < 6) && (
+          <button
+            onClick={toggleNightMode}
+            className="fixed bottom-4 right-4 z-50 px-3 py-1.5 bg-slate-800/90 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"
+          >
+            {nightModeOverride ? '🌙 Enable Night Mode' : '☀️ Override Night Mode'}
+          </button>
+      </CalendarProvider>
+        )}
 
-      {/* Night Mode CSS */}
-      <style>{`
+        {/* Night Mode CSS */}
+        <style>{`
         body.night-mode {
           filter: sepia(100%) hue-rotate(-50deg) saturate(400%) contrast(0.9);
         }
