@@ -48,6 +48,9 @@ import { checkAdminStatus } from '../lib/adminService';
 
 // Emergency Mode Components
 import ModeSelector from '../components/ModeSelector';
+
+// Calendar Components
+import CalendarConnect from '../components/calendar/CalendarConnect';
 import ModeIndicator from '../components/ModeIndicator';
 
 
@@ -595,9 +598,13 @@ export default function DashboardPage() {
           <div className="space-y-6">
             {/* Longevity Score - Compact */}
             <LongevityScoreWidget intakeData={intakeData} userName={intakeData?.name} compact={true} />
-            
+
             {/* Emergency Mode Selector */}
             <ModeSelector />
+
+            {/* Calendar Integration */}
+            <CalendarConnect variant="compact" />
+
             {/* New Plan Button */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm">
               <button
@@ -636,11 +643,11 @@ export default function DashboardPage() {
               </button>
             </div>
 
-              {/* Save & Export Section */}
-              <div className="mt-4 pt-4 border-t border-slate-700">
-                <h4 className="text-slate-400 text-xs uppercase tracking-wider mb-3 font-semibold">Save & Export</h4>
-                <WhatsAppButton />
-              </div>
+            {/* Save & Export Section */}
+            <div className="mt-4 pt-4 border-t border-slate-700">
+              <h4 className="text-slate-400 text-xs uppercase tracking-wider mb-3 font-semibold">Save & Export</h4>
+              <WhatsAppButton />
+            </div>
 
             <MonthOverview
               plan={plan}
