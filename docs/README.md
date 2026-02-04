@@ -1,113 +1,172 @@
 # ExtensioVitae Documentation
 
-**Last Updated:** 2026-02-03  
-**Version:** 2.1.2
+**Last Updated:** 2026-02-04  
+**Status:** Organized & Clean
 
 ---
 
-## 📚 Documentation Index
+## 📁 Documentation Structure
 
-### 🚀 **Getting Started**
+### Core Documents (Root Level)
 
-1. **[POST_DATABASE_SETUP.md](POST_DATABASE_SETUP.md)** - Complete setup guide
-   - Supabase project setup
-   - Database initialization
-   - Environment configuration
-   - Google OAuth setup
-   - Local testing
+**Strategic:**
+- **`VISION.md`** - Die große Vision (Axiome, Three Horizons, North Star)
+- **`FUTURE.md`** - Konkrete Umsetzung (Module, Scoring, Build-Sequenz)
+- **`FEATURES.md`** - Feature-Übersicht und Spezifikationen
+- **`Ideas.md`** - Feature-Ideen und Backlog
 
-### 📋 **Product Documentation**
+**Operational:**
+- **`tasks.md`** - Aktuelle Tasks & Technical Debt
+- **`WORKFLOW.md`** - Daily Workflow Cycle Protocol
+- **`WORKFLOW_PROMPT.md`** - Workflow Execution Prompt
 
-2. **[01-PRODUCT-OVERVIEW.md](01-PRODUCT-OVERVIEW.md)** - Product vision and concept
-3. **[02-USER-FLOW.md](02-USER-FLOW.md)** - Complete user journey
-4. **[03-LANDING-PAGE.md](03-LANDING-PAGE.md)** - Landing page design
-5. **[04-INTAKE-FORM.md](04-INTAKE-FORM.md)** - Questionnaire structure
-6. **[05-AI-PLAN-GENERATION.md](05-AI-PLAN-GENERATION.md)** - Plan generation logic
-7. **[06-WHATSAPP-FLOW.md](06-WHATSAPP-FLOW.md)** - WhatsApp integration concept
-8. **[07-DASHBOARD.md](07-DASHBOARD.md)** - Dashboard features
-9. **[09-MAKE-AUTOMATIONS.md](09-MAKE-AUTOMATIONS.md)** - Make.com workflows
-
-### 🔧 **Technical Documentation**
-
-10. **[AUDIT.md](AUDIT.md)** - Code quality audit and recommendations
-11. **[tasks.md](tasks.md)** - Current tasks and technical debt
-12. **[ANALYTICS_ADMIN_SETUP.md](ANALYTICS_ADMIN_SETUP.md)** - Analytics and admin setup
-13. **[GIT_GITHUB_SETUP.md](GIT_GITHUB_SETUP.md)** - Git and GitHub configuration
-
-### 💡 **Planning & Ideas**
-
-14. **[Ideas.md](Ideas.md)** - Feature ideas and backlog
-15. **[UPDATE_SUMMARY.md](UPDATE_SUMMARY.md)** - Recent updates summary
-16. **[concepts/](concepts/)** - Detailed concept documents
+**Overview:**
+- **`README.md`** - This file
 
 ---
 
-## 🗂️ Archived Documentation
+## 📂 Subdirectories
 
-Older or superseded documentation has been moved to `docs/archive/`:
+### `/audits` - Security & Quality Audits
+- `audit_2026-02-04.json` - Initial security audit
+- `audit_2026-02-04_part2.json` - REMEDIATION #3 Part 1 audit
+- `audit_2026-02-04_final.json` - REMEDIATION #3 complete audit
+- `audit_2026-02-04_session_summary.json` - Full session audit
+- `AUDIT.md` - Audit documentation
+- `BETA_READINESS_ASSESSMENT.md` - Beta readiness checklist
 
-- `DEBUG_OAUTH.md` - OAuth debugging guide (issue resolved)
-- `FIX_GOOGLE_OAUTH.md` - Google OAuth fix guide (issue resolved)
-- `FRESH_DATABASE_SETUP.md` - Old database setup (superseded by POST_DATABASE_SETUP.md)
-- `QUICKSTART_DATABASE.md` - Quick setup (superseded by POST_DATABASE_SETUP.md)
-- `CONSOLIDATED_TASKS.md` - Old task list (superseded by tasks.md)
-- `GIT_HISTORY_CLEANUP.md` - Git cleanup guide (completed)
-- `ADMIN_FEEDBACK_DEBUG_STATUS.md` - Debug status (resolved)
+### `/guides` - Setup & Configuration Guides
+- `SECURITY_HEADERS.md` - Security headers configuration
+- `SENTRY_SETUP.md` - Sentry error monitoring setup
+- `BACKUP_CONFIGURATION.md` - Supabase backup configuration
+- `EDGE_FUNCTION_DEPLOYMENT.md` - Edge Function deployment guide
+- `EDGE_FUNCTION_VERIFICATION.md` - Edge Function testing guide
+- `EMAIL_SETUP_GUIDE.md` - Email service setup
+- `EMAIL_STRATEGY.md` - Email strategy & templates
+- `REMINDER_BACKUPS_AFTER_PRO.md` - Backup reminder (Pro plan)
 
----
+### `/sessions` - Session Summaries & Reports
+- `DAILY_WORKFLOW_SUMMARY_2026-02-04.md` - Day 1 workflow summary
+- `DEPLOYMENT_SUCCESS_2026-02-04.md` - Edge Function deployment report
+- `WEEK2_SESSION_2026-02-04.md` - Week 2 session summary
 
-## 🎯 Quick Links
+### `/archive` - Historical & Deprecated Docs
+- `01-PRODUCT-OVERVIEW.md` - Old product overview
+- `02-USER-FLOW.md` - Old user flow
+- `03-LANDING-PAGE.md` - Old landing page spec
+- `04-INTAKE-FORM.md` - Old intake form spec
+- `05-AI-PLAN-GENERATION.md` - Old AI generation spec
+- `07-DASHBOARD.md` - Old dashboard spec
+- `MVP_ROADMAP.md` - Old MVP roadmap
+- `PRODUCT_VISION_SYNTHESIS.md` - Old vision synthesis
+- `WHATS_NEXT.md` - Merged into tasks.md
 
-### For New Developers
-1. Start with [POST_DATABASE_SETUP.md](POST_DATABASE_SETUP.md)
-2. Read [01-PRODUCT-OVERVIEW.md](01-PRODUCT-OVERVIEW.md)
-3. Check [tasks.md](tasks.md) for current priorities
+### `/concepts` - Design Concepts
+- (Existing concept files)
 
-### For Product/Design
-1. [02-USER-FLOW.md](02-USER-FLOW.md) - User journey
-2. [03-LANDING-PAGE.md](03-LANDING-PAGE.md) - Landing page
-3. [07-DASHBOARD.md](07-DASHBOARD.md) - Dashboard features
+### `/implementation` - Implementation Details
+- (Existing implementation files)
 
-### For DevOps/Deployment
-1. [POST_DATABASE_SETUP.md](POST_DATABASE_SETUP.md) - Database setup
-2. [ANALYTICS_ADMIN_SETUP.md](ANALYTICS_ADMIN_SETUP.md) - Analytics
-3. [tasks.md](tasks.md) - Deployment blockers
-
----
-
-## 📝 Recent Changes (v2.1.2)
-
-### ✅ Auth System Fixes
-- Google OAuth login working
-- User signup/login working
-- RLS policies fixed (no more infinite recursion)
-- Dashboard redirect working
-
-### ✅ Documentation Cleanup
-- Archived outdated guides
-- Updated setup documentation
-- Created comprehensive changelog
-
-### ⚠️ Known Issues
-- Admin panel temporarily disabled (needs re-implementation)
-- Foreign key constraint removed on `user_profiles.user_id`
-
-See [tasks.md](tasks.md) for full details.
+### `/testing` - Test Documentation
+- (Existing test files)
 
 ---
 
-## 🔗 External Resources
+## 🎯 Quick Navigation
 
-- **Supabase Docs:** https://supabase.com/docs
-- **React Router:** https://reactrouter.com
-- **PostHog Analytics:** https://posthog.com/docs
-- **Make.com:** https://www.make.com/en/help
+**Need to know what to work on?**  
+→ Read `tasks.md`
+
+**Need to understand the vision?**  
+→ Read `VISION.md` → `FUTURE.md`
+
+**Need to set something up?**  
+→ Check `/guides` folder
+
+**Need to see progress?**  
+→ Check `/sessions` folder
+
+**Need to review security?**  
+→ Check `/audits` folder
 
 ---
 
-## 📧 Support
+## 📊 Document Hierarchy
 
-For questions or issues, check:
-1. [tasks.md](tasks.md) - Known issues and fixes
-2. [AUDIT.md](AUDIT.md) - Code quality recommendations
-3. [archive/](archive/) - Historical documentation
+```
+VISION.md  → Die große Vision (Axiome, Three Horizons, North Star)
+     ↓
+FUTURE.md  → Konkrete Umsetzung (Module, Scoring, Build-Sequenz)
+     ↓
+tasks.md   → Aktuelle Tasks (Was jetzt zu tun ist)
+     ↓
+/guides    → How to implement specific features
+     ↓
+/sessions  → What we've accomplished
+```
+
+---
+
+## 🔍 Finding Documents
+
+**By Purpose:**
+- **Strategic Planning:** VISION.md, FUTURE.md
+- **Current Work:** tasks.md
+- **Feature Specs:** FEATURES.md, Ideas.md
+- **How-To Guides:** /guides folder
+- **Progress Reports:** /sessions folder
+- **Quality Assurance:** /audits folder
+- **Historical Reference:** /archive folder
+
+**By Date:**
+- All session summaries include dates in filename
+- All audits include dates in filename
+- Check `Last Updated` in document headers
+
+---
+
+## 📝 Document Conventions
+
+**Naming:**
+- Strategic docs: `UPPERCASE.md`
+- Guides: `TITLE_CASE.md` in `/guides`
+- Sessions: `PREFIX_YYYY-MM-DD.md` in `/sessions`
+- Audits: `audit_YYYY-MM-DD.json` in `/audits`
+
+**Headers:**
+- All docs include `Last Updated` date
+- All docs include `Status` or `Version`
+- All docs include clear purpose statement
+
+---
+
+## 🗑️ Cleanup Policy
+
+**Archive when:**
+- Document is superseded by newer version
+- Information is merged into another doc
+- Document is no longer relevant
+
+**Delete when:**
+- Duplicate content exists
+- Information is outdated and not historical
+- Document was temporary/scratch
+
+**Keep when:**
+- Strategic importance (VISION, FUTURE)
+- Operational necessity (tasks, WORKFLOW)
+- Historical value (audits, sessions)
+- Reference value (guides)
+
+---
+
+## ✅ Current Status
+
+**Total Documents:** ~40 files  
+**Organization:** Clean & Structured  
+**Last Cleanup:** 2026-02-04  
+**Next Review:** When adding 10+ new files
+
+---
+
+**For questions about documentation structure, see this README.**
