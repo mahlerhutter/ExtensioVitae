@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import * as Sentry from '@sentry/react';
 
 class ErrorBoundary extends React.Component {
     constructor(props) {
@@ -13,6 +14,9 @@ class ErrorBoundary extends React.Component {
     }
 
     componentDidCatch(error, errorInfo) {
+        // Log to Sentry
+        Sentry.captureException(error, { contexts: { react: errorInfo } });
+
         // Log error details for debugging
         console.error('ErrorBoundary caught an error:', error, errorInfo);
         this.setState({
