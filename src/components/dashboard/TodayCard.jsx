@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ProgressRing from './ProgressRing';
 import TaskItem from './TaskItem';
 import { getCurrentBlock, getBlockDisplayName, isTaskInCurrentBlock } from '../../utils/time';
+import { useMode } from '../../contexts/ModeContext';
 
 // Helper to format date
 function formatDate(date) {
@@ -12,15 +13,35 @@ function formatDate(date) {
 /**
  * Today Card Component
  * Shows today's tasks with progress tracking and Focus Mode
+ * NOW WITH EMERGENCY MODE INTEGRATION
  */
 export default function TodayCard({ day, dayData, progress, onTaskToggle, startDate }) {
     const [viewMode, setViewMode] = useState('focus'); // 'focus' | 'list'
     const currentBlock = getCurrentBlock();
 
-    // Filter tasks based on view mode
-    const displayTasks = viewMode === 'focus'
+    // Emergency Mode Integration
+    const {
+        isEmergencyModeActive,
+        modeConfig,
+        shouldShowTask,
+        shouldEmphasizeTask,
+        shouldSuppressTask
+    } = useMode();
+
+    // Filter tasks based on view mode AND emergency mode
+    let displayTasks = viewMode === 'focus'
         ? dayData.tasks.filter(task => isTaskInCurrentBlock(task, currentBlock))
         : dayData.tasks;
+
+    // Apply emergency mode filtering
+    if (isEmergencyModeActive()) {
+        displayTasks = displayTasks.filter(task => {
+            // Suppress tasks that should be hidden in this mode
+            if (shouldSuppressTask(task)) return false;
+            // Show tasks that pass the mode filter
+            return shouldShowTask(task);
+        });
+    }
 
     const completedCount = dayData.tasks.filter((t) => progress[t.id]).length;
     const totalTime = dayData.tasks.reduce((acc, t) => acc + t.time_minutes, 0);
@@ -42,6 +63,23 @@ export default function TodayCard({ day, dayData, progress, onTaskToggle, startD
                 </div>
                 <ProgressRing completed={completedCount} total={dayData.tasks.length} />
             </div>
+
+            {/* Emergency Mode Active Notice */}
+            {isEmergencyModeActive() && (
+                <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <div className="flex items-center gap-2">
+                        <span className="text-lg">{modeConfig.icon}</span>
+                        <div className="flex-1">
+                            <p className="text-blue-300 text-sm font-medium">
+                                {modeConfig.name} Mode aktiv
+                            </p>
+                            <p className="text-blue-400/70 text-xs mt-0.5">
+                                Protokoll angepasst: {modeConfig.focus}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Focus Mode Toggle */}
             <div className="mb-4 flex items-center justify-between bg-slate-800/50 rounded-lg p-3">
@@ -72,7 +110,9 @@ export default function TodayCard({ day, dayData, progress, onTaskToggle, startD
                     <div className="text-5xl mb-4">🧘</div>
                     <h3 className="text-xl font-semibold text-white mb-2">Active Recovery</h3>
                     <p className="text-slate-400 text-sm mb-4">
-                        Keine Aufgaben für diesen Zeitblock.
+                        {isEmergencyModeActive()
+                            ? `Keine Aufgaben im ${modeConfig.name} Mode für diesen Zeitblock.`
+                            : 'Keine Aufgaben für diesen Zeitblock.'}
                     </p>
 
                     {/* Next Protocol Time */}
@@ -93,14 +133,19 @@ export default function TodayCard({ day, dayData, progress, onTaskToggle, startD
                 </div>
             ) : (
                 <div className="space-y-3">
-                    {displayTasks.map((task) => (
-                        <TaskItem
-                            key={task.id}
-                            task={task}
-                            completed={progress[task.id] || false}
-                            onToggle={() => onTaskToggle(day, task.id)}
-                        />
-                    ))}
+                    {displayTasks.map((task) => {
+                        const isEmphasized = isEmergencyModeActive() && shouldEmphasizeTask(task);
+
+                        return (
+                            <TaskItem
+                                key={task.id}
+                                task={task}
+                                completed={progress[task.id] || false}
+                                onToggle={() => onTaskToggle(day, task.id)}
+                                emphasized={isEmphasized}
+                            />
+                        );
+                    })}
                 </div>
             )}
 
@@ -110,6 +155,13 @@ export default function TodayCard({ day, dayData, progress, onTaskToggle, startD
                     {remainingTime === 0 ? 'Alles erledigt!' : `${remainingTime} min übrig`}
                 </span>
             </div>
+
+            {/* Emergency Mode Task Count */}
+            {isEmergencyModeActive() && (
+                <div className="mt-2 text-xs text-center text-slate-500">
+                    {displayTasks.length} von {dayData.tasks.length} Aufgaben im {modeConfig.name} Mode
+                </div>
+            )}
         </div>
     );
 }

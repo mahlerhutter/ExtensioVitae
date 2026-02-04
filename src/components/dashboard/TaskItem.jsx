@@ -17,8 +17,9 @@ const PILLARS = {
 /**
  * Task Item Component
  * Individual task with checkbox, pillar indicator, and time estimate
+ * NOW WITH EMERGENCY MODE EMPHASIS SUPPORT
  */
-export default function TaskItem({ task, completed, onToggle }) {
+export default function TaskItem({ task, completed, onToggle, emphasized = false }) {
     const pillar = PILLARS[task.pillar] || { label: task.pillar || 'Task', color: 'bg-slate-500', textColor: 'text-slate-400' };
     const { addToast } = useToast();
 
@@ -40,8 +41,10 @@ export default function TaskItem({ task, completed, onToggle }) {
 
     return (
         <div
-            className={`relative flex items-start gap-4 p-4 rounded-lg transition-all cursor-pointer ${isQuickWin ? 'border-2 border-amber-400/50 bg-amber-400/5' : ''
-                } ${completed ? 'bg-slate-800/30' : 'bg-slate-800/60 hover:bg-slate-800'}`}
+            className={`relative flex items-start gap-4 p-4 rounded-lg transition-all cursor-pointer 
+                ${isQuickWin ? 'border-2 border-amber-400/50 bg-amber-400/5' : ''}
+                ${emphasized ? 'border-2 border-blue-400/50 bg-blue-400/5 ring-2 ring-blue-400/20' : ''}
+                ${completed ? 'bg-slate-800/30' : 'bg-slate-800/60 hover:bg-slate-800'}`}
             onClick={handleToggle}
         >
             {isQuickWin && (
@@ -49,10 +52,17 @@ export default function TaskItem({ task, completed, onToggle }) {
                     Start Here
                 </div>
             )}
+            {emphasized && (
+                <div className="absolute -top-2 -left-2 bg-blue-400 text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    Priority
+                </div>
+            )}
             <button
                 className={`mt-0.5 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${completed
                     ? 'bg-amber-400 border-amber-400'
-                    : 'border-slate-600 hover:border-amber-400'
+                    : emphasized
+                        ? 'border-blue-400 hover:border-blue-300'
+                        : 'border-slate-600 hover:border-amber-400'
                     }`}
             >
                 {completed && (
@@ -66,7 +76,7 @@ export default function TaskItem({ task, completed, onToggle }) {
                     <span className={`w-2 h-2 rounded-full ${pillar.color}`} />
                     <span className={`text-xs font-medium ${pillar.textColor}`}>{pillar.label}</span>
                 </div>
-                <p className={`text-sm leading-relaxed ${completed ? 'text-slate-500 line-through' : 'text-slate-200'}`}>
+                <p className={`text-sm leading-relaxed ${completed ? 'text-slate-500 line-through' : emphasized ? 'text-white font-medium' : 'text-slate-200'}`}>
                     <EvidenceText text={task.task} />
                 </p>
             </div>
