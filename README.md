@@ -4,8 +4,8 @@
 
 A minimalist PWA that generates 30-day longevity blueprints based on user intake data. Built with React, Tailwind CSS, and Supabase.
 
-[![Status](https://img.shields.io/badge/status-v0.5.0%20In%20Progress-blue)]()
-[![Production](https://img.shields.io/badge/production-92%25%20Ready-success)]()
+[![Status](https://img.shields.io/badge/status-v0.6.0%20Beta-blue)](https://extensiovitae.vercel.app)
+[![Production](https://img.shields.io/badge/production-95%25%20Ready-success)]()
 [![License](https://img.shields.io/badge/license-Proprietary-red)]()
 
 ---
@@ -65,16 +65,26 @@ VITE_SUPABASE_ANON_KEY=your_anon_key
 | **Error Monitoring** | 🟡 | Sentry integration (soft-ready) |
 | **Security Headers** | ✅ | Production-ready security configuration |
 
-### 🚀 **v0.5.0 - Strategic Bets (In Progress - 71% Complete)**
+### 🚀 **v0.5.0 - Strategic Bets (Complete)**
 
 | Feature | Status | Description |
 |---------|--------|-------------|
 | **Lab Snapshot Lite** | ✅ | Biomarker tracking with color-coded status for 10 key markers |
 | **Recovery Score** | ✅ | 3-question morning check-in with auto-swap (HIIT → Yoga Nidra) |
 | **Calendar Event Detection** | ✅ | Smart detection of flights, focus blocks, late-night events |
-| **Calendar OAuth Integration** | 🔒 | Blocked - Google OAuth credentials needed |
-| **Lab OCR** | 🔒 | Blocked - Anthropic API key needed |
-| **Email Notifications** | 🔒 | Blocked - Resend API key needed |
+| **Biological Supplies Widget** | ✅ | Inventory tracking with smart refill recommendations |
+| **Supplement Timing Protocol** | ✅ | Optimized supplement scheduling based on circadian rhythm |
+
+### 🧪 **v0.6.0 - Lab Results Integration (Beta)**
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Lab Upload** | ✅ | Drag & drop PDF/image upload with secure storage |
+| **OCR Parsing** | ✅ | Claude 3.5 Sonnet vision API for biomarker extraction |
+| **Biomarker Database** | ✅ | Normalized schema for trend analysis (lab_results + biomarkers) |
+| **Detail View** | ✅ | Modal with categorized biomarkers and status indicators |
+| **Dashboard Integration** | ✅ | Quick Actions + NextBestAction wiring |
+| **Edge Function** | 🟡 | Implemented, pending deployment |
 
 ---
 
