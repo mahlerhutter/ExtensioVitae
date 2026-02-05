@@ -15,13 +15,19 @@ import './NextBestAction.css';
  * @param {object} user - User object
  * @param {object} todayStats - Today's statistics
  */
-export default function NextBestAction({ user, todayStats = {} }) {
+export default function NextBestAction({ user, todayStats = {}, onMorningCheckInClick }) {
     const navigate = useNavigate();
     const action = determineNextAction(user, todayStats);
 
     if (!action) return null;
 
     const handleClick = () => {
+        // Special handling for morning check-in
+        if (action.isMorningCheckIn && onMorningCheckInClick) {
+            onMorningCheckInClick();
+            return;
+        }
+
         if (action.link) {
             if (action.link.startsWith('#')) {
                 // Scroll to element
@@ -61,7 +67,8 @@ function determineNextAction(user, todayStats) {
             icon: '☀️',
             text: 'Morning Check-in starten',
             reason: 'Starte deinen Tag richtig. Dauert 30 Sekunden.',
-            link: '/health-profile'  // Navigate to health profile for recovery tracking
+            link: '/health-profile',  // Fallback if no callback
+            isMorningCheckIn: true  // Flag for callback handling
         };
     }
 

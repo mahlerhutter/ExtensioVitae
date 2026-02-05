@@ -79,6 +79,7 @@ import StreakCounter from '../components/dashboard/StreakCounter';
 import DailyInsight from '../components/dashboard/DailyInsight';
 import NextBestAction from '../components/dashboard/NextBestAction';
 import TrendChart from '../components/progress/TrendChart';
+import MorningCheckIn from '../components/dashboard/MorningCheckIn';
 
 // Pillar configuration
 const PILLARS = {
@@ -172,6 +173,9 @@ export default function DashboardPage() {
   const [showModuleHub, setShowModuleHub] = useState(false);
   const [showModuleActivation, setShowModuleActivation] = useState(false);
   const [hasActiveModules, setHasActiveModules] = useState(null); // null = loading, true/false = checked
+
+  // Morning Check-in State (v0.5.1)
+  const [showMorningCheckIn, setShowMorningCheckIn] = useState(false);
 
   // Protocol Pack State (v0.4.0) - Now persistent via DB
   const [activePack, setActivePack] = useState(null);
@@ -822,6 +826,7 @@ export default function DashboardPage() {
             hasLabResults: false, // TODO: Check from user profile
             hasCalendarConnected: !!todayEvents?.length
           }}
+          onMorningCheckInClick={() => setShowMorningCheckIn(true)}
         />
 
         {selectedDay && selectedDay !== currentDay && (
@@ -1207,6 +1212,19 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Morning Check-in Modal (v0.5.1) */}
+      {showMorningCheckIn && (
+        <MorningCheckIn
+          showModal={showMorningCheckIn}
+          onComplete={(result) => {
+            setShowMorningCheckIn(false);
+            addToast(`Recovery Score: ${result.score}/100`, 'success');
+          }}
+          onSkip={() => setShowMorningCheckIn(false)}
+        />
+      )}
+
       {/* Confirmation Dialog */}
       <ConfirmDialog />
     </div>
