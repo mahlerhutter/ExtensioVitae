@@ -10,6 +10,7 @@ import HealthProfilePage from './pages/HealthProfilePage';
 import SciencePage from './pages/SciencePage';
 import NotFoundPage from './pages/NotFoundPage';
 import ModuleHubPage from './pages/ModuleHubPage';
+import LabsPage from './pages/LabsPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import ImprintPage from './pages/ImprintPage';
@@ -202,6 +203,17 @@ export default function App() {
                 <ProtectedRoute>
                   <OnboardingGuard>
                     <ModuleHubPage />
+                  </OnboardingGuard>
+                </ProtectedRoute>
+              </ErrorBoundary>
+            } />
+
+            {/* Labs (Protected + Onboarding Guard) */}
+            <Route path="/labs" element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <OnboardingGuard>
+                    <LabsPage />
                   </OnboardingGuard>
                 </ProtectedRoute>
               </ErrorBoundary>

@@ -199,6 +199,64 @@ export default function DashboardPage() {
   const [predictions, setPredictions] = useState([]);
   const [loadingPredictions, setLoadingPredictions] = useState(false);
 
+  // Stats for NextBestAction (v0.5.2)
+  const [dashboardStats, setDashboardStats] = useState({
+    morningCheckIn: false,
+    incompleteTasks: 0,
+    hasLabResults: false
+  });
+
+  // Fetch Dashboard Stats
+  useEffect(() => {
+    async function fetchStats() {
+      if (!user?.id) return;
+
+      try {
+        const today = new Date().toISOString().split('T')[0];
+
+        // 1. Check Morning Check-In
+        const { count: checkInCount } = await supabase
+          .from('recovery_scores')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .eq('check_in_date', today);
+
+        // 2. Check Lab Results
+        const { count: labCount } = await supabase
+          .from('lab_results')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id);
+
+        setDashboardStats(prev => ({
+          ...prev,
+          morningCheckIn: (checkInCount || 0) > 0,
+          hasLabResults: (labCount || 0) > 0
+        }));
+
+      } catch (error) {
+        logger.error('[Dashboard] Failed to fetch stats:', error);
+      }
+    }
+
+    fetchStats();
+  }, [user?.id, showMorningCheckIn]); // Re-fetch when check-in modal closes/opens logic changes
+
+  // Update incomplete tasks based on plan progress
+  useEffect(() => {
+    if (!plan || !progress || !currentDay) return;
+
+    const dayData = plan.days[currentDay - 1];
+    if (!dayData?.tasks) return;
+
+    const totalTasks = dayData.tasks.length;
+    const completedTasks = Object.values(progress[currentDay] || {}).filter(Boolean).length;
+
+    setDashboardStats(prev => ({
+      ...prev,
+      incompleteTasks: Math.max(0, totalTasks - completedTasks)
+    }));
+  }, [plan, progress, currentDay]);
+
   useEffect(() => {
     // Load or generate plan using DataService
     const loadPlan = async () => {
@@ -821,9 +879,9 @@ export default function DashboardPage() {
         <NextBestAction
           user={user}
           todayStats={{
-            morningCheckIn: false, // TODO: Check from recovery_tracking
-            incompleteTasks: 0, // TODO: Count from user_tasks
-            hasLabResults: false, // TODO: Check from user profile
+            morningCheckIn: dashboardStats.morningCheckIn,
+            incompleteTasks: dashboardStats.incompleteTasks,
+            hasLabResults: dashboardStats.hasLabResults,
             hasCalendarConnected: !!todayEvents?.length
           }}
           onMorningCheckInClick={() => setShowMorningCheckIn(true)}
@@ -941,6 +999,15 @@ export default function DashboardPage() {
                 >
                   <span className="text-lg">🩺</span>
                   <span>Mein Gesundheitsprofil</span>
+                </button>
+
+                {/* Lab Results Button */}
+                <button
+                  onClick={() => navigate('/labs')}
+                  className="w-full py-2.5 bg-slate-800/70 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-all border border-slate-700/50 hover:border-slate-600 flex items-center gap-3 px-4"
+                >
+                  <span className="text-lg">🧪</span>
+                  <span>Laborberichte</span>
                 </button>
 
                 {/* Module Hub Button */}

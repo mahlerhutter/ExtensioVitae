@@ -6,25 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Biomarker patterns for extraction
-const BIOMARKER_PATTERNS = {
-  vitamin_d: /(?:vitamin\s*d|25-oh|calcidiol|25-hydroxyvitamin)[:\s]*(\d+[.,]?\d*)/i,
-  b12: /(?:vitamin\s*b12|cobalamin|b-12)[:\s]*(\d+[.,]?\d*)/i,
-  ferritin: /ferritin[:\s]*(\d+[.,]?\d*)/i,
-  tsh: /(?:tsh|thyrotropin)[:\s]*(\d+[.,]?\d*)/i,
-  hba1c: /(?:hba1c|glyk[oä]h[aä]moglobin|a1c)[:\s]*(\d+[.,]?\d*)/i,
-  crp: /(?:crp|c-reaktiv|hs-crp)[:\s]*(\d+[.,]?\d*)/i,
-  homocysteine: /homocystein[:\s]*(\d+[.,]?\d*)/i,
-  ldl: /ldl[:\s-]*(?:cholesterin|c)?[:\s]*(\d+[.,]?\d*)/i,
-  hdl: /hdl[:\s-]*(?:cholesterin|c)?[:\s]*(\d+[.,]?\d*)/i,
-  triglycerides: /triglycerid[e]?[:\s]*(\d+[.,]?\d*)/i,
-  glucose: /(?:glukose|glucose|nüchternzucker)[:\s]*(\d+[.,]?\d*)/i,
-  iron: /(?:eisen|iron)[:\s]*(\d+[.,]?\d*)/i,
-  zinc: /zink[:\s]*(\d+[.,]?\d*)/i,
-  magnesium: /magnesium[:\s]*(\d+[.,]?\d*)/i,
-  folate: /(?:fols[aä]ure|folat|folate)[:\s]*(\d+[.,]?\d*)/i,
-}
-
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
@@ -65,7 +46,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-3-5-sonnet-20240620',
         max_tokens: 4096,
         messages: [
           {
@@ -90,24 +71,14 @@ Antwort NUR als JSON in diesem Format:
   "biomarkers": {
     "vitamin_d": {"value": 45.2, "unit": "ng/mL"},
     "ferritin": {"value": 89, "unit": "ng/mL"},
-    ... weitere gefundene Marker
+    ... weitere gefundene Marker (nutze englische slugs wie 'tsh', 'ldl', 'hba1c')
   },
-  "raw_text": "Die ersten 500 Zeichen des extrahierten Textes",
+  "raw_text": "Die ersten 500 Zeichen des extrahierten Textes zur Kontrolle",
   "confidence": 85
 }
 
-Wichtige Biomarker (falls vorhanden):
-- Vitamin D (25-OH)
-- Vitamin B12
-- Ferritin, Eisen
-- TSH, fT3, fT4
-- HbA1c, Glukose
-- CRP (hsCRP)
-- Homocystein
-- LDL, HDL, Triglyceride
-- Zink, Magnesium, Folsäure
-
-Wenn ein Wert nicht lesbar ist, weglassen. Bei Unsicherheit "confidence" niedriger setzen.`
+Wenn ein Wert nicht lesbar ist, weglassen.
+Wenn ranges angegeben sind, ignoriere sie, extrahiere nur den gemessenen Wert.`
               }
             ]
           }
@@ -124,6 +95,10 @@ Wenn ein Wert nicht lesbar ist, weglassen. Bei Unsicherheit "confidence" niedrig
     // Extract JSON from Claude's response
     let parsedData
     try {
+      if (!claudeResponse.content || !claudeResponse.content[0] || !claudeResponse.content[0].text) {
+        throw new Error('Invalid response format from Claude');
+      }
+
       const responseText = claudeResponse.content[0].text
       // Try to find JSON in the response
       const jsonMatch = responseText.match(/\{[\s\S]*\}/)
@@ -137,67 +112,73 @@ Wenn ein Wert nicht lesbar ist, weglassen. Bei Unsicherheit "confidence" niedrig
       parsedData = {
         biomarkers: {},
         confidence: 0,
-        raw_text: claudeResponse.content[0].text.substring(0, 500)
+        raw_text: claudeResponse.content?.[0]?.text || "No content"
       }
     }
 
-    // Normalize biomarker values
-    const normalizedBiomarkers: Record<string, number> = {}
-    if (parsedData.biomarkers) {
-      for (const [key, data] of Object.entries(parsedData.biomarkers)) {
-        const value = (data as any)?.value
-        if (typeof value === 'number' && !isNaN(value)) {
-          normalizedBiomarkers[key] = value
-        } else if (typeof value === 'string') {
-          const numValue = parseFloat(value.replace(',', '.'))
-          if (!isNaN(numValue)) {
-            normalizedBiomarkers[key] = numValue
-          }
-        }
-      }
-    }
-
-    // Update lab result in database
-    const { error: updateError } = await supabase
+    // Update metadata in lab_results and fetch user_id
+    // using select().single() to return the updated record + user_id
+    const { data: currentLabResult, error: updateError } = await supabase
       .from('lab_results')
       .update({
-        lab_date: parsedData.lab_date || new Date().toISOString().split('T')[0],
-        lab_provider: parsedData.lab_provider,
-        biomarkers: normalizedBiomarkers,
-        parsed_data: parsedData.biomarkers,
-        ocr_raw_text: parsedData.raw_text,
-        ocr_confidence: parsedData.confidence || 50,
-        ocr_provider: 'claude',
-        parsing_status: Object.keys(normalizedBiomarkers).length > 0 ? 'parsed' : 'failed',
-        parsing_errors: Object.keys(normalizedBiomarkers).length === 0
-          ? [{ message: 'No biomarkers extracted', timestamp: new Date().toISOString() }]
-          : []
+        test_date: parsedData.lab_date || new Date().toISOString().split('T')[0],
+        provider: parsedData.lab_provider || 'Unbekannt',
+        status: parsedData.biomarkers && Object.keys(parsedData.biomarkers).length > 0 ? 'completed' : 'failed',
+        notes: `Analyzed by Claude. Confidence: ${parsedData.confidence || 0}%`
       })
       .eq('id', labResultId)
+      .select('user_id')
+      .single()
 
-    if (updateError) {
-      throw new Error(`Database update error: ${updateError.message}`)
+    if (updateError || !currentLabResult) {
+      throw new Error(`Database update error: ${updateError?.message || 'Result not found'}`)
     }
 
-    // Generate deficiencies based on biomarkers
-    const deficiencies = await analyzeDeficiencies(supabase, normalizedBiomarkers)
+    const userId = currentLabResult.user_id;
 
-    // Update deficiencies
-    if (deficiencies.length > 0) {
-      await supabase
-        .from('lab_results')
-        .update({ deficiencies })
-        .eq('id', labResultId)
+    // Insert biomarkers into the new table
+    const biomarkerInserts = []
+    if (parsedData.biomarkers && Object.keys(parsedData.biomarkers).length > 0) {
+
+      for (const [slug, data] of Object.entries(parsedData.biomarkers)) {
+        const item = data as any
+        let value = item.value
+
+        // Normalize string numbers
+        if (typeof value === 'string') {
+          value = parseFloat(value.replace(',', '.'))
+        }
+
+        if (typeof value === 'number' && !isNaN(value)) {
+          biomarkerInserts.push({
+            result_id: labResultId,
+            user_id: userId,
+            name: slug.charAt(0).toUpperCase() + slug.slice(1).replace(/_/g, ' '),
+            slug: slug,
+            value: value,
+            unit: item.unit || '',
+            category: 'General'
+          })
+        }
+      }
+
+      if (biomarkerInserts.length > 0) {
+        const { error: insertError } = await supabase
+          .from('biomarkers')
+          .insert(biomarkerInserts)
+
+        if (insertError) {
+          console.error('Error inserting biomarkers:', insertError)
+        }
+      }
     }
 
     return new Response(
       JSON.stringify({
         success: true,
         labResultId,
-        biomarkersFound: Object.keys(normalizedBiomarkers).length,
-        biomarkers: normalizedBiomarkers,
-        confidence: parsedData.confidence || 50,
-        deficiencies
+        biomarkersFound: biomarkerInserts.length,
+        confidence: parsedData.confidence || 50
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
@@ -217,59 +198,3 @@ Wenn ein Wert nicht lesbar ist, weglassen. Bei Unsicherheit "confidence" niedrig
     )
   }
 })
-
-// Analyze biomarkers against reference ranges
-async function analyzeDeficiencies(supabase: any, biomarkers: Record<string, number>) {
-  const deficiencies: Array<{
-    code: string;
-    name_de: string;
-    status: string;
-    value: number;
-    unit: string;
-  }> = []
-
-  try {
-    const codes = Object.keys(biomarkers)
-    if (codes.length === 0) return deficiencies
-
-    const { data: references, error } = await supabase
-      .from('biomarker_references')
-      .select('*')
-      .in('code', codes)
-
-    if (error || !references) return deficiencies
-
-    for (const ref of references) {
-      const value = biomarkers[ref.code]
-      if (value === undefined) continue
-
-      let status = 'optimal'
-
-      if (ref.optimal_min !== null && ref.optimal_max !== null) {
-        if (value < ref.normal_min) {
-          status = 'low'
-        } else if (value > ref.normal_max) {
-          status = 'high'
-        } else if (value < ref.optimal_min) {
-          status = 'suboptimal_low'
-        } else if (value > ref.optimal_max) {
-          status = 'suboptimal_high'
-        }
-      }
-
-      if (status !== 'optimal') {
-        deficiencies.push({
-          code: ref.code,
-          name_de: ref.name_de,
-          status,
-          value,
-          unit: ref.unit
-        })
-      }
-    }
-  } catch (err) {
-    console.error('Error analyzing deficiencies:', err)
-  }
-
-  return deficiencies
-}
