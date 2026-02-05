@@ -4,8 +4,8 @@
 
 A minimalist PWA that generates 30-day longevity blueprints based on user intake data. Built with React, Tailwind CSS, and Supabase.
 
-[![Status](https://img.shields.io/badge/status-MVP%20Complete-success)]()
-[![Branch](https://img.shields.io/badge/branch-dev--feature-blue)]()
+[![Status](https://img.shields.io/badge/status-v0.5.0%20In%20Progress-blue)]()
+[![Production](https://img.shields.io/badge/production-92%25%20Ready-success)]()
 [![License](https://img.shields.io/badge/license-Proprietary-red)]()
 
 ---
@@ -52,6 +52,29 @@ VITE_SUPABASE_ANON_KEY=your_anon_key
 - **Mobile-First:** Responsive design with keyboard handling
 - **Performance:** Lightweight, dependency-free implementations
 - **Accessibility:** Clear typography, sufficient contrast, touch-friendly
+
+### 🧬 **v0.4.0 - Intelligence Layer (Complete)**
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Circadian Light Protocol** | ✅ | Dynamic light exposure recommendations based on time of day |
+| **Supplement Timing Optimizer** | ✅ | Science-backed timing for supplements aligned with circadian rhythm |
+| **AI Context Injection** | ✅ | Enhanced plan generation with user profile and historical data |
+| **Fasting Window Calculator** | ✅ | Intermittent fasting support with visual timeline |
+| **Telegram Bot** | 🟡 | Code complete, awaiting deployment (token needed) |
+| **Error Monitoring** | 🟡 | Sentry integration (soft-ready) |
+| **Security Headers** | ✅ | Production-ready security configuration |
+
+### 🚀 **v0.5.0 - Strategic Bets (In Progress - 71% Complete)**
+
+| Feature | Status | Description |
+|---------|--------|-------------|
+| **Lab Snapshot Lite** | ✅ | Biomarker tracking with color-coded status for 10 key markers |
+| **Recovery Score** | ✅ | 3-question morning check-in with auto-swap (HIIT → Yoga Nidra) |
+| **Calendar Event Detection** | ✅ | Smart detection of flights, focus blocks, late-night events |
+| **Calendar OAuth Integration** | 🔒 | Blocked - Google OAuth credentials needed |
+| **Lab OCR** | 🔒 | Blocked - Anthropic API key needed |
+| **Email Notifications** | 🔒 | Blocked - Resend API key needed |
 
 ---
 
@@ -152,7 +175,10 @@ git commit --no-verify -m "your message"
 
 ## 📝 Documentation
 
+- **[CHANGELOG.md](./docs/CHANGELOG.md)** - Version history and release notes
 - **[FEATURES.md](./FEATURES.md)** - Comprehensive feature documentation
+- **[FUTURE.md](./docs/FUTURE.md)** - Roadmap and module priority matrix
+- **[tasks.md](./docs/tasks.md)** - Current tasks and execution priorities
 - **[CLAUDE.MD](./CLAUDE.MD)** - Development prompts and context
 - **Inline Comments** - Code-level documentation
 

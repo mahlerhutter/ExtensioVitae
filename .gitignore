@@ -118,3 +118,21 @@ docs/guides/
 docs/*_2026-*.md
 docs/*_2026-*.json
 
+# Deployment & Debug Docs (internal)
+docs/CHANGELOG.md
+docs/EMAIL_DEPLOYMENT.md
+docs/INTAKE_PROGRESSBAR_ADDED.md
+docs/NPM_INSTALL_FIX.md
+docs/VERCEL_DEBUG_STRATEGY.md
+docs/VERCEL_BUILD_FIX.md
+docs/*_DEPLOYMENT.md
+docs/*_FIX.md
+docs/*_DEBUG*.md
+
+# EXCEPTIONS: Allow important UX/Product documentation
+!docs/TOP_1_PERCENT_STATUS.md
+!docs/UX_WEEK1_*.md
+!docs/V0.*.md
+!docs/modules/
+!docs/user-journey/
+

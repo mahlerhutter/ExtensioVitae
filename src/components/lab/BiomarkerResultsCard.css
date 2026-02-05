@@ -1,0 +1,442 @@
+/* ============================================================================
+   BiomarkerResultsCard Styles
+   ============================================================================ */
+
+.biomarker-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.biomarker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.biomarker-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.refresh-button {
+  background: #f3f4f6;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.refresh-button:hover {
+  background: #e5e7eb;
+  transform: translateY(-1px);
+}
+
+/* ============================================================================
+   Grid Layout
+   ============================================================================ */
+
+.biomarker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.biomarker-item {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.biomarker-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================================================
+   Biomarker Item Header
+   ============================================================================ */
+
+.biomarker-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+
+.biomarker-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-icon {
+  font-size: 20px;
+}
+
+.name-text {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1f2937;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ============================================================================
+   Value Display
+   ============================================================================ */
+
+.biomarker-value {
+  margin: 16px 0;
+}
+
+.value-number {
+  font-size: 32px;
+  font-weight: 700;
+  color: #111827;
+  display: block;
+}
+
+/* ============================================================================
+   Ranges
+   ============================================================================ */
+
+.biomarker-ranges {
+  margin: 16px 0;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+}
+
+.range-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.range-item:last-child {
+  margin-bottom: 0;
+}
+
+.range-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.range-value {
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.range-item.optimal {
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.range-item.optimal .range-label {
+  color: #10b981;
+}
+
+.range-item.optimal .range-value {
+  color: #10b981;
+}
+
+/* ============================================================================
+   Recommendation
+   ============================================================================ */
+
+.biomarker-recommendation {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 12px;
+  background: #fef3c7;
+  border-left: 3px solid #f59e0b;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+.rec-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.rec-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #92400e;
+}
+
+/* ============================================================================
+   Metadata
+   ============================================================================ */
+
+.biomarker-meta {
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.test-date,
+.lab-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ============================================================================
+   Confidence Warning
+   ============================================================================ */
+
+.confidence-warning {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #fee2e2;
+  border-left: 3px solid #ef4444;
+  border-radius: 6px;
+  font-size: 12px;
+  color: #991b1b;
+}
+
+/* ============================================================================
+   Loading & Error States
+   ============================================================================ */
+
+.loading-state,
+.error-state,
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 16px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-icon,
+.empty-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.error-state p,
+.empty-state p {
+  color: #6b7280;
+  margin: 8px 0 16px;
+}
+
+.retry-button,
+.upload-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.retry-button:hover,
+.upload-button:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* ============================================================================
+   Modal
+   ============================================================================ */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.close-button:hover {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.detail-section {
+  margin-bottom: 24px;
+}
+
+.detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.detail-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.current-value {
+  font-size: 36px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-text {
+  font-size: 16px;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.ranges-table,
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ranges-table td,
+.info-table td {
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.ranges-table td:first-child,
+.info-table td:first-child {
+  color: #6b7280;
+  font-weight: 500;
+  width: 40%;
+}
+
+.ranges-table td:last-child,
+.info-table td:last-child {
+  color: #1f2937;
+  font-weight: 600;
+  text-align: right;
+}
+
+.optimal-row td {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 12px;
+  color: #10b981 !important;
+}
+
+.notes-text {
+  margin: 0;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #374151;
+}
+
+/* ============================================================================
+   Responsive
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  .biomarker-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .biomarker-card {
+    padding: 16px;
+  }
+
+  .value-number {
+    font-size: 28px;
+  }
+
+  .modal-content {
+    margin: 20px;
+  }
+}
