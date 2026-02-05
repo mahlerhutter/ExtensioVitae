@@ -5,6 +5,7 @@ import { getUserProfile } from '../lib/supabase';
 import { trackIntakeCompleted } from '../lib/analytics';
 import { useToast } from '../components/Toast';
 import { logger } from '../lib/logger';
+import ProgressBar from '../components/onboarding/ProgressBar';
 
 const QUESTIONS = {
   mandatory: [
@@ -589,6 +590,13 @@ export default function IntakePage() {
 
       <main className="flex-1">
         <div className="max-w-3xl mx-auto px-6 py-12">
+          {/* Progress Bar */}
+          <ProgressBar
+            currentStep={1}
+            totalSteps={3}
+            stepLabels={['Basics', 'Lifestyle', 'Preferences']}
+          />
+
           <div className="mb-10 text-center">
             <h1 className="text-3xl md:text-4xl font-semibold text-white mb-4">
               Design Your Blueprint

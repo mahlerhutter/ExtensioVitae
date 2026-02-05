@@ -16,6 +16,7 @@ import ImprintPage from './pages/ImprintPage';
 import FuturePage from './pages/FuturePage';
 import FeaturesPage from './pages/FeaturesPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import OnboardingGuard from './components/OnboardingGuard';
 import ErrorBoundary from './components/ErrorBoundary';
 import BetaBadge from './components/BetaBadge';
 import { ModeProvider } from './contexts/ModeContext';
@@ -146,50 +147,62 @@ export default function App() {
               </ErrorBoundary>
             } />
 
-            {/* Protected Dashboard Routes with Error Boundary */}
+            {/* Protected Dashboard Routes with Error Boundary + Onboarding Guard */}
             <Route path="/dashboard" element={
               <ErrorBoundary>
                 <ProtectedRoute>
-                  <DashboardPage />
+                  <OnboardingGuard>
+                    <DashboardPage />
+                  </OnboardingGuard>
                 </ProtectedRoute>
               </ErrorBoundary>
             } />
             <Route path="/d/:planId" element={
               <ErrorBoundary>
                 <ProtectedRoute>
-                  <DashboardPage />
+                  <OnboardingGuard>
+                    <DashboardPage />
+                  </OnboardingGuard>
                 </ProtectedRoute>
               </ErrorBoundary>
             } />
             <Route path="/d/:planId/:day" element={
               <ErrorBoundary>
                 <ProtectedRoute>
-                  <DashboardPage />
+                  <OnboardingGuard>
+                    <DashboardPage />
+                  </OnboardingGuard>
                 </ProtectedRoute>
               </ErrorBoundary>
             } />
 
-            {/* Health Profile (Protected) */}
+            {/* Health Profile (Protected + Onboarding Guard) */}
             <Route path="/health-profile" element={
               <ErrorBoundary>
                 <ProtectedRoute>
-                  <HealthProfilePage />
+                  <OnboardingGuard>
+                    <HealthProfilePage />
+                  </OnboardingGuard>
                 </ProtectedRoute>
               </ErrorBoundary>
             } />
             <Route path="/settings/health" element={
               <ErrorBoundary>
                 <ProtectedRoute>
-                  <HealthProfilePage />
+                  <OnboardingGuard>
+                    <HealthProfilePage />
+                  </OnboardingGuard>
                 </ProtectedRoute>
               </ErrorBoundary>
             } />
 
-            {/* Module Hub (Protected) */}
+            {/* Module Hub (Protected + Onboarding Guard) */}
             <Route path="/modules" element={
               <ErrorBoundary>
                 <ProtectedRoute>
-                  <ModuleHubPage />
+                  <OnboardingGuard>
+                    <ModuleHubPage />
+                  </OnboardingGuard>
                 </ProtectedRoute>
               </ErrorBoundary>
             } />

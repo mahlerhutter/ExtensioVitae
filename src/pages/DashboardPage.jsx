@@ -67,10 +67,18 @@ import TodayDashboard from '../components/dashboard/TodayDashboard';
 import ProtocolLibrary from '../components/dashboard/ProtocolLibrary';
 import { PROTOCOL_PACKS } from '../lib/protocolPacks';
 import CircadianWidget from '../components/dashboard/CircadianWidget';
+import CircadianCard from '../components/dashboard/CircadianCard';
+import SupplementTimingWidget from '../components/dashboard/SupplementTimingWidget';
 import { useConfirm } from '../components/ui/ConfirmModal';
 import ConciergeCard from '../components/dashboard/ConciergeCard';
 import { getPredictiveIntelligence } from '../lib/predictiveService';
 import BiologicalSuppliesWidget from '../components/dashboard/BiologicalSuppliesWidget';
+
+// UX Week 1 Components (v0.5.0)
+import StreakCounter from '../components/dashboard/StreakCounter';
+import DailyInsight from '../components/dashboard/DailyInsight';
+import NextBestAction from '../components/dashboard/NextBestAction';
+import TrendChart from '../components/progress/TrendChart';
 
 // Pillar configuration
 const PILLARS = {
@@ -791,13 +799,30 @@ export default function DashboardPage() {
       />
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Top Bar: Emergency Mode + Longevity Score */}
+        {/* Top Bar: Emergency Mode + Longevity Score + Streak */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <ModeIndicator showDuration={true} size="md" />
+          <div className="flex items-center gap-4">
+            <ModeIndicator showDuration={true} size="md" />
+            {user?.id && <StreakCounter userId={user.id} />}
+          </div>
           <div className="sm:ml-auto">
             <LongevityScoreWidget intakeData={intakeData} userName={intakeData?.name} compact={true} variant="inline" />
           </div>
         </div>
+
+        {/* Daily Insight */}
+        <DailyInsight />
+
+        {/* Next Best Action */}
+        <NextBestAction
+          user={user}
+          todayStats={{
+            morningCheckIn: false, // TODO: Check from recovery_tracking
+            incompleteTasks: 0, // TODO: Count from user_tasks
+            hasLabResults: false, // TODO: Check from user profile
+            hasCalendarConnected: !!todayEvents?.length
+          }}
+        />
 
         {selectedDay && selectedDay !== currentDay && (
           <button
@@ -869,6 +894,7 @@ export default function DashboardPage() {
             {/* Premium Widgets */}
             <div className="space-y-4 mb-6">
               <CircadianWidget />
+              <CircadianCard userProfile={intakeData} />
               <BiologicalSuppliesWidget
                 userId={user?.id}
                 activeProtocols={activePack ? [{ protocol_id: activePack.id }] : []}
@@ -876,7 +902,15 @@ export default function DashboardPage() {
                   addToast('Nachbestellung erfolgreich erstellt!', 'success');
                 }}
               />
+              <SupplementTimingWidget
+                userId={user?.id}
+                wakeTime={intakeData?.wake_time || '07:00'}
+                activeProtocols={activePack ? [{ protocol_id: activePack.id }] : []}
+              />
             </div>
+
+            {/* 7-Day Trend Chart */}
+            {user?.id && <TrendChart userId={user.id} />}
 
             {/* Quick Actions */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
