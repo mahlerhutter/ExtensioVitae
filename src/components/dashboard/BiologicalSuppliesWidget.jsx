@@ -21,7 +21,7 @@ export default function BiologicalSuppliesWidget({ userId, activeProtocols = [],
   const [loading, setLoading] = useState(true);
   const [showReorderModal, setShowReorderModal] = useState(false);
   const [reorderList, setReorderList] = useState([]);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   // Edit modal state
   const [showEditModal, setShowEditModal] = useState(false);
@@ -303,11 +303,10 @@ export default function BiologicalSuppliesWidget({ userId, activeProtocols = [],
               {reorderList.map((item, idx) => (
                 <div
                   key={idx}
-                  className={`bg-slate-800/50 border ${
-                    item.urgency === 'critical' || item.urgency === 'depleted'
+                  className={`bg-slate-800/50 border ${item.urgency === 'critical' || item.urgency === 'depleted'
                       ? 'border-red-500/30'
                       : 'border-slate-700'
-                  } rounded-lg p-4`}
+                    } rounded-lg p-4`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">

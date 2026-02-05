@@ -25,7 +25,7 @@ export default function SupplementTimingWidget({ userId, wakeTime = '07:00', act
     const [conflicts, setConflicts] = useState([]);
     const [inventory, setInventory] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [expanded, setExpanded] = useState(false);
+    const [expanded, setExpanded] = useState(true);
 
     useEffect(() => {
         if (userId) {
@@ -220,9 +220,8 @@ export default function SupplementTimingWidget({ userId, wakeTime = '07:00', act
                                         return (
                                             <div
                                                 key={idx}
-                                                className={`bg-slate-800/50 rounded-lg p-3 ${
-                                                    hasConflict ? 'ring-1 ring-orange-500/50' : ''
-                                                }`}
+                                                className={`bg-slate-800/50 rounded-lg p-3 ${hasConflict ? 'ring-1 ring-orange-500/50' : ''
+                                                    }`}
                                             >
                                                 <div className="flex items-start justify-between mb-2">
                                                     <div className="flex-1">
