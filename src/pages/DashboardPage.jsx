@@ -67,7 +67,7 @@ import TodayDashboard from '../components/dashboard/TodayDashboard';
 import ProtocolLibrary from '../components/dashboard/ProtocolLibrary';
 import { PROTOCOL_PACKS } from '../lib/protocolPacks';
 import CircadianWidget from '../components/dashboard/CircadianWidget';
-import CircadianCard from '../components/dashboard/CircadianCard';
+// import CircadianCard from '../components/dashboard/CircadianCard'; // TODO: Re-enable after Vercel cache clears
 import SupplementTimingWidget from '../components/dashboard/SupplementTimingWidget';
 import { useConfirm } from '../components/ui/ConfirmModal';
 import ConciergeCard from '../components/dashboard/ConciergeCard';
@@ -899,7 +899,8 @@ export default function DashboardPage() {
             {/* Premium Widgets */}
             <div className="space-y-4 mb-6">
               <CircadianWidget />
-              <CircadianCard userProfile={intakeData} />
+              {/* <CircadianCard userProfile={intakeData} /> */}
+              {/* TODO: Re-enable CircadianCard after Vercel cache clears */}
               <BiologicalSuppliesWidget
                 userId={user?.id}
                 activeProtocols={activePack ? [{ protocol_id: activePack.id }] : []}
