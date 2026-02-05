@@ -40,6 +40,19 @@ export default function DashboardHeader({ userName, onSignOut, onProfileClick, i
                 </Link>
 
                 <div className="flex items-center gap-4">
+                    {/* Longevity Store */}
+                    <a
+                        href="https://longevitystore.de"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-amber-400 hover:text-amber-300 text-sm transition-colors flex items-center gap-2 hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-amber-400/20"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                        </svg>
+                        <span>Longevity Store</span>
+                    </a>
+
                     {isAdmin && (
                         <Link
                             to="/admin"
