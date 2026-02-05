@@ -4,6 +4,7 @@ import DashboardHeader from '../components/dashboard/DashboardHeader';
 import { useAuth } from '../contexts/AuthContext';
 import { useMode } from '../contexts/ModeContext';
 import LabUpload from '../components/bloodcheck/LabUpload';
+import LabResultDetails from '../components/bloodcheck/LabResultDetails';
 import { supabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
@@ -14,6 +15,7 @@ export default function LabsPage() {
     const navigate = useNavigate();
     const [labResults, setLabResults] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedResultId, setSelectedResultId] = useState(null);
 
     useEffect(() => {
         fetchLabResults();
@@ -95,7 +97,10 @@ export default function LabsPage() {
                                             </p>
                                         </div>
                                     </div>
-                                    <button className="text-sm text-amber-400 hover:text-amber-300 font-medium">
+                                    <button
+                                        onClick={() => setSelectedResultId(result.id)}
+                                        className="text-sm text-amber-400 hover:text-amber-300 font-medium"
+                                    >
                                         Details
                                     </button>
                                 </div>
@@ -104,6 +109,14 @@ export default function LabsPage() {
                     )}
                 </section>
             </main>
+
+            {/* Details Modal */}
+            {selectedResultId && (
+                <LabResultDetails
+                    resultId={selectedResultId}
+                    onClose={() => setSelectedResultId(null)}
+                />
+            )}
         </div>
     );
 }

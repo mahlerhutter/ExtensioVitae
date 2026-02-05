@@ -90,13 +90,51 @@ export default function LabUpload({ onUploadComplete }) {
 
             if (dbError) throw dbError;
 
-            setProgress(100);
-            addToast('Upload erfolgreich! Analyse wird gestartet...', 'success');
-            logger.info('[LabUpload] File uploaded successfully:', dbData.id);
+            // 3. Trigger analysis immediately
+            addToast('Upload erfolgreich! Starte KI-Analyse...', 'info');
 
-            if (onUploadComplete) {
-                onUploadComplete(dbData);
+            // Helper to convert to Base64
+            const toBase64 = file => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]); // remove data:image/...;base64,
+                reader.onerror = error => reject(error);
+            });
+
+            try {
+                const base64File = await toBase64(file);
+
+                const { data: analysisData, error: analysisError } = await supabase.functions.invoke('parse-lab-report', {
+                    body: {
+                        labResultId: dbData.id,
+                        fileBase64: base64File,
+                        fileType: file.type
+                    }
+                });
+
+                if (analysisError) throw analysisError;
+
+                addToast('Analyse abgeschlossen! Ergebnisse verfügbar.', 'success');
+                logger.info('[LabUpload] Analysis complete:', analysisData);
+
+                // Refresh data with the analyzed result (might need a fetch or just pass the basic one and let SWR/state reload)
+                // For now, we pass the dbData which is now "outdated" regarding biomarkers, 
+                // but the list view usually re-fetches or we can optimistically update if we had the biomarkers returned.
+                // The edge function returns: { success: true, labResultId, biomarkersFound: ..., confidence: ... }
+
+                // Let's pass a merged object if possible, or just trigger reload
+                if (onUploadComplete) {
+                    onUploadComplete(dbData);
+                }
+
+            } catch (edgeError) {
+                logger.error('[LabUpload] Analysis triggered but failed:', edgeError);
+                addToast('Upload ok, aber Analyse fehlgeschlagen. Versuche es später erneut.', 'warning');
+                // Still complete the upload flow
+                if (onUploadComplete) onUploadComplete(dbData);
             }
+
+            setProgress(100);
 
         } catch (error) {
             logger.error('[LabUpload] Upload failed:', error);
