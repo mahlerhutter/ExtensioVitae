@@ -74,12 +74,12 @@ import ConciergeCard from '../components/dashboard/ConciergeCard';
 import { getPredictiveIntelligence } from '../lib/predictiveService';
 import BiologicalSuppliesWidget from '../components/dashboard/BiologicalSuppliesWidget';
 
-// UX Week 1 Components (v0.5.0)
-import StreakCounter from '../components/dashboard/StreakCounter';
-import DailyInsight from '../components/dashboard/DailyInsight';
-import NextBestAction from '../components/dashboard/NextBestAction';
-import TrendChart from '../components/progress/TrendChart';
-import MorningCheckIn from '../components/dashboard/MorningCheckIn';
+// UX Week 1 Components (v0.5.0) - TEMPORARILY DISABLED FOR BUILD FIX
+// import StreakCounter from '../components/dashboard/StreakCounter';
+// import DailyInsight from '../components/dashboard/DailyInsight';
+// import NextBestAction from '../components/dashboard/NextBestAction';
+// import TrendChart from '../components/progress/TrendChart';
+// import MorningCheckIn from '../components/dashboard/MorningCheckIn';
 
 // Pillar configuration
 const PILLARS = {
@@ -807,7 +807,7 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div className="flex items-center gap-4">
             <ModeIndicator showDuration={true} size="md" />
-            {user?.id && <StreakCounter userId={user.id} />}
+            {/* {user?.id && <StreakCounter userId={user.id} />} */}
           </div>
           <div className="sm:ml-auto">
             <LongevityScoreWidget intakeData={intakeData} userName={intakeData?.name} compact={true} variant="inline" />
@@ -815,19 +815,19 @@ export default function DashboardPage() {
         </div>
 
         {/* Daily Insight */}
-        <DailyInsight />
+        {/* <DailyInsight /> */}
 
         {/* Next Best Action */}
-        <NextBestAction
+        {/* <NextBestAction
           user={user}
           todayStats={{
-            morningCheckIn: false, // TODO: Check from recovery_tracking
-            incompleteTasks: 0, // TODO: Count from user_tasks
-            hasLabResults: false, // TODO: Check from user profile
+            morningCheckIn: false,
+            incompleteTasks: 0,
+            hasLabResults: false,
             hasCalendarConnected: !!todayEvents?.length
           }}
           onMorningCheckInClick={() => setShowMorningCheckIn(true)}
-        />
+        /> */}
 
         {selectedDay && selectedDay !== currentDay && (
           <button
@@ -916,7 +916,7 @@ export default function DashboardPage() {
             </div>
 
             {/* 7-Day Trend Chart */}
-            {user?.id && <TrendChart userId={user.id} />}
+            {/* {user?.id && <TrendChart userId={user.id} />} */}
 
             {/* Quick Actions */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
@@ -1215,7 +1215,7 @@ export default function DashboardPage() {
       )}
 
       {/* Morning Check-in Modal (v0.5.1) */}
-      {showMorningCheckIn && (
+      {/* {showMorningCheckIn && (
         <MorningCheckIn
           showModal={showMorningCheckIn}
           onComplete={(result) => {
@@ -1224,7 +1224,7 @@ export default function DashboardPage() {
           }}
           onSkip={() => setShowMorningCheckIn(false)}
         />
-      )}
+      )} */}
 
       {/* Confirmation Dialog */}
       <ConfirmDialog />
