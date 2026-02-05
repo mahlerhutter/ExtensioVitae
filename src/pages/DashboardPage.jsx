@@ -78,7 +78,7 @@ import BiologicalSuppliesWidget from '../components/dashboard/BiologicalSupplies
 import StreakCounter from '../components/dashboard/StreakCounter';
 import DailyInsight from '../components/dashboard/DailyInsight';
 import NextBestAction from '../components/dashboard/NextBestAction';
-import TrendChart from '../components/progress/TrendChart';
+// import TrendChart from '../components/progress/TrendChart'; // TODO: Fix recharts build issue
 import MorningCheckIn from '../components/dashboard/MorningCheckIn';
 
 // Pillar configuration
@@ -916,7 +916,8 @@ export default function DashboardPage() {
             </div>
 
             {/* 7-Day Trend Chart */}
-            {user?.id && <TrendChart userId={user.id} />}
+            {/* {user?.id && <TrendChart userId={user.id} />} */}
+            {/* TODO: Fix recharts build issue on Vercel */}
 
             {/* Quick Actions */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
