@@ -79,9 +79,16 @@ export default function MorningCheckIn({ onComplete, onSkip, showModal: external
                 feeling
             });
 
-            // Save to database
-            await recoveryService.saveRecoveryScore(supabase, user.id, result);
+            // Try to save to database (non-blocking)
+            try {
+                await recoveryService.saveRecoveryScore(supabase, user.id, result);
+                console.log('[MorningCheckIn] Recovery score saved to DB');
+            } catch (saveError) {
+                // Log error but don't block the user flow
+                console.warn('[MorningCheckIn] Failed to save to DB (table may not exist):', saveError.message);
+            }
 
+            // Always show results, even if DB save failed
             setRecoveryResult(result);
             setStep(4); // Show results
 
@@ -90,8 +97,8 @@ export default function MorningCheckIn({ onComplete, onSkip, showModal: external
                 onComplete(result);
             }
         } catch (error) {
-            console.error('Error saving recovery score:', error);
-            alert('Failed to save recovery score. Please try again.');
+            console.error('[MorningCheckIn] Error calculating recovery score:', error);
+            alert('Failed to calculate recovery score. Please try again.');
         } finally {
             setLoading(false);
         }
