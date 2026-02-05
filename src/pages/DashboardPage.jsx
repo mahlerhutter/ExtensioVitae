@@ -67,7 +67,7 @@ import TodayDashboard from '../components/dashboard/TodayDashboard';
 import ProtocolLibrary from '../components/dashboard/ProtocolLibrary';
 import { PROTOCOL_PACKS } from '../lib/protocolPacks';
 import CircadianWidget from '../components/dashboard/CircadianWidget';
-// import CircadianCard from '../components/dashboard/CircadianCard'; // TODO: Re-enable after Vercel cache clears
+import CircadianCard from '../components/dashboard/CircadianCard';
 import SupplementTimingWidget from '../components/dashboard/SupplementTimingWidget';
 import { useConfirm } from '../components/ui/ConfirmModal';
 import ConciergeCard from '../components/dashboard/ConciergeCard';
@@ -78,7 +78,7 @@ import BiologicalSuppliesWidget from '../components/dashboard/BiologicalSupplies
 import StreakCounter from '../components/dashboard/StreakCounter';
 import DailyInsight from '../components/dashboard/DailyInsight';
 import NextBestAction from '../components/dashboard/NextBestAction';
-// import TrendChart from '../components/progress/TrendChart'; // TODO: Fix recharts build issue
+import TrendChart from '../components/progress/TrendChart';
 import MorningCheckIn from '../components/dashboard/MorningCheckIn';
 
 // Pillar configuration
@@ -899,7 +899,7 @@ export default function DashboardPage() {
             {/* Premium Widgets */}
             <div className="space-y-4 mb-6">
               <CircadianWidget />
-              {/* <CircadianCard userProfile={intakeData} /> */}
+              <CircadianCard userProfile={intakeData} />
               {/* TODO: Re-enable CircadianCard after Vercel cache clears */}
               <BiologicalSuppliesWidget
                 userId={user?.id}
@@ -916,7 +916,7 @@ export default function DashboardPage() {
             </div>
 
             {/* 7-Day Trend Chart */}
-            {/* {user?.id && <TrendChart userId={user.id} />} */}
+            {user?.id && <TrendChart userId={user.id} />}
             {/* TODO: Fix recharts build issue on Vercel */}
 
             {/* Quick Actions */}
