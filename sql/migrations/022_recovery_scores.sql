@@ -20,18 +20,19 @@ CREATE TABLE IF NOT EXISTS recovery_scores (
     recommendations JSONB DEFAULT '[]'::jsonb,
     
     -- Timestamps
+    check_in_date DATE NOT NULL DEFAULT CURRENT_DATE,
     recorded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     
     -- Constraints
-    CONSTRAINT unique_user_date UNIQUE (user_id, DATE(recorded_at))
+    CONSTRAINT unique_user_date UNIQUE (user_id, check_in_date)
 );
 
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_recovery_scores_user_id ON recovery_scores(user_id);
 CREATE INDEX IF NOT EXISTS idx_recovery_scores_recorded_at ON recovery_scores(recorded_at DESC);
-CREATE INDEX IF NOT EXISTS idx_recovery_scores_user_date ON recovery_scores(user_id, DATE(recorded_at));
+CREATE INDEX IF NOT EXISTS idx_recovery_scores_user_date ON recovery_scores(user_id, check_in_date);
 
 -- Enable Row Level Security
 ALTER TABLE recovery_scores ENABLE ROW LEVEL SECURITY;
@@ -53,7 +54,7 @@ CREATE POLICY "Users can insert own recovery scores"
 CREATE POLICY "Users can update own recovery scores"
     ON recovery_scores
     FOR UPDATE
-    USING (auth.uid() = user_id AND DATE(recorded_at) = CURRENT_DATE);
+    USING (auth.uid() = user_id AND check_in_date = CURRENT_DATE);
 
 -- Users can delete their own recovery scores
 CREATE POLICY "Users can delete own recovery scores"
