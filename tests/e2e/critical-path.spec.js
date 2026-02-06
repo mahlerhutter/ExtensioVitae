@@ -31,7 +31,7 @@ test.describe('Critical Path: Intake to Dashboard', () => {
         await page.getByRole('button', { name: /^Male$/i }).click();
 
         // Next
-        await page.getByRole('button', { name: /Next|Weiter/i }).click();
+        await page.getByRole('button', { name: /Next|Weiter|Continue/i }).click();
 
         // --- Step 1: Status ---
         // Sleep
@@ -47,7 +47,7 @@ test.describe('Critical Path: Intake to Dashboard', () => {
         await page.waitForTimeout(300);
 
         // Next
-        await page.getByRole('button', { name: /Next|Weiter/i }).click();
+        await page.getByRole('button', { name: /Next|Weiter|Continue/i }).click();
 
         // --- Step 2: Goals ---
         // Step 2: Goals
