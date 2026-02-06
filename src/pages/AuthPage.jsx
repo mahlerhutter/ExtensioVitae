@@ -15,6 +15,26 @@ export default function AuthPage() {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const navigate = useNavigate();
+  const [showReset, setShowReset] = useState(false);
+
+  const handlePasswordReset = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
+      });
+      if (error) throw error;
+      setMessage('Password reset link sent to ' + email);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Check if already signed in AND listen for OAuth callback
   useEffect(() => {
@@ -177,7 +197,7 @@ export default function AuthPage() {
         </div>
 
         {/* Email/Password Form */}
-        <form onSubmit={handleAuth} className="space-y-4">
+        <form onSubmit={showReset ? handlePasswordReset : handleAuth} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
               Email
@@ -192,37 +212,59 @@ export default function AuthPage() {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
-              placeholder="••••••••"
-              required
-            />
-          </div>
+          {!showReset && (
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-slate-300">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => { setShowReset(true); setError(null); setMessage(null); }}
+                  className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+          )}
 
           <button
             type="submit"
             disabled={loading}
             className="w-full bg-amber-400 hover:bg-amber-500 text-slate-900 font-medium px-4 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Processing...' : isSignUp ? 'Sign Up' : 'Log In'}
+            {loading ? 'Processing...' : showReset ? 'Send Reset Link' : (isSignUp ? 'Sign Up' : 'Log In')}
           </button>
         </form>
 
         <div className="mt-6 text-center text-sm text-slate-400">
-          {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-          <button
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
-          >
-            {isSignUp ? 'Log In' : 'Sign Up'}
-          </button>
+          {showReset ? (
+            <button
+              onClick={() => { setShowReset(false); setError(null); setMessage(null); }}
+              className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
+            >
+              Back to Login
+            </button>
+          ) : (
+            <>
+              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+              <button
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
+              >
+                {isSignUp ? 'Log In' : 'Sign Up'}
+              </button>
+            </>
+          )}
         </div>
 
         {/* Skip login for development (when Supabase not configured) */}

@@ -5,6 +5,7 @@ import IntakePage from './pages/IntakePage';
 import GeneratingPage from './pages/GeneratingPage';
 import DashboardPage from './pages/DashboardPage';
 import AuthPage from './pages/AuthPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import AdminPage from './pages/AdminPage';
 import HealthProfilePage from './pages/HealthProfilePage';
 import SciencePage from './pages/SciencePage';
@@ -20,6 +21,7 @@ import RecoveryPage from './pages/RecoveryPage';
 import VersionsPage from './pages/VersionsPage';
 import FriendsPage from './pages/FriendsPage';
 import DashboardMockupPage from './pages/DashboardMockupPage';
+import WhyExtensioPage from './pages/WhyExtensioPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import OnboardingGuard from './components/OnboardingGuard';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -97,6 +99,11 @@ export default function App() {
             <Route path="/auth" element={
               <ErrorBoundary>
                 <AuthPage />
+              </ErrorBoundary>
+            } />
+            <Route path="/reset-password" element={
+              <ErrorBoundary>
+                <ResetPasswordPage />
               </ErrorBoundary>
             } />
             <Route path="/intake" element={
@@ -179,6 +186,12 @@ export default function App() {
             <Route path="/friends/mockup" element={
               <ErrorBoundary>
                 <DashboardMockupPage />
+              </ErrorBoundary>
+            } />
+
+            <Route path="/friends/why" element={
+              <ErrorBoundary>
+                <WhyExtensioPage />
               </ErrorBoundary>
             } />
 
