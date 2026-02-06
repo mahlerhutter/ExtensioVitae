@@ -5,6 +5,10 @@ test.describe('Critical Path: Intake to Dashboard', () => {
     test('should guide user from landing page to dashboard', async ({ page }) => {
         test.setTimeout(60000); // Increase timeout to 60s for full flow
 
+        // Debug Logging
+        page.on('console', msg => console.log(`[BROWSER] ${msg.text()}`));
+        page.on('pageerror', err => console.error(`[BROWSER ERROR] ${err.message}`));
+
         // 1. Visit Landing Page
         await page.goto('/');
         await expect(page).toHaveTitle(/ExtensioVitae/);
