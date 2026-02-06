@@ -242,6 +242,17 @@ export default function AuthPage() {
       <p className="mt-6 text-slate-500 text-sm text-center max-w-md">
         By signing in, you agree to our Terms of Service and Privacy Policy.
       </p>
+
+      {/* Back to Home */}
+      <a
+        href="/"
+        className="mt-8 text-slate-500 hover:text-amber-400 text-sm transition-colors flex items-center gap-2"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+        Back to Home
+      </a>
     </div>
   );
 }
