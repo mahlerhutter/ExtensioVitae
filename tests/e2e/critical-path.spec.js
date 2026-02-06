@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Critical Path: Intake to Dashboard', () => {
 
     test('should guide user from landing page to dashboard', async ({ page }) => {
-        test.setTimeout(60000); // Increase timeout to 60s for full flow
+        test.setTimeout(120000); // Increase timeout to 120s for full LLM generation flow
 
         // Debug Logging
         page.on('console', msg => console.log(`[BROWSER] ${msg.text()}`));
@@ -71,8 +71,8 @@ test.describe('Critical Path: Intake to Dashboard', () => {
         await expect(page).toHaveURL(/\/generating|\/dashboard|\/d\//, { timeout: 15000 });
 
         // 5. Verify Dashboard
-        // Wait for dashboard specific element
-        await expect(page.locator('[data-tour="daily-progress"]')).toBeVisible({ timeout: 20000 });
+        // Wait for dashboard specific element (Plan generation takes time)
+        await expect(page.locator('[data-tour="daily-progress"]')).toBeVisible({ timeout: 60000 });
     });
 
 });
