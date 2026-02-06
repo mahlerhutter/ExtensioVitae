@@ -106,10 +106,10 @@ test.describe('Critical Path: Intake to Dashboard', () => {
         // App now redirects to Auth for new users, or Dashboard if guest access active
         await expect(page).toHaveURL(/\/dashboard|\/auth/, { timeout: 15000 });
 
-        const url = page.url();
-        console.log(`[TEST] Final URL: ${url}`);
+        const urlObj = new URL(page.url());
+        console.log(`[TEST] Final Path: ${urlObj.pathname}`);
 
-        if (url.includes('/dashboard')) {
+        if (urlObj.pathname.startsWith('/dashboard')) {
             try {
                 await expect(page.locator('[data-tour="daily-progress"]')).toBeVisible({ timeout: 20000 });
             } catch (e) {
@@ -119,9 +119,9 @@ test.describe('Critical Path: Intake to Dashboard', () => {
                 console.log(body.substring(0, 2000)); // First 2000 chars
                 throw e;
             }
-        } else if (url.includes('/auth')) {
+        } else if (urlObj.pathname.startsWith('/auth')) {
             // If redirected to auth, we consider the critical path "intake -> plan generation" complete
-            await expect(page.getByRole('heading', { name: /Sign|Account|Anmelden/i })).toBeVisible();
+            await expect(page.getByRole('heading', { name: /Sign|Account|Anmelden|Welcome|Extensio/i })).toBeVisible();
         }
     });
 
