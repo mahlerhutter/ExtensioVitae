@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride';
-import { useTheme } from '../../hooks/useTheme'; // Assuming generic hook or just use constants
 
 export default function OnboardingTour() {
     const [run, setRun] = useState(false);
