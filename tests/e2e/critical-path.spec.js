@@ -88,11 +88,28 @@ test.describe('Critical Path: Intake to Dashboard', () => {
         // 4. Generating Page -> Dashboard
         // Might redirect to /generating then /dashboard/d/...
         // Allow up to 10s for generation
-        await expect(page).toHaveURL(/\/generating|\/dashboard|\/d\//, { timeout: 15000 });
+        // Wait for generation page
+        await expect(page).toHaveURL(/\/generating/, { timeout: 15000 });
 
-        // 5. Verify Dashboard
-        // Wait for dashboard specific element (Plan generation takes time)
-        await expect(page.locator('[data-tour="daily-progress"]')).toBeVisible({ timeout: 60000 });
+        // 4. Confirm Plan (Review Modal)
+        const confirmBtn = page.getByRole('button', { name: /Los geht's|Start/i });
+        // Generation + Animation can take time
+        await expect(confirmBtn).toBeVisible({ timeout: 60000 });
+        await confirmBtn.click();
+
+        // 5. Verify Redirect
+        // App now redirects to Auth for new users, or Dashboard if guest access active
+        await expect(page).toHaveURL(/\/dashboard|\/auth/, { timeout: 15000 });
+
+        const url = page.url();
+        console.log(`[TEST] Final URL: ${url}`);
+
+        if (url.includes('/dashboard')) {
+            await expect(page.locator('[data-tour="daily-progress"]')).toBeVisible({ timeout: 20000 });
+        } else if (url.includes('/auth')) {
+            // If redirected to auth, we consider the critical path "intake -> plan generation" complete
+            await expect(page.getByRole('heading', { name: /Sign|Account|Anmelden/i })).toBeVisible();
+        }
     });
 
 });
