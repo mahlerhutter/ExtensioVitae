@@ -28,7 +28,7 @@ import InteractiveLoading from '../components/dashboard/InteractiveLoading';
 import LongevityScoreWidget from '../components/dashboard/LongevityScoreWidget';
 import PillarsExplanationBox from '../components/dashboard/PillarsExplanationBox';
 import PillarsExplanationModal from '../components/dashboard/PillarsExplanationModal';
-import DashboardHeader from '../components/dashboard/DashboardHeader';
+import DashboardHeaderV2 from '../components/dashboard/DashboardHeaderV2';
 import UserProfileSection from '../components/dashboard/UserProfileSection';
 import PlanSummary from '../components/dashboard/PlanSummary';
 import MonthOverview from '../components/dashboard/MonthOverview';
@@ -934,7 +934,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-950">
-      <DashboardHeader
+      <DashboardHeaderV2
         userName={plan.user_name}
         onSignOut={handleSignOut}
         onProfileClick={() => setShowEditModal(true)}
@@ -942,8 +942,8 @@ export default function DashboardPage() {
       />
 
       <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Top Bar: Emergency Mode + Longevity Score + Streak */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        {/* Top Status Bar: Mode + Streak + Longevity Score */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div className="flex items-center gap-4">
             <ModeIndicator showDuration={true} size="md" />
             {user?.id && <StreakCounter userId={user.id} />}
@@ -953,43 +953,61 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Welcome Hero Card - Day 1-7 Experience (v0.7.0) */}
-        {(currentDay <= 7 || Object.values(onboardingMilestones).filter(Boolean).length < 5) && (
+        {/* HERO SECTION: Day 1-7 Onboarding OR Impact Counter */}
+        {(currentDay <= 7 || Object.values(onboardingMilestones).filter(Boolean).length < 5) ? (
           <WelcomeHeroCard
             userName={plan?.user_name || 'dort'}
             milestones={onboardingMilestones}
             onQuickWinClick={() => {
-              // Scroll to TodayDashboard
               const todayDashboard = document.querySelector('[data-tour="daily-progress"]');
               if (todayDashboard) {
                 todayDashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // Pulse animation to draw attention
                 todayDashboard.classList.add('ring-4', 'ring-amber-400', 'ring-opacity-50');
                 setTimeout(() => {
                   todayDashboard.classList.remove('ring-4', 'ring-amber-400', 'ring-opacity-50');
                 }, 2000);
               } else {
-                // Fallback: scroll to main content
                 window.scrollTo({ top: 400, behavior: 'smooth' });
               }
             }}
           />
+        ) : (
+          <div className="mb-8">
+            <ImpactCounter
+              yearsAdded={null}
+              biologicalAge={plan?.biological_age || intakeData?.biological_age}
+              chronologicalAge={intakeData?.age}
+              completionRate={calculateCompletionRate()}
+            />
+          </div>
         )}
 
-        {/* Daily Insight */}
-        <DailyInsight />
+        {/* PRIMARY ACTION ZONE */}
+        <div className="mb-8 space-y-4">
+          <DailyInsight />
+          <NextBestAction
+            user={user}
+            todayStats={{
+              morningCheckIn: dashboardStats.morningCheckIn,
+              incompleteTasks: dashboardStats.incompleteTasks,
+              hasLabResults: dashboardStats.hasLabResults,
+              hasCalendarConnected: !!todayEvents?.length
+            }}
+            onMorningCheckInClick={() => setShowMorningCheckIn(true)}
+          />
+        </div>
 
-        {/* Next Best Action */}
-        <NextBestAction
-          user={user}
-          todayStats={{
-            morningCheckIn: dashboardStats.morningCheckIn,
-            incompleteTasks: dashboardStats.incompleteTasks,
-            hasLabResults: dashboardStats.hasLabResults,
-            hasCalendarConnected: !!todayEvents?.length
-          }}
-          onMorningCheckInClick={() => setShowMorningCheckIn(true)}
-        />
+        {/* Concierge Card - Priority Inbox (above today dashboard) */}
+        {predictions.length > 0 && (
+          <div className="mb-6">
+            <ConciergeCard
+              predictions={predictions}
+              userId={user?.id}
+              onActivate={handleActivatePrediction}
+              onDismiss={handleDismissPrediction}
+            />
+          </div>
+        )}
 
         {selectedDay && selectedDay !== currentDay && (
           <button
@@ -1000,20 +1018,11 @@ export default function DashboardPage() {
           </button>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Main Content */}
+        {/* MAIN DASHBOARD GRID */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Main Column - Today Dashboard (wider) */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Concierge Card - Priority Inbox (v0.7.0) */}
-            {predictions.length > 0 && (
-              <ConciergeCard
-                predictions={predictions}
-                userId={user?.id}
-                onActivate={handleActivatePrediction}
-                onDismiss={handleDismissPrediction}
-              />
-            )}
-
-            {/* Today Dashboard - Unified view showing all active modules */}
+            {/* Today Dashboard - Core Functionality */}
             <div data-tour="daily-progress">
               <TodayDashboard
                 userId={user?.id}
@@ -1031,7 +1040,7 @@ export default function DashboardPage() {
               />
             </div>
 
-            {/* Recovery Adaptation Notice - Shows when recovery is suboptimal (v0.7.0) */}
+            {/* Recovery Adaptation Notice - Conditional (when recovery < 70) */}
             {dashboardStats.recoveryScore !== null && dashboardStats.recoveryScore < 70 && (
               <AdaptationNotice
                 recoveryScore={dashboardStats.recoveryScore}
@@ -1052,48 +1061,94 @@ export default function DashboardPage() {
               />
             )}
 
-            <PlanSummary
+            {/* Month Overview - Calendar View */}
+            <MonthOverview
               plan={plan}
-              onShowFullPlan={() => setShowFullPlanModal(true)}
-              onShowHistory={async () => {
-                setShowHistoryModal(true);
-                setLoadingHistory(true);
-                try {
-                  logger.debug('[Dashboard] Fetching history...');
-                  const history = await getArchivedPlans();
-                  logger.debug('[Dashboard] History fetched length:', history.length);
-                  setArchivedPlans(history);
-                } catch (e) {
-                  logger.error("Failed to load history", e);
-                } finally {
-                  setLoadingHistory(false);
-                }
-              }}
+              progress={progress}
+              currentDay={currentDay}
+              onDayClick={handleDayClick}
+              startDate={plan.start_date}
+              userId={user?.id}
             />
-            <PillarsExplanationBox needs={plan?.meta?.computed?.needs} />
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar - Compact & Focused */}
           <div className="space-y-6">
-            {/* Impact Counter - Years Added (v0.7.0) */}
-            <ImpactCounter
-              yearsAdded={null} // Calculated internally from completionRate
-              biologicalAge={plan?.biological_age || intakeData?.biological_age}
-              chronologicalAge={intakeData?.age}
-              completionRate={calculateCompletionRate()}
-            />
+            {/* Science Credibility */}
+            <ScienceCredibilityBar compact={true} />
 
-            {/* Science Credibility Bar (v0.7.0) */}
-            <ScienceCredibilityBar compact={false} />
+            {/* Quick Actions - Consolidated */}
+            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+              <h3 className="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-3">Quick Actions</h3>
 
-            {/* Emergency Mode Selector */}
+              <button
+                onClick={() => navigate('/intake')}
+                className="w-full py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold rounded-lg transition-all text-sm flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                Neuer Plan
+              </button>
+
+              <div className="space-y-2">
+                <button
+                  onClick={() => navigate('/modules')}
+                  className="w-full py-2 bg-slate-800/70 hover:bg-slate-700 text-white text-xs font-medium rounded-lg transition-all border border-slate-700/50 flex items-center gap-2 px-3"
+                >
+                  <span>📦</span>
+                  <span>Module Hub</span>
+                </button>
+
+                <button
+                  onClick={() => navigate('/recovery')}
+                  className="w-full py-2 bg-slate-800/70 hover:bg-slate-700 text-white text-xs font-medium rounded-lg transition-all border border-slate-700/50 flex items-center gap-2 px-3"
+                >
+                  <span>📊</span>
+                  <span>Recovery</span>
+                </button>
+              </div>
+            </div>
+
+            {/* 7-Day Trend */}
+            {user?.id && <TrendChart userId={user.id} />}
+
+            {/* Mode Selector - Collapsible */}
             <ModeSelector variant="collapsible" />
 
-            {/* Calendar Integration */}
+            {/* Calendar Connect - Compact */}
             <CalendarConnect variant="compact" />
+          </div>
+        </div>
 
-            {/* Premium Widgets */}
-            <div className="space-y-4 mb-6">
+        {/* SECONDARY CONTENT - Below Fold */}
+        <div className="mt-12 space-y-6">
+          <PlanSummary
+            plan={plan}
+            onShowFullPlan={() => setShowFullPlanModal(true)}
+            onShowHistory={async () => {
+              setShowHistoryModal(true);
+              setLoadingHistory(true);
+              try {
+                logger.debug('[Dashboard] Fetching history...');
+                const history = await getArchivedPlans();
+                logger.debug('[Dashboard] History fetched length:', history.length);
+                setArchivedPlans(history);
+              } catch (e) {
+                logger.error("Failed to load history", e);
+              } finally {
+                setLoadingHistory(false);
+              }
+            }}
+          />
+
+          <PillarsExplanationBox needs={plan?.meta?.computed?.needs} />
+
+          {/* Premium Widgets - Collapsible Section */}
+          <details className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
+            <summary className="px-6 py-4 cursor-pointer hover:bg-slate-800/50 transition-colors text-white font-semibold flex items-center justify-between">
+              <span>🔬 Advanced Tracking</span>
+              <span className="text-slate-400 text-sm">Expand</span>
+            </summary>
+            <div className="px-6 pb-6 space-y-4">
               <CircadianWidget />
               <CircadianCard userProfile={intakeData} />
               <BiologicalSuppliesWidget
@@ -1109,70 +1164,11 @@ export default function DashboardPage() {
                 activeProtocols={activePack ? [{ protocol_id: activePack.id }] : []}
               />
             </div>
-
-            {/* 7-Day Trend Chart */}
-            {user?.id && <TrendChart userId={user.id} />}
-
-            {/* Quick Actions */}
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
-              {/* Primary Action - New Plan */}
-              <button
-                onClick={() => navigate('/intake')}
-                className="w-full py-3 bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold rounded-lg transition-all shadow-lg shadow-amber-500/10 flex items-center justify-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                Neuen Plan erstellen
-              </button>
-
-              {/* Secondary Actions */}
-              <div className="pt-3 border-t border-slate-800 space-y-2">
-                <p className="text-slate-500 text-xs uppercase tracking-wider font-semibold mb-2">Meine Daten</p>
-
-                {/* Health Profile Button */}
-                <button
-                  onClick={() => navigate('/health-profile')}
-                  className="w-full py-2.5 bg-slate-800/70 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-all border border-slate-700/50 hover:border-slate-600 flex items-center gap-3 px-4"
-                >
-                  <span className="text-lg">🩺</span>
-                  <span>Mein Gesundheitsprofil</span>
-                </button>
-
-                {/* Module Hub Button */}
-                <button
-                  data-tour="module-hub-trigger"
-                  onClick={() => navigate('/modules')}
-                  className="w-full py-2.5 bg-slate-800/70 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-all border border-slate-700/50 hover:border-slate-600 flex items-center gap-3 px-4"
-                >
-                  <span className="text-lg">📦</span>
-                  <span>Module Hub</span>
-                </button>
-
-                {/* Lab Results Button */}
-                <button
-                  onClick={() => navigate('/labs')}
-                  className="w-full py-2.5 bg-slate-800/70 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-all border border-slate-700/50 hover:border-slate-600 flex items-center gap-3 px-4"
-                >
-                  <span className="text-lg">🧪</span>
-                  <span>Laborberichte</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Recovery & Performance Button */}
-            <button
-              onClick={() => navigate('/recovery')}
-              className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-sm font-medium rounded-lg transition-all border border-purple-500/50 hover:border-purple-400 flex items-center gap-3 px-4 shadow-lg shadow-purple-500/20"
-            >
-              <span className="text-lg">📊</span>
-              <span>Recovery & Performance</span>
-            </button>
-          </div>
+          </details>
 
           {/* Export Actions */}
-          <div className="pt-3 border-t border-slate-800 space-y-2">
-            <p className="text-slate-500 text-xs uppercase tracking-wider font-semibold mb-2">Export</p>
-
-            {/* Calendar Export Button */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
+            <h3 className="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-2">Export & Share</h3>
             <button
               onClick={() => {
                 const icsContent = generateICS(plan);
@@ -1185,19 +1181,9 @@ export default function DashboardPage() {
               <span className="text-lg">📅</span>
               <span>Kalender exportieren</span>
             </button>
-
             <WhatsAppButton />
           </div>
         </div>
-
-        <MonthOverview
-          plan={plan}
-          progress={progress}
-          currentDay={currentDay}
-          onDayClick={handleDayClick}
-          startDate={plan.start_date}
-          userId={user?.id}
-        />
 
         {/* History */}
         {archivedPlans.length > 0 && (
