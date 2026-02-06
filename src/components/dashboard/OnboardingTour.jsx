@@ -5,16 +5,29 @@ export default function OnboardingTour() {
     const [run, setRun] = useState(false);
 
     useEffect(() => {
-        // Check if tour has been seen
+        // Check URL params for debug override
+        const params = new URLSearchParams(window.location.search);
+        const forceReset = params.get('tour') === 'reset';
+
+        if (forceReset) {
+            localStorage.removeItem('has_seen_dashboard_tour');
+        }
+
         const hasSeenTour = localStorage.getItem('has_seen_dashboard_tour');
 
-        // Only run if not seen and we are on the dashboard (which this component is inside)
-        if (!hasSeenTour) {
-            // Small delay to ensure UI is rendered
-            const timer = setTimeout(() => {
-                setRun(true);
-            }, 1500);
-            return () => clearTimeout(timer);
+        if (!hasSeenTour || forceReset) {
+            // WaitForElement logic
+            const checkExist = setInterval(() => {
+                const dashboardElement = document.querySelector('[data-tour="daily-progress"]');
+                if (dashboardElement) {
+                    clearInterval(checkExist);
+                    setRun(true);
+                }
+            }, 500); // Check every 500ms
+
+            // Stop checking after 10s
+            const timer = setTimeout(() => clearInterval(checkExist), 10000);
+            return () => { clearInterval(checkExist); clearTimeout(timer); };
         }
     }, []);
 
@@ -71,6 +84,7 @@ export default function OnboardingTour() {
             steps={steps}
             run={run}
             continuous
+            disableOverlayClose={true}
             showSkipButton
             showProgress
             callback={handleJoyrideCallback}
