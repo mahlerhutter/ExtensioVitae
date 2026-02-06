@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import IntakePage from './pages/IntakePage';
 import GeneratingPage from './pages/GeneratingPage';
-import DashboardPage from './pages/DashboardPage';
+import DashboardNewPage from './pages/DashboardNewPage';
 import AuthPage from './pages/AuthPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import AdminPage from './pages/AdminPage';
@@ -163,7 +163,7 @@ export default function App() {
               <ErrorBoundary>
                 <ProtectedRoute>
                   <OnboardingGuard>
-                    <DashboardPage />
+                    <DashboardNewPage />
                   </OnboardingGuard>
                 </ProtectedRoute>
               </ErrorBoundary>
@@ -172,7 +172,7 @@ export default function App() {
               <ErrorBoundary>
                 <ProtectedRoute>
                   <OnboardingGuard>
-                    <DashboardPage />
+                    <DashboardNewPage />
                   </OnboardingGuard>
                 </ProtectedRoute>
               </ErrorBoundary>
@@ -181,7 +181,7 @@ export default function App() {
               <ErrorBoundary>
                 <ProtectedRoute>
                   <OnboardingGuard>
-                    <DashboardPage />
+                    <DashboardNewPage />
                   </OnboardingGuard>
                 </ProtectedRoute>
               </ErrorBoundary>

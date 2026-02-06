@@ -150,7 +150,7 @@ function calculatePlanDay(startDate) {
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 // Main Dashboard Page
-export default function DashboardPage() {
+export default function DashboardNewPage() {
   useDocumentTitle('Your Dashboard - ExtensioVitae');
   const [plan, setPlan] = useState(null);
   const [progress, setProgress] = useState({});
