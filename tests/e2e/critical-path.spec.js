@@ -5,9 +5,6 @@ test.describe('Critical Path: Intake to Dashboard', () => {
     test('should guide user from landing page to dashboard', async ({ page }) => {
         test.setTimeout(120000); // Increase timeout to 120s for full LLM generation flow
 
-        // Debug Logging
-        page.on('console', msg => console.log(`[BROWSER] ${msg.text()}`));
-        page.on('pageerror', err => console.error(`[BROWSER ERROR] ${err.message}`));
 
         // Mock Supabase Edge Function to speed up test and avoid API costs
         await page.route('**/functions/v1/generate-plan-proxy', async route => {
@@ -110,15 +107,7 @@ test.describe('Critical Path: Intake to Dashboard', () => {
         console.log(`[TEST] Final Path: ${urlObj.pathname}`);
 
         if (urlObj.pathname.startsWith('/dashboard')) {
-            try {
-                await expect(page.locator('[data-tour="daily-progress"]')).toBeVisible({ timeout: 20000 });
-            } catch (e) {
-                console.log('[DEBUG] Dashboard Content Dump:');
-                // Log only body content to avoid spamming too much
-                const body = await page.evaluate(() => document.body.innerHTML);
-                console.log(body.substring(0, 2000)); // First 2000 chars
-                throw e;
-            }
+            await expect(page.locator('[data-tour="daily-progress"]')).toBeVisible({ timeout: 20000 });
         } else if (urlObj.pathname.startsWith('/auth')) {
             // If redirected to auth, we consider the critical path "intake -> plan generation" complete
             await expect(page.getByRole('heading', { name: /Sign|Account|Anmelden|Welcome|Extensio/i })).toBeVisible();
