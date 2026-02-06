@@ -33,7 +33,7 @@ export default function GeneratingPage() {
         if (prev < STAGES.length - 1) return prev + 1;
         return prev;
       });
-    }, 800); // Changed from 4000ms to 800ms
+    }, 2000); // Slower pacing for realism (10s total animation)
 
     return () => clearInterval(stageInterval);
   }, []);
