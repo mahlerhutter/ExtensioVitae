@@ -19,7 +19,9 @@ export default function OnboardingTour() {
             // WaitForElement logic
             const checkExist = setInterval(() => {
                 const dashboardElement = document.querySelector('[data-tour="daily-progress"]');
-                if (dashboardElement) {
+                const moduleHubElement = document.querySelector('[data-tour="module-hub-trigger"]');
+
+                if (dashboardElement && moduleHubElement) {
                     clearInterval(checkExist);
                     setRun(true);
                 }

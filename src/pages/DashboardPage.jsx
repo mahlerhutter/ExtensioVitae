@@ -1005,6 +1005,7 @@ export default function DashboardPage() {
 
                 {/* Module Hub Button */}
                 <button
+                  data-tour="module-hub-trigger"
                   onClick={() => navigate('/modules')}
                   className="w-full py-2.5 bg-slate-800/70 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-all border border-slate-700/50 hover:border-slate-600 flex items-center gap-3 px-4"
                 >
