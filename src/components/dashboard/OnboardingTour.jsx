@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride';
 
-export default function OnboardingTour() {
+export default function OnboardingTour({ canStart = true }) {
     const [run, setRun] = useState(false);
 
     useEffect(() => {
+        if (!canStart) return;
+
         // Check URL params for debug override
         const params = new URLSearchParams(window.location.search);
         const forceReset = params.get('tour') === 'reset';

@@ -1320,6 +1320,10 @@ export default function DashboardPage() {
 
       {/* Confirmation Dialog */}
       <ConfirmDialog />
+
+      <OnboardingTour
+        canStart={!showInitialFeedback && !showMorningCheckIn && !showModuleActivation && !showModuleHub}
+      />
     </div >
   );
 }
