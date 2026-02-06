@@ -27,7 +27,12 @@ const FALLBACK_MODULES = [
     is_premium: false,
     description_de: '16 Stunden fasten, 8 Stunden Essensfenster.',
     description_en: '16 hours fasting, 8 hours eating window.',
-    priority_weight: 90
+    priority_weight: 90,
+    daily_tasks: [
+      { id: 'fast_start', task: 'Fastenfenster starten (keine Kalorien mehr)', type: 'checkbox' },
+      { id: 'hydration', task: 'Morgens 500ml Wasser + Salz', type: 'checkbox' },
+      { id: 'fast_break', task: 'Fastenbrechen (Proteinreich)', type: 'checkbox' }
+    ]
   },
   {
     id: 'fallback-sleep-protocol',
@@ -42,7 +47,12 @@ const FALLBACK_MODULES = [
     is_premium: false,
     description_de: 'Optimiere deinen Schlaf für mehr Energie.',
     description_en: 'Optimize your sleep for more energy.',
-    priority_weight: 95
+    priority_weight: 95,
+    daily_tasks: [
+      { id: 'no_caffeine', task: 'Kein Koffein nach 14:00', type: 'checkbox' },
+      { id: 'blue_block', task: 'Blue-Light Blocker (1h vor Bett)', type: 'checkbox' },
+      { id: 'magnesium', task: 'Magnesium Bisglycinat (300-400mg)', type: 'checkbox' }
+    ]
   },
   {
     id: 'fallback-morning-routine',
@@ -57,7 +67,12 @@ const FALLBACK_MODULES = [
     is_premium: false,
     description_de: 'Starte jeden Tag mit einer energetisierenden Routine.',
     description_en: 'Start every day with an energizing routine.',
-    priority_weight: 85
+    priority_weight: 85,
+    daily_tasks: [
+      { id: 'sunlight', task: 'Tageslicht (5-10 min outdoor)', type: 'checkbox' },
+      { id: 'movement', task: 'Bewegung (Dehnen/Spazieren)', type: 'checkbox' },
+      { id: 'cold_water', task: 'Kaltes Wasser ins Gesicht / Dusche', type: 'checkbox' }
+    ]
   },
   {
     id: 'fallback-stress-reset',
@@ -72,7 +87,12 @@ const FALLBACK_MODULES = [
     is_premium: false,
     description_de: '7 Tage für mehr innere Ruhe.',
     description_en: '7 days for more inner peace.',
-    priority_weight: 80
+    priority_weight: 80,
+    daily_tasks: [
+      { id: 'box_breathing', task: 'Box Breathing (4-4-4-4) - 5min', type: 'checkbox' },
+      { id: 'nsdr', task: 'NSDR / Yoga Nidra Session', type: 'checkbox' },
+      { id: 'nature', task: 'Zeit in der Natur (ohne Handy)', type: 'checkbox' }
+    ]
   }
 ];
 

@@ -56,8 +56,36 @@ export default function TodayDashboard({
         getActiveUserModules(userId)
       ]);
 
-      const tasks = tracking?.tasks || [];
-      setTodayTasks(tasks);
+      const serverTasks = tracking?.tasks || [];
+
+      // Inject virtual tasks from active modules (client-side logic)
+      const virtualTasks = [];
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      (modules || []).forEach(m => {
+        // Ensure definition exists
+        const def = m.definition || m.module;
+        if (def && def.daily_tasks && Array.isArray(def.daily_tasks)) {
+          def.daily_tasks.forEach(dt => {
+            const virtualId = `mt_${m.id}_${dt.id}`;
+            const isDone = localStorage.getItem(`status_${virtualId}_${todayStr}`) === 'true';
+
+            virtualTasks.push({
+              id: virtualId,
+              module_instance_id: m.id,
+              title: dt.task,
+              title_de: dt.task,
+              completed: isDone,
+              duration_minutes: dt.duration || 10,
+              description: dt.description || '',
+              is_virtual: true
+            });
+          });
+        }
+      });
+
+      const allTasks = [...serverTasks, ...virtualTasks];
+      setTodayTasks(allTasks);
       setActiveModules(modules || []);
       setCompletedToday(tasks.filter(t => t.completed).length);
 
@@ -73,15 +101,32 @@ export default function TodayDashboard({
   };
 
   const handleTaskComplete = async (taskId) => {
+    const task = todayTasks.find(t => t.id === taskId);
+    const newStatus = !task?.completed;
+
     setTodayTasks(prev =>
-      prev.map(t => t.id === taskId ? { ...t, completed: true } : t)
+      prev.map(t => t.id === taskId ? { ...t, completed: newStatus } : t)
     );
-    setCompletedToday(prev => prev + 1);
+
+    // Update count immediately for UI responsiveness
+    setCompletedToday(prev => newStatus ? prev + 1 : prev - 1);
 
     try {
-      await completeTaskApi(taskId);
+      if (task?.is_virtual) {
+        // Handle virtual task (localStorage)
+        const todayStr = new Date().toISOString().split('T')[0];
+        if (newStatus) {
+          localStorage.setItem(`status_${taskId}_${todayStr}`, 'true');
+        } else {
+          localStorage.removeItem(`status_${taskId}_${todayStr}`);
+        }
+      } else {
+        // Handle normal task (server)
+        await completeTaskApi(taskId);
+      }
     } catch (error) {
       console.error('Error completing task:', error);
+      // Revert optimism if needed (simplified here)
     }
 
     setTimeout(loadData, 500);
@@ -632,10 +677,9 @@ function PlanTaskItem({ task, isCompleted, onComplete }) {
 
   return (
     <div
-      className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg sm:rounded-xl transition-all ${
-        isCompleted
-          ? 'bg-green-500/10 border border-green-500/20'
-          : isOptimized
+      className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-lg sm:rounded-xl transition-all ${isCompleted
+        ? 'bg-green-500/10 border border-green-500/20'
+        : isOptimized
           ? 'bg-gradient-to-r from-amber-500/10 to-transparent border border-amber-500/30 hover:border-amber-500/50'
           : 'bg-slate-800/50 border border-slate-700/50 hover:border-slate-600 active:bg-slate-800'
         }`}
@@ -644,10 +688,9 @@ function PlanTaskItem({ task, isCompleted, onComplete }) {
       <button
         onClick={onComplete}
         disabled={isCompleted}
-        className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-          isCompleted
-            ? 'bg-green-500 border-green-500'
-            : isOptimized
+        className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${isCompleted
+          ? 'bg-green-500 border-green-500'
+          : isOptimized
             ? 'border-amber-500 hover:border-amber-400'
             : 'border-slate-600 hover:border-amber-500'
           }`}
