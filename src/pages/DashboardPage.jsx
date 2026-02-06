@@ -317,7 +317,8 @@ export default function DashboardPage() {
   useEffect(() => {
     // Load or generate plan using DataService
     const loadPlan = async () => {
-      setLoading(true);
+      // Only show full loading screen if we don't have data yet
+      if (!plan) setLoading(true);
 
       try {
         // Log storage info for debugging
@@ -496,7 +497,10 @@ export default function DashboardPage() {
           }
 
           // Check if initial feedback should be shown
-          if (existingPlan.supabase_plan_id && await shouldUseSupabase()) {
+          const dismissedKey = `feedback_dismissed_${existingPlan.supabase_plan_id}`;
+          const isDismissed = localStorage.getItem(dismissedKey) === 'true';
+
+          if (existingPlan.supabase_plan_id && await shouldUseSupabase() && !isDismissed) {
             try {
               const feedbackGiven = await checkIfFeedbackGiven(existingPlan.supabase_plan_id, 'initial');
               if (!feedbackGiven && !feedbackSubmitted) {
@@ -1359,6 +1363,9 @@ export default function DashboardPage() {
             onSkip={() => {
               setShowInitialFeedback(false);
               setFeedbackSubmitted(true);
+              if (plan?.supabase_plan_id) {
+                localStorage.setItem(`feedback_dismissed_${plan.supabase_plan_id}`, 'true');
+              }
             }}
           />
         )
