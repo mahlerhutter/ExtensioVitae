@@ -29,36 +29,12 @@ import { ModeProvider } from './contexts/ModeContext';
 import { CalendarProvider } from './contexts/CalendarContext';
 import CalendarCallbackPage from './pages/CalendarCallbackPage';
 import OAuthCallback from './components/oauth/OAuthCallback';
-import { getCircadianIntelligence, shouldActivateMelatoninGuard } from './lib/circadianService';
+import { getCircadianIntelligence } from './lib/circadianService';
 
 
 
 export default function App() {
-  const [nightModeOverride, setNightModeOverride] = useState(false);
-  const [nightModeActive, setNightModeActive] = useState(false);
 
-  // HACK 1: Melatonin Guard - Adaptive Red Shift based on circadian rhythm
-  useEffect(() => {
-    const checkNightMode = () => {
-      const override = localStorage.getItem('night_mode_override') === 'true';
-      const shouldActivate = shouldActivateMelatoninGuard();
-
-      setNightModeActive(shouldActivate);
-
-      if (shouldActivate && !override) {
-        document.body.classList.add('night-mode');
-      } else {
-        document.body.classList.remove('night-mode');
-      }
-
-      setNightModeOverride(override);
-    };
-
-    checkNightMode();
-    const interval = setInterval(checkNightMode, 300000); // Check every 5 minutes
-
-    return () => clearInterval(interval);
-  }, []);
 
   // HACK 4: Ghost Tab - Change title when user leaves
   useEffect(() => {
@@ -74,15 +50,7 @@ export default function App() {
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  const toggleNightMode = () => {
-    const newValue = !nightModeOverride;
-    localStorage.setItem('night_mode_override', newValue.toString());
-    setNightModeOverride(newValue);
 
-    if (newValue) {
-      document.body.classList.remove('night-mode');
-    }
-  };
 
   return (
     <ModeProvider>
@@ -289,22 +257,7 @@ export default function App() {
           </Routes>
         </BrowserRouter>
 
-        {/* Night Mode Override Button - Shows when Melatonin Guard is active */}
-        {nightModeActive && (
-          <button
-            onClick={toggleNightMode}
-            className="fixed bottom-4 right-4 z-50 px-3 py-1.5 bg-slate-800/90 hover:bg-slate-700 border border-slate-600 rounded-lg text-xs text-slate-300 transition-colors"
-          >
-            {nightModeOverride ? '🌙 Enable Night Mode' : '☀️ Override Night Mode'}
-          </button>
-        )}
 
-        {/* Night Mode CSS */}
-        <style>{`
-        body.night-mode {
-          filter: sepia(100%) hue-rotate(-50deg) saturate(400%) contrast(0.9);
-        }
-      `}</style>
       </CalendarProvider>
     </ModeProvider >
   );
