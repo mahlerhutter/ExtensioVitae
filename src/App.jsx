@@ -21,7 +21,6 @@ import RecoveryPage from './pages/RecoveryPage';
 import VersionsPage from './pages/VersionsPage';
 import FriendsPage from './pages/FriendsPage';
 import DashboardMockupPage from './pages/DashboardMockupPage';
-import WhyExtensioPage from './pages/WhyExtensioPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import OnboardingGuard from './components/OnboardingGuard';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -189,11 +188,7 @@ export default function App() {
               </ErrorBoundary>
             } />
 
-            <Route path="/friends/why" element={
-              <ErrorBoundary>
-                <WhyExtensioPage />
-              </ErrorBoundary>
-            } />
+
 
             {/* Protected Dashboard Routes with Error Boundary + Onboarding Guard */}
             <Route path="/dashboard" element={
