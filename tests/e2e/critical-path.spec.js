@@ -28,7 +28,7 @@ test.describe('Critical Path: Intake to Dashboard', () => {
         await ageInput.fill('35');
 
         // Sex (Option Button)
-        await page.getByRole('button', { name: /Male/i }).click();
+        await page.getByRole('button', { name: /^Male$/i }).click();
 
         // Next
         await page.getByRole('button', { name: /Next|Weiter/i }).click();
