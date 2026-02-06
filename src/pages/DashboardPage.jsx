@@ -28,7 +28,7 @@ import InteractiveLoading from '../components/dashboard/InteractiveLoading';
 import LongevityScoreWidget from '../components/dashboard/LongevityScoreWidget';
 import PillarsExplanationBox from '../components/dashboard/PillarsExplanationBox';
 import PillarsExplanationModal from '../components/dashboard/PillarsExplanationModal';
-import DashboardHeaderV2 from '../components/dashboard/DashboardHeaderV2.jsx';
+import DashboardHeader from '../components/dashboard/DashboardHeader.jsx';
 import UserProfileSection from '../components/dashboard/UserProfileSection';
 import PlanSummary from '../components/dashboard/PlanSummary';
 import MonthOverview from '../components/dashboard/MonthOverview';
@@ -934,7 +934,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-950">
-      <DashboardHeaderV2
+      <DashboardHeader
         userName={plan.user_name}
         onSignOut={handleSignOut}
         onProfileClick={() => setShowEditModal(true)}
