@@ -31,8 +31,12 @@ export default function OnboardingTour() {
                 }
             }, 500); // Check every 500ms
 
-            // Stop checking after 10s
-            const timer = setTimeout(() => clearInterval(checkExist), 10000);
+            // Stop checking after 3s and force start (Joyride handles missing targets)
+            const timer = setTimeout(() => {
+                console.warn('[Onboarding] Elements not found in time. Forcing start.');
+                clearInterval(checkExist);
+                setRun(true);
+            }, 3000);
             return () => { clearInterval(checkExist); clearTimeout(timer); };
         }
     }, []);
