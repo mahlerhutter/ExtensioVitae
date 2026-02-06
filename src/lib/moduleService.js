@@ -117,22 +117,39 @@ function transformModuleInstances(instances) {
   };
 
   return instances.map(instance => {
-    const moduleDef = instance.module;
+    let moduleDef = instance.module;
+
+    // Attempt to find matching fallback to enhance data (e.g. daily_tasks)
+    const fallbackMatch = FALLBACK_MODULES.find(f =>
+      f.slug === moduleDef?.slug || f.id === moduleDef?.id || f.slug === instance.module_id
+    );
 
     const definition = moduleDef ? {
       ...moduleDef,
-      name_de: moduleDef.name_de || moduleDef.name || fallbackDef.name_de,
-      name_en: moduleDef.name_en || moduleDef.name || fallbackDef.name_en,
-      icon: moduleDef.icon || fallbackDef.icon,
-      pillars: moduleDef.pillars || fallbackDef.pillars,
-      category: moduleDef.category || fallbackDef.category,
-      slug: moduleDef.slug || fallbackDef.slug
-    } : fallbackDef;
+      name_de: moduleDef.name_de || moduleDef.name || (fallbackMatch?.name_de || 'Unbenanntes Modul'),
+      name_en: moduleDef.name_en || moduleDef.name || (fallbackMatch?.name_en || 'Unnamed Module'),
+      icon: moduleDef.icon || (fallbackMatch?.icon || '📋'),
+      pillars: moduleDef.pillars || (fallbackMatch?.pillars || []),
+      category: moduleDef.category || (fallbackMatch?.category || 'general'),
+      slug: moduleDef.slug || (fallbackMatch?.slug || 'unknown'),
+      // CRITICAL: Inject daily_tasks if missing in DB but present in fallback
+      daily_tasks: moduleDef.daily_tasks || fallbackMatch?.daily_tasks || []
+    } : (fallbackMatch || {
+      name_de: 'Unbenanntes Modul',
+      name_en: 'Unnamed Module',
+      name: 'Module',
+      icon: '📋',
+      pillars: [],
+      category: 'general',
+      duration_days: 30,
+      slug: 'unknown',
+      daily_tasks: []
+    });
 
     return {
       ...instance,
       definition,
-      total_days: instance.total_days || moduleDef?.duration_days || 30,
+      total_days: instance.total_days || definition.duration_days || 30,
       current_day: instance.current_day || 1,
       completion_rate: instance.completion_percentage || 0
     };
