@@ -17,11 +17,15 @@ export default function OnboardingTour() {
 
         if (!hasSeenTour || forceReset) {
             // WaitForElement logic
+            console.log('[Onboarding] Waiting for elements...');
             const checkExist = setInterval(() => {
                 const dashboardElement = document.querySelector('[data-tour="daily-progress"]');
                 const moduleHubElement = document.querySelector('[data-tour="module-hub-trigger"]');
 
+                console.log('[Onboarding] Checking elements:', { dashboard: !!dashboardElement, hub: !!moduleHubElement });
+
                 if (dashboardElement && moduleHubElement) {
+                    console.log('[Onboarding] Elements found! Starting tour.');
                     clearInterval(checkExist);
                     setRun(true);
                 }
