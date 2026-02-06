@@ -1131,9 +1131,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-    </div>
-        </div >
-      </main >
+      </main>
 
       <footer className="border-t border-slate-800 mt-12">
         <div className="max-w-6xl mx-auto px-6 py-6 text-center text-slate-500 text-sm">
@@ -1158,169 +1156,169 @@ export default function DashboardPage() {
         progress={progress}
       />
 
-  {/* Plan History Modal */ }
-  <PlanHistoryModal
-    isOpen={showHistoryModal}
-    onClose={() => setShowHistoryModal(false)}
-    plans={archivedPlans}
-    isLoading={loadingHistory}
-    onLoadPlan={async (p) => {
-      setPlan(p);
-      // Load progress for this plan
-      const archProgress = await getProgress(p.supabase_plan_id);
-      setProgress(archProgress);
-      if (p.start_date) {
-        setCurrentDay(calculatePlanDay(p.start_date));
-      } else {
-        setCurrentDay(1);
+      {/* Plan History Modal */}
+      <PlanHistoryModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        plans={archivedPlans}
+        isLoading={loadingHistory}
+        onLoadPlan={async (p) => {
+          setPlan(p);
+          // Load progress for this plan
+          const archProgress = await getProgress(p.supabase_plan_id);
+          setProgress(archProgress);
+          if (p.start_date) {
+            setCurrentDay(calculatePlanDay(p.start_date));
+          } else {
+            setCurrentDay(1);
+          }
+
+          // v0.4.0: Load Active Protocols
+          try {
+            const activeProtocols = await getActiveProtocols();
+            if (activeProtocols && activeProtocols.length > 0) {
+              const firstActive = activeProtocols[0];
+              const packTemplate = PROTOCOL_PACKS.find(p => p.id === firstActive.protocol_id);
+
+              if (packTemplate) {
+                setActivePack({
+                  ...packTemplate,
+                  task_completion_status: firstActive.task_completion_status || {},
+                  tasks_completed: firstActive.tasks_completed || 0
+                });
+                setActivePackDbId(firstActive.id);
+              }
+            }
+          } catch (error) {
+            logger.warn('[Dashboard] Failed to load protocols:', error);
+          }
+          handleSelectDay(null);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        initialData={intakeData}
+        onSave={handleUpdateProfile}
+      />
+
+      {/* Feedback Components */}
+      {
+        showInitialFeedback && (
+          <InitialFeedbackModal
+            onSubmit={async (feedbackData) => {
+              try {
+                // Only include plan_id if it exists
+                const feedback = {
+                  ...feedbackData,
+                  ...(plan?.supabase_plan_id && { plan_id: plan.supabase_plan_id }),
+                };
+                await submitFeedback(feedback);
+                setShowInitialFeedback(false);
+                setFeedbackSubmitted(true);
+                addToast('Vielen Dank für dein Feedback! 🎉', 'success');
+              } catch (error) {
+                logger.error('[Dashboard] Failed to submit initial feedback:', error);
+                addToast(`Fehler: ${error.message || 'Unbekannter Fehler'}`, 'error');
+              }
+            }}
+            onSkip={() => {
+              setShowInitialFeedback(false);
+              setFeedbackSubmitted(true);
+            }}
+          />
+        )
       }
 
-      // v0.4.0: Load Active Protocols
-      try {
-        const activeProtocols = await getActiveProtocols();
-        if (activeProtocols && activeProtocols.length > 0) {
-          const firstActive = activeProtocols[0];
-          const packTemplate = PROTOCOL_PACKS.find(p => p.id === firstActive.protocol_id);
-
-          if (packTemplate) {
-            setActivePack({
-              ...packTemplate,
-              task_completion_status: firstActive.task_completion_status || {},
-              tasks_completed: firstActive.tasks_completed || 0
-            });
-            setActivePackDbId(firstActive.id);
-          }
-        }
-      } catch (error) {
-        logger.warn('[Dashboard] Failed to load protocols:', error);
+      {
+        showFeedbackPanel && (
+          <GeneralFeedbackPanel
+            onClose={() => setShowFeedbackPanel(false)}
+            onSubmit={async (feedbackData) => {
+              try {
+                await submitFeedback({
+                  ...feedbackData,
+                  plan_id: plan?.supabase_plan_id,
+                });
+              } catch (error) {
+                logger.error('[Dashboard] Failed to submit general feedback:', error);
+                throw error;
+              }
+            }}
+          />
+        )
       }
-      handleSelectDay(null);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }}
-  />
 
-  {/* Edit Profile Modal */ }
-  <EditProfileModal
-    isOpen={showEditModal}
-    onClose={() => setShowEditModal(false)}
-    initialData={intakeData}
-    onSave={handleUpdateProfile}
-  />
+      {
+        user && (
+          <FloatingFeedbackButton onClick={() => setShowFeedbackPanel(true)} />
+        )
+      }
 
-  {/* Feedback Components */ }
-  {
-    showInitialFeedback && (
-      <InitialFeedbackModal
-        onSubmit={async (feedbackData) => {
-          try {
-            // Only include plan_id if it exists
-            const feedback = {
-              ...feedbackData,
-              ...(plan?.supabase_plan_id && { plan_id: plan.supabase_plan_id }),
-            };
-            await submitFeedback(feedback);
-            setShowInitialFeedback(false);
-            setFeedbackSubmitted(true);
-            addToast('Vielen Dank für dein Feedback! 🎉', 'success');
-          } catch (error) {
-            logger.error('[Dashboard] Failed to submit initial feedback:', error);
-            addToast(`Fehler: ${error.message || 'Unbekannter Fehler'}`, 'error');
-          }
-        }}
-        onSkip={() => {
-          setShowInitialFeedback(false);
-          setFeedbackSubmitted(true);
-        }}
-      />
-    )
-  }
+      {/* Module Activation Flow (New User Onboarding) */}
+      {
+        showModuleActivation && user?.id && (
+          <ModuleActivationFlow
+            userId={user.id}
+            intakeData={intakeData}
+            language="de"
+            onComplete={() => {
+              setShowModuleActivation(false);
+              setHasActiveModules(true);
+              // Refresh the page to show the new modules
+              window.location.reload();
+              addToast('🧩 Module aktiviert! Dein Daily Tracking ist bereit.', 'success');
+            }}
+            onSkip={() => {
+              setShowModuleActivation(false);
+              localStorage.setItem('module_onboarding_dismissed', 'true');
+            }}
+          />
+        )
+      }
 
-  {
-    showFeedbackPanel && (
-      <GeneralFeedbackPanel
-        onClose={() => setShowFeedbackPanel(false)}
-        onSubmit={async (feedbackData) => {
-          try {
-            await submitFeedback({
-              ...feedbackData,
-              plan_id: plan?.supabase_plan_id,
-            });
-          } catch (error) {
-            logger.error('[Dashboard] Failed to submit general feedback:', error);
-            throw error;
-          }
-        }}
-      />
-    )
-  }
+      {/* Module Hub Modal */}
+      {
+        showModuleHub && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => setShowModuleHub(false)}
+            />
+            <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+              <button
+                onClick={() => setShowModuleHub(false)}
+                className="absolute top-4 right-4 z-10 p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <ModuleHub userId={user?.id} language="de" />
+            </div>
+          </div>
+        )
+      }
 
-  {
-    user && (
-      <FloatingFeedbackButton onClick={() => setShowFeedbackPanel(true)} />
-    )
-  }
+      {/* Morning Check-in Modal (v0.5.1) */}
+      {
+        showMorningCheckIn && (
+          <MorningCheckIn
+            showModal={showMorningCheckIn}
+            onComplete={(result) => {
+              setShowMorningCheckIn(false);
+              addToast(`Recovery Score: ${result.score}/100`, 'success');
+            }}
+            onSkip={() => setShowMorningCheckIn(false)}
+          />
+        )
+      }
 
-  {/* Module Activation Flow (New User Onboarding) */ }
-  {
-    showModuleActivation && user?.id && (
-      <ModuleActivationFlow
-        userId={user.id}
-        intakeData={intakeData}
-        language="de"
-        onComplete={() => {
-          setShowModuleActivation(false);
-          setHasActiveModules(true);
-          // Refresh the page to show the new modules
-          window.location.reload();
-          addToast('🧩 Module aktiviert! Dein Daily Tracking ist bereit.', 'success');
-        }}
-        onSkip={() => {
-          setShowModuleActivation(false);
-          localStorage.setItem('module_onboarding_dismissed', 'true');
-        }}
-      />
-    )
-  }
-
-  {/* Module Hub Modal */ }
-  {
-    showModuleHub && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div
-          className="absolute inset-0 bg-black/70"
-          onClick={() => setShowModuleHub(false)}
-        />
-        <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-          <button
-            onClick={() => setShowModuleHub(false)}
-            className="absolute top-4 right-4 z-10 p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          <ModuleHub userId={user?.id} language="de" />
-        </div>
-      </div>
-    )
-  }
-
-  {/* Morning Check-in Modal (v0.5.1) */ }
-  {
-    showMorningCheckIn && (
-      <MorningCheckIn
-        showModal={showMorningCheckIn}
-        onComplete={(result) => {
-          setShowMorningCheckIn(false);
-          addToast(`Recovery Score: ${result.score}/100`, 'success');
-        }}
-        onSkip={() => setShowMorningCheckIn(false)}
-      />
-    )
-  }
-
-  {/* Confirmation Dialog */ }
-  <ConfirmDialog />
+      {/* Confirmation Dialog */}
+      <ConfirmDialog />
     </div >
   );
 }
