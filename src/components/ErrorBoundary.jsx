@@ -13,7 +13,7 @@ class ErrorBoundary extends React.Component {
     }
 
     componentDidCatch(error, errorInfo) {
-        // TODO: Sentry integration ready - install @sentry/react and uncomment
+        // Sentry integration ready for v0.7.0 - install @sentry/react when needed
         // See docs/SENTRY_SETUP.md for instructions
         // Sentry.captureException(error, { contexts: { react: errorInfo } });
 

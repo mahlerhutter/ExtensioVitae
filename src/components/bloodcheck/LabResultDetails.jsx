@@ -110,8 +110,8 @@ export default function LabResultDetails({ resultId, onClose }) {
                 <div className="px-6 pt-4">
                     <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700">
                         <div className={`w-2 h-2 rounded-full ${result?.status === 'completed' ? 'bg-emerald-400' :
-                                result?.status === 'failed' ? 'bg-red-400' :
-                                    'bg-amber-400 animate-pulse'
+                            result?.status === 'failed' ? 'bg-red-400' :
+                                'bg-amber-400 animate-pulse'
                             }`}></div>
                         <span className="text-sm text-slate-300 font-medium capitalize">
                             {result?.status === 'completed' ? 'Analysiert' :
@@ -191,7 +191,7 @@ export default function LabResultDetails({ resultId, onClose }) {
                     {biomarkers.length > 0 && (
                         <button
                             onClick={() => {
-                                // TODO: Export as PDF or CSV
+                                // Export as PDF/CSV - planned for v0.7.0 (Lab Results Intelligence)
                                 logger.info('[LabResultDetails] Export clicked');
                             }}
                             className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors border border-slate-700"

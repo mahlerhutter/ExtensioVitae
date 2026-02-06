@@ -221,7 +221,7 @@ function Pillars() {
               className="relative bg-slate-900/50 border border-slate-700 rounded-xl p-6 text-center hover:border-amber-400/50 transition-colors group overflow-hidden"
               tabIndex={0}
             >
-              <div className="text-slate-400 group-hover:text-amber-400 transition-colors mb-4 flex justify-center">
+              <div className="text-slate-300 group-hover:text-amber-300 transition-colors mb-4 flex justify-center">
                 {icons[pillar.key]}
               </div>
               <h3 className="text-white font-medium mb-2">{pillar.label}</h3>

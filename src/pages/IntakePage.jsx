@@ -15,6 +15,7 @@ const QUESTIONS = {
       type: 'text',
       placeholder: 'First name',
       required: true,
+      autocomplete: 'name',
     },
     {
       id: 'age',
@@ -24,7 +25,8 @@ const QUESTIONS = {
       max: 80,
       placeholder: 'Age (18-80)',
       required: true,
-      helper: 'We create plans for adults 18-80 years old.'
+      helper: 'We create plans for adults 18-80 years old.',
+      autocomplete: 'off',
     },
     {
       id: 'sex',
@@ -147,7 +149,7 @@ const QUESTIONS = {
   ],
 };
 
-function NumberField({ question, value, onChange, placeholder, helper, min, max }) {
+function NumberField({ question, value, onChange, placeholder, helper, min, max, autocomplete }) {
   return (
     <div className="space-y-3">
       <label className="block text-xl font-medium text-white">
@@ -168,6 +170,7 @@ function NumberField({ question, value, onChange, placeholder, helper, min, max 
         min={min}
         max={max}
         placeholder={placeholder}
+        autoComplete={autocomplete || 'off'}
         className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent appearance-none"
       />
       {helper && <p className="text-slate-500 text-sm">{helper}</p>}
@@ -203,7 +206,7 @@ function RangeField({ question, value, onChange, min, max, helper }) {
   );
 }
 
-function TextField({ question, value, onChange, placeholder, helper }) {
+function TextField({ question, value, onChange, placeholder, helper, autocomplete }) {
   return (
     <div className="space-y-3">
       <label className="block text-xl font-medium text-white">
@@ -214,6 +217,7 @@ function TextField({ question, value, onChange, placeholder, helper }) {
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        autoComplete={autocomplete || 'off'}
         className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent"
       />
       {helper && <p className="text-slate-500 text-sm">{helper}</p>}
@@ -276,6 +280,7 @@ function TelField({ question, value, onChange, placeholder, helper }) {
         onChange={(e) => handleChange(e.target.value)}
         onBlur={handleBlur}
         placeholder={placeholder}
+        autoComplete="tel"
         className={`w-full bg-slate-800 border rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 transition-all ${error
           ? 'border-red-500 focus:ring-red-400 focus:border-red-400'
           : 'border-slate-700 focus:ring-amber-400 focus:border-transparent'

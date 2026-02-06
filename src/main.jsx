@@ -8,7 +8,7 @@ import './index.css';
 import { ToastProvider } from './components/Toast';
 import ErrorBoundary from './components/ErrorBoundary';
 
-// TODO: Sentry integration ready - install @sentry/react and uncomment
+// Sentry integration ready for v0.7.0 - install @sentry/react when needed
 // See docs/SENTRY_SETUP.md for instructions
 
 // Initialize analytics (non-blocking)

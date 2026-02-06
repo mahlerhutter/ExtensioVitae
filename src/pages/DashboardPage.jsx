@@ -959,7 +959,6 @@ export default function DashboardPage() {
             <div className="space-y-4 mb-6">
               <CircadianWidget />
               <CircadianCard userProfile={intakeData} />
-              {/* TODO: Re-enable CircadianCard after Vercel cache clears */}
               <BiologicalSuppliesWidget
                 userId={user?.id}
                 activeProtocols={activePack ? [{ protocol_id: activePack.id }] : []}
@@ -976,7 +975,6 @@ export default function DashboardPage() {
 
             {/* 7-Day Trend Chart */}
             {user?.id && <TrendChart userId={user.id} />}
-            {/* TODO: Fix recharts build issue on Vercel */}
 
             {/* Quick Actions */}
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-sm space-y-4">
