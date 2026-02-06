@@ -28,7 +28,7 @@ import InteractiveLoading from '../components/dashboard/InteractiveLoading';
 import LongevityScoreWidget from '../components/dashboard/LongevityScoreWidget';
 import PillarsExplanationBox from '../components/dashboard/PillarsExplanationBox';
 import PillarsExplanationModal from '../components/dashboard/PillarsExplanationModal';
-import DashboardHeaderV2 from '../components/dashboard/DashboardHeaderV2';
+import DashboardHeaderV2 from '../components/dashboard/DashboardHeaderV2.jsx';
 import UserProfileSection from '../components/dashboard/UserProfileSection';
 import PlanSummary from '../components/dashboard/PlanSummary';
 import MonthOverview from '../components/dashboard/MonthOverview';
@@ -84,11 +84,11 @@ import MorningCheckIn from '../components/dashboard/MorningCheckIn';
 import OnboardingTour from '../components/dashboard/OnboardingTour';
 
 // Beta-Tester Nutzen Components (v0.7.0)
-import WelcomeHeroCard from '../components/dashboard/WelcomeHeroCard';
-import ImpactCounter from '../components/dashboard/ImpactCounter';
-import ScienceCredibilityBar from '../components/dashboard/ScienceCredibilityBar';
-import AdaptationNotice from '../components/dashboard/AdaptationNotice';
-import EmptyState, { EMPTY_STATE_TYPES } from '../components/dashboard/EmptyState';
+import WelcomeHeroCard from '../components/dashboard/WelcomeHeroCard.jsx';
+import ImpactCounter from '../components/dashboard/ImpactCounter.jsx';
+import ScienceCredibilityBar from '../components/dashboard/ScienceCredibilityBar.jsx';
+import AdaptationNotice from '../components/dashboard/AdaptationNotice.jsx';
+import EmptyState, { EMPTY_STATE_TYPES } from '../components/dashboard/EmptyState.jsx';
 
 // Pillar configuration
 const PILLARS = {
