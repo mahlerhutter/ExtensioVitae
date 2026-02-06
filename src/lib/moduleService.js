@@ -93,6 +93,46 @@ const FALLBACK_MODULES = [
       { id: 'nsdr', task: 'NSDR / Yoga Nidra Session', type: 'checkbox' },
       { id: 'nature', task: 'Zeit in der Natur (ohne Handy)', type: 'checkbox' }
     ]
+  },
+  {
+    id: 'fallback-omad',
+    slug: 'omad-protocol',
+    name_de: '🍽️ OMAD (One Meal A Day)',
+    name_en: 'OMAD Protocol',
+    icon: '🍽️',
+    category: 'nutrition',
+    pillars: ['nutrition', 'metabolism'],
+    duration_days: 14,
+    is_active: true,
+    is_premium: true, // Mark as premium (example)
+    description_de: 'Maximale Autophagie durch 23h Fasten.',
+    description_en: 'Maximal autophagy via 23h fasting.',
+    priority_weight: 92,
+    daily_tasks: [
+      { id: 'fast_until_dinner', task: 'Fasten bis zum Abendessen (nur Wasser/Kaffee)', type: 'checkbox' },
+      { id: 'electrolytes', task: 'Elektrolyte (Natrium/Kalium) mittags', type: 'checkbox' },
+      { id: 'feast', task: 'Das Festmahl genießen (Nährstoffdicht!)', type: 'checkbox' }
+    ]
+  },
+  {
+    id: 'fallback-breathwork',
+    slug: 'breathwork-mastery',
+    name_de: '🌬️ Breathwork Masterclass',
+    name_en: 'Breathwork Mastery',
+    icon: '🌬️',
+    category: 'stress',
+    pillars: ['stress', 'recovery'],
+    duration_days: 21,
+    is_active: true,
+    is_premium: false,
+    description_de: 'Meistere deine Atmung für Fokus und Entspannung.',
+    description_en: 'Master your breath for focus and relaxation.',
+    priority_weight: 70,
+    daily_tasks: [
+      { id: 'co2_tolerance', task: 'CO2-Toleranz Test (Morgens)', type: 'checkbox' },
+      { id: 'breath_focus', task: 'Physiological Sigh (beim Stress)', type: 'checkbox' },
+      { id: 'relax_breath', task: '4-7-8 Atmung (zum Einschlafen)', type: 'checkbox' }
+    ]
   }
 ];
 
