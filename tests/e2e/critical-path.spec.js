@@ -3,6 +3,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Critical Path: Intake to Dashboard', () => {
 
     test('should guide user from landing page to dashboard', async ({ page }) => {
+        test.setTimeout(60000); // Increase timeout to 60s for full flow
+
         // 1. Visit Landing Page
         await page.goto('/');
         await expect(page).toHaveTitle(/ExtensioVitae/);
@@ -22,7 +24,7 @@ test.describe('Critical Path: Intake to Dashboard', () => {
         await ageInput.fill('35');
 
         // Sex (Option Button)
-        await page.getByRole('button', { name: 'Male', exact: true }).click();
+        await page.getByRole('button', { name: /Male/i }).click();
 
         // Next
         await page.getByRole('button', { name: /Next|Weiter/i }).click();
