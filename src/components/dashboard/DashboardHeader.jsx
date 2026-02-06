@@ -33,23 +33,14 @@ export default function DashboardHeader({ userName, onSignOut, onProfileClick, i
     };
 
     return (
-        <header className="border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-0 z-10">
+        <header className="border-b border-slate-800 bg-slate-900/95 backdrop-blur-sm sticky top-0 z-50">
             <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
                 <Link to="/dashboard" className="text-xl font-semibold text-white tracking-tight">
                     Extensio<span className="text-amber-400">Vitae</span>
                 </Link>
 
                 <div className="flex items-center gap-4">
-                    {/* Longevity Store */}
-                    <Link
-                        to="/shop"
-                        className="text-amber-400 hover:text-amber-300 text-sm transition-colors flex items-center gap-2 hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-amber-400/20"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                        <span>Longevity Store</span>
-                    </Link>
+
 
                     {isAdmin && (
                         <Link
@@ -86,7 +77,7 @@ export default function DashboardHeader({ userName, onSignOut, onProfileClick, i
 
                         {/* Dropdown Menu */}
                         {isMenuOpen && (
-                            <div className="absolute right-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden">
+                            <div className="absolute right-0 mt-2 w-56 bg-slate-800 border border-slate-700 rounded-lg shadow-xl overflow-hidden z-50">
                                 {/* User Info */}
                                 <div className="px-4 py-3 border-b border-slate-700">
                                     <p className="text-sm font-medium text-white">{userName}</p>

@@ -68,7 +68,7 @@ export default function ModuleHubPage() {
         setActivating(module.id);
 
         try {
-            const result = await activateModule(user.id, module.id, {});
+            const result = await activateModule(user.id, module.slug, {});
 
             if (result.success) {
                 addToast(`✨ ${module.name_de} aktiviert!`, 'success');

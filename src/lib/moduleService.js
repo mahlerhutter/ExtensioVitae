@@ -313,7 +313,17 @@ export async function getUserModules(userId) {
     // Transform data with fallbacks for UI components
     return transformModuleInstances(data || []);
   } catch (error) {
-    console.error('Error fetching user modules:', error);
+    console.warn('[ModuleService] DB error fetching user modules, trying local fallback:', error.message);
+    try {
+      const key = `extensio_modules_${userId}`;
+      const local = localStorage.getItem(key);
+      if (local) {
+        const parsed = JSON.parse(local);
+        // Local modules are already stored with 'module' property containing definition
+        // We need to run them through transform to ensure consistency
+        return transformModuleInstances(parsed);
+      }
+    } catch (e) { console.error('Local module fetch error:', e); }
     return [];
   }
 }
@@ -353,15 +363,21 @@ export async function getActiveUserModules(userId) {
  * @returns {Promise<Object>}
  */
 export async function activateModule(userId, moduleSlug, config = {}) {
-  try {
-    // Get module definition
-    const moduleDef = await getModuleBySlug(moduleSlug);
-    if (!moduleDef) {
-      return { success: false, error: 'Module not found' };
-    }
+  // 1. Get Definition (with fallback support)
+  const moduleDef = await getModuleBySlug(moduleSlug);
+  if (!moduleDef) {
+    return { success: false, error: 'Module not found' };
+  }
 
-    // Check if user already has this module active
-    const { data: existing } = await supabase
+  // Calculate end date
+  const endsAt = moduleDef.duration_days
+    ? new Date(Date.now() + moduleDef.duration_days * 24 * 60 * 60 * 1000).toISOString()
+    : null;
+
+  try {
+    // 2. DB Logic
+    // Check existing
+    const { data: existing, error: existingError } = await supabase
       .from('module_instances')
       .select('id')
       .eq('user_id', userId)
@@ -369,16 +385,14 @@ export async function activateModule(userId, moduleSlug, config = {}) {
       .eq('status', 'active')
       .single();
 
+    // Ignore P0001 (Row not found) but throw others (like table missing)
+    if (existingError && existingError.code !== 'PGRST116') throw existingError;
+
     if (existing) {
       return { success: false, error: 'Module already active' };
     }
 
-    // Calculate end date if module has duration
-    const endsAt = moduleDef.duration_days
-      ? new Date(Date.now() + moduleDef.duration_days * 24 * 60 * 60 * 1000).toISOString()
-      : null;
-
-    // Create instance
+    // Insert
     const { data, error } = await supabase
       .from('module_instances')
       .insert({
@@ -397,9 +411,49 @@ export async function activateModule(userId, moduleSlug, config = {}) {
 
     if (error) throw error;
     return { success: true, instance: data };
+
   } catch (error) {
-    console.error('Error activating module:', error);
-    return { success: false, error: error.message };
+    console.warn('[ModuleService] DB Activation failed, falling back to LocalStorage:', error.message);
+
+    // 3. Local Fallback
+    try {
+      // Generate ID
+      const instanceId = typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `local-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+      const newInstance = {
+        id: instanceId,
+        user_id: userId,
+        module_id: moduleDef.id,
+        module: moduleDef, // Include full def regarding UI requirements
+        status: 'active',
+        created_at: new Date().toISOString(),
+        config: config,
+        total_days: moduleDef.duration_days,
+        ends_at: endsAt,
+        auto_pause_in_modes: moduleDef.affected_by_modes || [],
+        current_day: 1,
+        completion_percentage: 0
+      };
+
+      const key = `extensio_modules_${userId}`;
+      const local = localStorage.getItem(key);
+      let modules = local ? JSON.parse(local) : [];
+
+      // Check duplicates locally
+      if (modules.some(m => m.module_id === moduleDef.id && m.status === 'active')) {
+        return { success: false, error: 'Module already active (local)' };
+      }
+
+      modules.push(newInstance);
+      localStorage.setItem(key, JSON.stringify(modules));
+
+      return { success: true, instance: newInstance };
+    } catch (localErr) {
+      console.error('Local activation fatal:', localErr);
+      return { success: false, error: error.message };
+    }
   }
 }
 

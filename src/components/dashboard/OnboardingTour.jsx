@@ -82,7 +82,7 @@ export default function OnboardingTour({ canStart = true }) {
             target: '[data-tour="module-hub-trigger"]', // We need to add this class/data attr to the button
             content: (
                 <div className="text-left">
-                    <h3 className="font-bold text-md mb-1 text-slate-900">Die Protokoll-Bibliothek</h3>
+                    <h3 className="font-bold text-md mb-1 text-slate-900">Module Hub</h3>
                     <p className="text-slate-600 text-sm">
                         Hier findest du spezialisierte Module (Fasten, Schlaf, Stress), die du nach Bedarf aktivieren kannst.
                     </p>

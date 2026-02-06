@@ -83,6 +83,13 @@ import TrendChart from '../components/progress/TrendChart';
 import MorningCheckIn from '../components/dashboard/MorningCheckIn';
 import OnboardingTour from '../components/dashboard/OnboardingTour';
 
+// Beta-Tester Nutzen Components (v0.7.0)
+import WelcomeHeroCard from '../components/dashboard/WelcomeHeroCard';
+import ImpactCounter from '../components/dashboard/ImpactCounter';
+import ScienceCredibilityBar from '../components/dashboard/ScienceCredibilityBar';
+import AdaptationNotice from '../components/dashboard/AdaptationNotice';
+import EmptyState, { EMPTY_STATE_TYPES } from '../components/dashboard/EmptyState';
+
 // Pillar configuration
 const PILLARS = {
   sleep: { label: 'Sleep', color: 'bg-indigo-500', textColor: 'text-indigo-400' },
@@ -184,6 +191,15 @@ export default function DashboardPage() {
   const [activePackDbId, setActivePackDbId] = useState(null); // Track DB record ID
   const { showConfirm, ConfirmDialog } = useConfirm();
 
+  // Onboarding Milestones State (v0.7.0)
+  const [onboardingMilestones, setOnboardingMilestones] = useState({
+    firstTask: false,
+    morningCheckIn: false,
+    threeDayStreak: false,
+    moduleActivated: false,
+    weekComplete: false
+  });
+
   const navigate = useNavigate();
   const { planId, day } = useParams(); // Get URL parameters
 
@@ -242,6 +258,45 @@ export default function DashboardPage() {
 
     fetchStats();
   }, [user?.id, showMorningCheckIn]); // Re-fetch when check-in modal closes/opens logic changes
+
+  // Track Onboarding Milestones (v0.7.0)
+  useEffect(() => {
+    if (!progress || !plan) return;
+
+    // Milestone 1: First Task completed
+    const hasCompletedTask = Object.values(progress).some(dayProgress =>
+      Object.values(dayProgress || {}).some(Boolean)
+    );
+    if (hasCompletedTask && !onboardingMilestones.firstTask) {
+      setOnboardingMilestones(prev => ({ ...prev, firstTask: true }));
+    }
+
+    // Milestone 2: Morning Check-in (from dashboardStats)
+    if (dashboardStats?.morningCheckIn && !onboardingMilestones.morningCheckIn) {
+      setOnboardingMilestones(prev => ({ ...prev, morningCheckIn: true }));
+    }
+
+    // Milestone 3: 3-Day Streak
+    const completedDaysCount = Object.keys(progress).filter(day => {
+      const dayProgress = progress[day];
+      const completedTasksInDay = Object.values(dayProgress || {}).filter(Boolean).length;
+      return completedTasksInDay > 0;
+    }).length;
+
+    if (completedDaysCount >= 3 && !onboardingMilestones.threeDayStreak) {
+      setOnboardingMilestones(prev => ({ ...prev, threeDayStreak: true }));
+    }
+
+    // Milestone 4: Module activated (if hasActiveModules is true)
+    if (hasActiveModules && !onboardingMilestones.moduleActivated) {
+      setOnboardingMilestones(prev => ({ ...prev, moduleActivated: true }));
+    }
+
+    // Milestone 5: Week Complete
+    if (completedDaysCount >= 7 && !onboardingMilestones.weekComplete) {
+      setOnboardingMilestones(prev => ({ ...prev, weekComplete: true }));
+    }
+  }, [progress, plan, dashboardStats, hasActiveModules]);
 
   // Update incomplete tasks based on plan progress
   useEffect(() => {
@@ -838,6 +893,26 @@ export default function DashboardPage() {
     }
   };
 
+  // Helper: Calculate overall completion rate (v0.7.0)
+  const calculateCompletionRate = () => {
+    if (!progress || !plan?.days) return 0;
+
+    let totalTasks = 0;
+    let completedTasks = 0;
+
+    plan.days.forEach((day, index) => {
+      const dayNum = index + 1;
+      const dayProgress = progress[dayNum] || {};
+      const tasksInDay = day.tasks?.length || 0;
+      const completedInDay = Object.values(dayProgress).filter(Boolean).length;
+
+      totalTasks += tasksInDay;
+      completedTasks += completedInDay;
+    });
+
+    return totalTasks > 0 ? completedTasks / totalTasks : 0;
+  };
+
   if (loading) {
     return <InteractiveLoading message="Loading your plan" />;
   }
@@ -873,6 +948,29 @@ export default function DashboardPage() {
             <LongevityScoreWidget intakeData={intakeData} userName={intakeData?.name} compact={true} variant="inline" />
           </div>
         </div>
+
+        {/* Welcome Hero Card - Day 1-7 Experience (v0.7.0) */}
+        {(currentDay <= 7 || Object.values(onboardingMilestones).filter(Boolean).length < 5) && (
+          <WelcomeHeroCard
+            userName={plan?.user_name || 'dort'}
+            milestones={onboardingMilestones}
+            onQuickWinClick={() => {
+              // Scroll to TodayDashboard
+              const todayDashboard = document.querySelector('[data-tour="daily-progress"]');
+              if (todayDashboard) {
+                todayDashboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Pulse animation to draw attention
+                todayDashboard.classList.add('ring-4', 'ring-amber-400', 'ring-opacity-50');
+                setTimeout(() => {
+                  todayDashboard.classList.remove('ring-4', 'ring-amber-400', 'ring-opacity-50');
+                }, 2000);
+              } else {
+                // Fallback: scroll to main content
+                window.scrollTo({ top: 400, behavior: 'smooth' });
+              }
+            }}
+          />
+        )}
 
         {/* Daily Insight */}
         <DailyInsight />
@@ -929,6 +1027,27 @@ export default function DashboardPage() {
               />
             </div>
 
+            {/* Recovery Adaptation Notice - Shows when recovery is suboptimal (v0.7.0) */}
+            {dashboardStats.recoveryScore !== null && dashboardStats.recoveryScore < 70 && (
+              <AdaptationNotice
+                recoveryScore={dashboardStats.recoveryScore}
+                adaptations={[
+                  {
+                    from: 'HIIT Workout 30 Min',
+                    to: 'Yoga Nidra 20 Min',
+                    reason: 'Dein Körper braucht heute mehr Recovery. HRV-Daten zeigen erhöhten Stress.'
+                  },
+                  {
+                    from: '6 Tasks geplant',
+                    to: '3 Essential Tasks',
+                    reason: 'Reduzierte Belastung für bessere Regeneration.'
+                  }
+                ]}
+                hrv={dashboardStats.hrv}
+                hrvBaseline={dashboardStats.hrvBaseline}
+              />
+            )}
+
             <PlanSummary
               plan={plan}
               onShowFullPlan={() => setShowFullPlanModal(true)}
@@ -952,6 +1071,17 @@ export default function DashboardPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Impact Counter - Years Added (v0.7.0) */}
+            <ImpactCounter
+              yearsAdded={null} // Calculated internally from completionRate
+              biologicalAge={plan?.biological_age || intakeData?.biological_age}
+              chronologicalAge={intakeData?.age}
+              completionRate={calculateCompletionRate()}
+            />
+
+            {/* Science Credibility Bar (v0.7.0) */}
+            <ScienceCredibilityBar compact={false} />
+
             {/* Emergency Mode Selector */}
             <ModeSelector variant="collapsible" />
 
@@ -1010,7 +1140,7 @@ export default function DashboardPage() {
                   className="w-full py-2.5 bg-slate-800/70 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-all border border-slate-700/50 hover:border-slate-600 flex items-center gap-3 px-4"
                 >
                   <span className="text-lg">📦</span>
-                  <span>Protokoll-Bibliothek</span>
+                  <span>Module Hub</span>
                 </button>
 
                 {/* Lab Results Button */}

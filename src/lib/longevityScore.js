@@ -205,10 +205,10 @@ function ageAdjustmentFactor(age) {
  */
 export function calculateLongevityScore(intake) {
     const {
-        age,
+        age: ageInput,
         sex = 'male',
-        height_cm,
-        weight_kg,
+        height_cm: heightInput,
+        weight_kg: weightInput,
         sleep_hours_bucket,
         stress_1_10,
         training_frequency,
@@ -219,6 +219,11 @@ export function calculateLongevityScore(intake) {
         circadian_alignment = 'moderate',
         wake_time
     } = intake;
+
+    // Ensure numeric values
+    const age = Number(ageInput);
+    const height_cm = Number(heightInput);
+    const weight_kg = Number(weightInput);
 
     // Basis-Lebenserwartung
     const baseExpectancy = BASE_LIFE_EXPECTANCY[sex] || 80;
