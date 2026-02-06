@@ -110,7 +110,15 @@ test.describe('Critical Path: Intake to Dashboard', () => {
         console.log(`[TEST] Final URL: ${url}`);
 
         if (url.includes('/dashboard')) {
-            await expect(page.locator('[data-tour="daily-progress"]')).toBeVisible({ timeout: 20000 });
+            try {
+                await expect(page.locator('[data-tour="daily-progress"]')).toBeVisible({ timeout: 20000 });
+            } catch (e) {
+                console.log('[DEBUG] Dashboard Content Dump:');
+                // Log only body content to avoid spamming too much
+                const body = await page.evaluate(() => document.body.innerHTML);
+                console.log(body.substring(0, 2000)); // First 2000 chars
+                throw e;
+            }
         } else if (url.includes('/auth')) {
             // If redirected to auth, we consider the critical path "intake -> plan generation" complete
             await expect(page.getByRole('heading', { name: /Sign|Account|Anmelden/i })).toBeVisible();
