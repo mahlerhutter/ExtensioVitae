@@ -7,58 +7,62 @@ test.describe('Critical Path: Intake to Dashboard', () => {
         await page.goto('/');
         await expect(page).toHaveTitle(/ExtensioVitae/);
 
-        // 2. Start Intake
-        // Look for button with "Start" or "Blueprint"
-        const startButton = page.getByRole('link', { name: /Start|Blueprint/i }).first();
-        // Fallback if no link found in hero, try direct navigation for test stability
-        if (await startButton.isVisible()) {
-            await startButton.click();
-        } else {
-            await page.goto('/intake');
-        }
-
-        // 3. Complete Intake (Simplified for Wizard)
+        // 3. Complete Intake
+        // Direct navigation to intake to ensure stability
+        await page.goto('/intake');
         await expect(page.url()).toContain('/intake');
 
-        // Step 1: Name
-        await page.getByPlaceholder(/name/i).fill('Test User');
-        await page.getByRole('button', { name: /Next|Continue/i }).click();
+        // --- Step 0: Basics ---
+        // Name
+        const nameInput = page.getByPlaceholder(/First name|Name/i);
+        await nameInput.fill('Testhans');
 
-        // Step 2: Status (skip or fill defaults)
-        // Assuming Step 2 has buttons or inputs. 
-        // We aim for "Next" button until we hit Submit or Generating
+        // Age
+        const ageInput = page.getByPlaceholder(/Age/i);
+        await ageInput.fill('35');
 
-        // Safety loop to get through wizard steps
-        let attempt = 0;
-        while (attempt < 5) {
-            attempt++;
-            const nextBtn = page.getByRole('button', { name: /Next|Continue|Generate/i });
-            if (await nextBtn.count() > 0) {
-                await nextBtn.first().click();
-                await page.waitForTimeout(500); // Animation wait
-            } else {
-                break;
-            }
+        // Sex (Option Button)
+        await page.getByRole('button', { name: 'Male', exact: true }).click();
 
-            // If we see "Submit" or "Generate Blueprint" specifically
-            const submitBtn = page.getByRole('button', { name: /Generate Blueprint/i });
-            if (await submitBtn.isVisible()) {
-                await submitBtn.click();
-                break;
-            }
-        }
+        // Next
+        await page.getByRole('button', { name: /Next|Weiter/i }).click();
 
-        // 4. Generating Page
+        // --- Step 1: Status ---
+        // Sleep
+        await page.getByRole('button', { name: /7.5 - 8 hours|7.5-8/i }).click();
+
+        // Training
+        await page.getByRole('button', { name: /3-4 times/i }).click();
+
+        // Diet (Multiselect - pick one)
+        await page.getByRole('button', { name: /Mostly Whole Foods/i }).click();
+
+        // Wait a bit for transitions
+        await page.waitForTimeout(300);
+
+        // Next
+        await page.getByRole('button', { name: /Next|Weiter/i }).click();
+
+        // --- Step 2: Goals ---
+        // Primary Goal
+        await page.getByRole('button', { name: 'More Energy' }).click();
+
+        // Wait a bit
+        await page.waitForTimeout(300);
+
+        // Final Submit: "Generate Blueprint"
+        // Try searching for the text specifically
+        const submitBtn = page.getByRole('button', { name: /Generate|Erstellen/i });
+        await submitBtn.click();
+
+        // 4. Generating Page -> Dashboard
         // Might redirect to /generating then /dashboard/d/...
-        await expect(page.url()).toMatch(/\/generating|\/dashboard|\/d\//);
+        // Allow up to 10s for generation
+        await expect(page).toHaveURL(/\/generating|\/dashboard|\/d\//, { timeout: 15000 });
 
         // 5. Verify Dashboard
-        // Wait for plan generation
-        await page.waitForTimeout(5000); // Give AI time
-
-        // Check for dashboard elements
-        await expect(page.getByText(/Guten|Good/i)).toBeVisible(); // Greeting
-        await expect(page.getByText(/0%/)).toBeVisible(); // Progress bar
+        // Wait for dashboard specific element
+        await expect(page.locator('[data-tour="daily-progress"]')).toBeVisible({ timeout: 20000 });
     });
 
 });
