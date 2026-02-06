@@ -56,6 +56,14 @@ export default function MorningCheckIn({ onComplete, onSkip, showModal: external
     async function checkIfNeedsCheckIn() {
         if (!user) return;
 
+        // Check time of day (only show between 4am and 12pm)
+        const now = new Date();
+        const hour = now.getHours();
+        if (hour < 4 || hour >= 12) {
+            console.log('[MorningCheckIn] Skipping check-in (outside morning hours 4-12)');
+            return;
+        }
+
         try {
             const todayScore = await recoveryService.getTodayRecoveryScore(supabase, user.id);
 
