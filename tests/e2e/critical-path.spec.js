@@ -46,8 +46,12 @@ test.describe('Critical Path: Intake to Dashboard', () => {
         await page.getByRole('button', { name: /Next|Weiter/i }).click();
 
         // --- Step 2: Goals ---
+        // Step 2: Goals
         // Primary Goal
         await page.getByRole('button', { name: 'More Energy' }).click();
+
+        // Consent Checkbox
+        await page.getByRole('checkbox').check();
 
         // Wait a bit
         await page.waitForTimeout(300);
