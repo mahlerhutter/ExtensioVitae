@@ -517,10 +517,19 @@ export default function IntakePage() {
 
                 {/* Consent Checkbox only on last step */}
                 {isLastStep && (
-                  <ConsentCheckbox
-                    checked={formData.whatsapp_consent || false}
-                    onChange={(val) => updateField('whatsapp_consent', val)}
-                  />
+                  <div className="space-y-4 animate-fadeIn">
+                    <label className="flex items-start gap-3 cursor-pointer p-4 bg-slate-800/50 rounded-xl border border-slate-700 hover:border-slate-600 transition-all">
+                      <input
+                        type="checkbox"
+                        checked={formData.whatsapp_consent || false}
+                        onChange={(e) => updateField('whatsapp_consent', e.target.checked)}
+                        className="mt-1 w-5 h-5 rounded border-slate-600 text-amber-500 focus:ring-amber-500 focus:ring-offset-0 bg-slate-700"
+                      />
+                      <div className="text-sm text-slate-300">
+                        I agree to receive my Longevity Protocol via WhatsApp and accept the <a href="/terms" target="_blank" className="text-amber-400 hover:underline">Terms</a> & <a href="/privacy" target="_blank" className="text-amber-400 hover:underline">Privacy Policy</a>.
+                      </div>
+                    </label>
+                  </div>
                 )}
               </div>
 
@@ -531,8 +540,8 @@ export default function IntakePage() {
                   onClick={handleNext}
                   disabled={isSubmitting}
                   className={`w-full py-4 rounded-xl text-lg font-bold transition-all transform shadow-lg ${isSubmitting
-                      ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                      : 'bg-amber-400 hover:bg-amber-500 text-slate-900 hover:scale-[1.02] shadow-amber-400/20'
+                    ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                    : 'bg-amber-400 hover:bg-amber-500 text-slate-900 hover:scale-[1.02] shadow-amber-400/20'
                     }`}
                 >
                   {isSubmitting ? 'Generating Plan...' : (isLastStep ? 'Generate Blueprint →' : 'Continue')}
