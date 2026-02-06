@@ -1000,6 +1000,15 @@ export default function DashboardPage() {
                   <span>Mein Gesundheitsprofil</span>
                 </button>
 
+                {/* Module Hub Button */}
+                <button
+                  onClick={() => navigate('/modules')}
+                  className="w-full py-2.5 bg-slate-800/70 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-all border border-slate-700/50 hover:border-slate-600 flex items-center gap-3 px-4"
+                >
+                  <span className="text-lg">📦</span>
+                  <span>Protokoll-Bibliothek</span>
+                </button>
+
                 {/* Lab Results Button */}
                 <button
                   onClick={() => navigate('/labs')}
