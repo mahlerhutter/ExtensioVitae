@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { trackEvent } from '../lib/analytics';
 
 class ErrorBoundary extends React.Component {
     constructor(props) {
@@ -13,9 +14,13 @@ class ErrorBoundary extends React.Component {
     }
 
     componentDidCatch(error, errorInfo) {
-        // Sentry integration ready for v0.7.0 - install @sentry/react when needed
-        // See docs/SENTRY_SETUP.md for instructions
-        // Sentry.captureException(error, { contexts: { react: errorInfo } });
+        // Send error to PostHog
+        trackEvent('app_crashed', {
+            error_message: error.message,
+            error_stack: error.stack,
+            component_stack: errorInfo.componentStack,
+            url: window.location.href
+        });
 
         // Log error details for debugging
         console.error('ErrorBoundary caught an error:', error, errorInfo);
