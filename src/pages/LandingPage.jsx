@@ -149,7 +149,7 @@ function Hero() {
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full mb-8">
             <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
             <span className="text-amber-400 text-sm font-medium">
-              Early Beta - We're improving daily based on your feedback
+              v0.6.3 Zerberus
             </span>
           </div>
         </div>

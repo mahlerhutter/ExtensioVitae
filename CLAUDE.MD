@@ -1,8 +1,8 @@
 # CLAUDE.MD - ExtensioVitae Project Guide
 
-**Last Updated:** 2026-02-03
-**Project Version:** 1.0.0 (Early Beta v0.1)
-**Status:** MVP - Beta-ready with core features complete
+**Last Updated:** 2026-02-04
+**Project Version:** 1.0.0 (Beta v0.3.3)
+**Status:** MVP - One-Tap Protocol Library live
 
 ## Project Overview
 
@@ -52,7 +52,13 @@ MVPExtensio/
 │   ├── components/         # Reusable React components
 │   │   ├── dashboard/      # Dashboard-specific components (18 files)
 │   │   ├── feedback/       # Feedback system components (4 files)
-│   │   └── plan-review/    # Plan review/edit components
+│   │   ├── plan-review/    # Plan review/edit components
+│   │   ├── modules/        # Module system (DailyView, ModuleHub, etc.)
+│   │   ├── bloodcheck/     # Blood check UI (Panel, Upload, BiomarkerCard)
+│   │   ├── analytics/      # Progress analytics (Dashboard, Charts)
+│   │   ├── notifications/  # Notification settings & history
+│   │   ├── marketplace/    # Module marketplace UI
+│   │   └── common/         # Shared components (ErrorBoundary, etc.)
 │   ├── pages/              # Full page components (12 pages)
 │   ├── lib/                # Utilities & services
 │   │   ├── supabase.js     # Supabase client
@@ -60,13 +66,25 @@ MVPExtensio/
 │   │   ├── planBuilder.js  # Plan building logic (57KB)
 │   │   ├── planGenerator.js # LLM plan generation
 │   │   ├── longevityScore.js # Scoring algorithm (29KB)
-│   │   └── [8 more services]
+│   │   ├── moduleService.js # Module registry & instances
+│   │   ├── bloodCheckService.js # Lab OCR integration
+│   │   ├── readinessService.js # Readiness scoring
+│   │   ├── analyticsService.js # Progress aggregates
+│   │   ├── notificationService.js # Push notifications
+│   │   ├── offlineService.js # Service worker management
+│   │   └── [more services]
 │   ├── contexts/           # React context providers
 │   ├── hooks/              # Custom React hooks
+│   │   └── useOptimizedQuery.js # Cached data fetching
 │   └── tests/              # Test files (6 test suites)
 ├── docs/                   # Comprehensive documentation (50+ files)
 ├── sql/                    # Database migrations & setup
-├── public/                 # Static assets
+│   └── migrations/         # 014 migrations total
+├── supabase/
+│   └── functions/          # Edge Functions
+│       └── parse-lab-report/ # OCR for lab results
+├── public/
+│   └── sw.js               # Service worker for offline
 └── [config files]          # Build, lint, test configs
 ```
 
@@ -88,6 +106,15 @@ MVPExtensio/
 - **feedbackService.js** - Feedback collection & management
 - **analytics.js** - PostHog event tracking
 - **logger.js** - Client-side logging utility
+- **moduleService.js** - Module registry and instance management
+- **dailyTrackingService.js** - Daily task aggregation across modules
+- **modeService.js** - Context/Emergency mode integration
+- **planModuleService.js** - 30-day plan to module conversion
+- **bloodCheckService.js** - Lab results and OCR integration
+- **readinessService.js** - Readiness scoring and task adjustment
+- **analyticsService.js** - Progress aggregates and achievements
+- **notificationService.js** - Push notifications and preferences
+- **offlineService.js** - Service worker and offline sync
 
 ### Pages (src/pages/)
 - **LandingPage.jsx** - Marketing homepage

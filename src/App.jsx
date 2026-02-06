@@ -16,6 +16,10 @@ import TermsPage from './pages/TermsPage';
 import ImprintPage from './pages/ImprintPage';
 import FuturePage from './pages/FuturePage';
 import FeaturesPage from './pages/FeaturesPage';
+import RecoveryPage from './pages/RecoveryPage';
+import VersionsPage from './pages/VersionsPage';
+import FriendsPage from './pages/FriendsPage';
+import DashboardMockupPage from './pages/DashboardMockupPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import OnboardingGuard from './components/OnboardingGuard';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -23,6 +27,7 @@ import BetaBadge from './components/BetaBadge';
 import { ModeProvider } from './contexts/ModeContext';
 import { CalendarProvider } from './contexts/CalendarContext';
 import CalendarCallbackPage from './pages/CalendarCallbackPage';
+import OAuthCallback from './components/oauth/OAuthCallback';
 import { getCircadianIntelligence, shouldActivateMelatoninGuard } from './lib/circadianService';
 
 
@@ -117,6 +122,18 @@ export default function App() {
               </ErrorBoundary>
             } />
 
+            {/* Wearable OAuth Callbacks */}
+            <Route path="/oauth/oura/callback" element={
+              <ErrorBoundary>
+                <OAuthCallback />
+              </ErrorBoundary>
+            } />
+            <Route path="/oauth/whoop/callback" element={
+              <ErrorBoundary>
+                <OAuthCallback />
+              </ErrorBoundary>
+            } />
+
             {/* Legal Pages */}
             <Route path="/privacy" element={
               <ErrorBoundary>
@@ -134,17 +151,34 @@ export default function App() {
               </ErrorBoundary>
             } />
 
-            {/* Hidden Future Vision Page (for trusted users only) */}
-            <Route path="/future" element={
+            {/* Friends & Family Hub - Hidden Pages for Trusted Users */}
+            <Route path="/friends" element={
+              <ErrorBoundary>
+                <FriendsPage />
+              </ErrorBoundary>
+            } />
+
+            <Route path="/friends/future" element={
               <ErrorBoundary>
                 <FuturePage />
               </ErrorBoundary>
             } />
 
-            {/* Hidden Features Roadmap Page */}
-            <Route path="/features" element={
+            <Route path="/friends/features" element={
               <ErrorBoundary>
                 <FeaturesPage />
+              </ErrorBoundary>
+            } />
+
+            <Route path="/friends/versions" element={
+              <ErrorBoundary>
+                <VersionsPage />
+              </ErrorBoundary>
+            } />
+
+            <Route path="/friends/mockup" element={
+              <ErrorBoundary>
+                <DashboardMockupPage />
               </ErrorBoundary>
             } />
 
@@ -172,6 +206,17 @@ export default function App() {
                 <ProtectedRoute>
                   <OnboardingGuard>
                     <DashboardPage />
+                  </OnboardingGuard>
+                </ProtectedRoute>
+              </ErrorBoundary>
+            } />
+
+            {/* Recovery & Performance (Protected + Onboarding Guard) */}
+            <Route path="/recovery" element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <OnboardingGuard>
+                    <RecoveryPage />
                   </OnboardingGuard>
                 </ProtectedRoute>
               </ErrorBoundary>
@@ -253,6 +298,6 @@ export default function App() {
         }
       `}</style>
       </CalendarProvider>
-    </ModeProvider>
+    </ModeProvider >
   );
 }

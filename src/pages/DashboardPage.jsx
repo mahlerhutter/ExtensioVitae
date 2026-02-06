@@ -19,7 +19,8 @@ import {
   activateProtocol,
   getActiveProtocols,
   updateProtocolTaskStatus,
-  deactivateProtocol
+  deactivateProtocol,
+  shouldUseSupabase
 } from '../lib/dataService';
 
 // Dashboard Components
@@ -1017,6 +1018,15 @@ export default function DashboardPage() {
                 >
                   <span className="text-lg">🧩</span>
                   <span>Module Hub</span>
+                </button>
+
+                {/* Recovery & Performance Button */}
+                <button
+                  onClick={() => navigate('/recovery')}
+                  className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-sm font-medium rounded-lg transition-all border border-purple-500/50 hover:border-purple-400 flex items-center gap-3 px-4 shadow-lg shadow-purple-500/20"
+                >
+                  <span className="text-lg">📊</span>
+                  <span>Recovery & Performance</span>
                 </button>
               </div>
 

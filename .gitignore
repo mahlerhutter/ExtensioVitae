@@ -128,6 +128,13 @@ docs/VERCEL_BUILD_FIX.md
 docs/*_DEPLOYMENT.md
 docs/*_FIX.md
 docs/*_DEBUG*.md
+docs/DEPLOYMENT_COMPLETE.md
+docs/WEARABLE_*.md
+docs/INTEGRATED_SYSTEMS_COMPLETE.md
+
+# System Status Reports (internal snapshots)
+SYSTEM_STATUS_*.md
+SYSTEM_SUMMARY.md
 
 # EXCEPTIONS: Allow important UX/Product documentation
 !docs/TOP_1_PERCENT_STATUS.md

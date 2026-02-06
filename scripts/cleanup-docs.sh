@@ -1,51 +1,53 @@
 #!/bin/bash
-# Docs Cleanup Script
-# Run this to organize docs folder
+# Documentation Cleanup Script
+# Moves old/completed documentation to archive
 
-cd "$(dirname "$0")/../docs" || exit 1
+echo "🧹 Cleaning up documentation..."
 
-echo "🧹 Cleaning up docs folder..."
+# Create archive directories
+mkdir -p docs/archive/v0.5.x
+mkdir -p docs/archive/deployment_logs
+mkdir -p docs/archive/migration_logs
+mkdir -p docs/archive/wearable_deployment
 
-# Create directories if they don't exist
-mkdir -p audits guides sessions archive
-
-# Move audits (if not already moved)
-echo "📊 Moving audits..."
-for file in audit_*.json AUDIT.md BETA_READINESS_ASSESSMENT.md; do
-    [ -f "$file" ] && mv "$file" audits/ 2>/dev/null && echo "  ✓ $file"
+# Move v0.5.x completion docs (if not already moved)
+for file in \
+  DASHBOARD_UX_INTEGRATED.md \
+  DEPLOYMENT_v0.5.1.md \
+  MORNING_CHECKIN_INTEGRATION.md \
+  ONBOARDING_GUARD_COMPLETE.md \
+  RECOVERY_SCORES_TABLE.md \
+  UX_WEEK1_COMPLETE.md \
+  UX_WEEK1_IMPLEMENTATION.md \
+  V0.4.0_COMPLETE.md \
+  V0.5.0_AUTONOMOUS_COMPLETE.md
+do
+  if [ -f "docs/$file" ]; then
+    mv "docs/$file" "docs/archive/v0.5.x/"
+    echo "✅ Archived: $file"
+  fi
 done
 
-# Move session summaries
-echo "📝 Moving session summaries..."
-for file in DAILY_WORKFLOW_SUMMARY_*.md DEPLOYMENT_SUCCESS_*.md WEEK2_SESSION_*.md; do
-    [ -f "$file" ] && mv "$file" sessions/ 2>/dev/null && echo "  ✓ $file"
+# Move deployment logs (if not already moved)
+for file in \
+  EDGE_FUNCTIONS_DEPLOY_MANUAL.md
+do
+  if [ -f "docs/$file" ]; then
+    mv "docs/$file" "docs/archive/wearable_deployment/"
+    echo "✅ Archived: $file"
+  fi
 done
 
-# Move guides
-echo "📚 Moving guides..."
-for file in SECURITY_HEADERS.md SENTRY_SETUP.md BACKUP_CONFIGURATION.md \
-            EDGE_FUNCTION_DEPLOYMENT.md EDGE_FUNCTION_VERIFICATION.md \
-            EMAIL_SETUP_GUIDE.md EMAIL_STRATEGY.md REMINDER_BACKUPS_AFTER_PRO.md; do
-    [ -f "$file" ] && mv "$file" guides/ 2>/dev/null && echo "  ✓ $file"
-done
+# Remove .DS_Store files
+find docs -name ".DS_Store" -delete 2>/dev/null
+echo "✅ Removed .DS_Store files"
 
-# Move to archive
-echo "🗄️  Moving to archive..."
-for file in 01-PRODUCT-OVERVIEW.md 02-USER-FLOW.md 03-LANDING-PAGE.md \
-            04-INTAKE-FORM.md 05-AI-PLAN-GENERATION.md 07-DASHBOARD.md \
-            MVP_ROADMAP.md PRODUCT_VISION_SYNTHESIS.md WHATS_NEXT.md; do
-    [ -f "$file" ] && mv "$file" archive/ 2>/dev/null && echo "  ✓ $file"
-done
-
-# Remove .DS_Store
-rm -f .DS_Store
+echo ""
+echo "📊 Remaining docs in /docs:"
+ls -1 docs/*.md 2>/dev/null | wc -l | xargs echo "  Markdown files:"
 
 echo ""
 echo "✅ Cleanup complete!"
 echo ""
-echo "📁 Docs structure:"
-echo "  Core docs: $(ls -1 *.md 2>/dev/null | wc -l | tr -d ' ') files"
-echo "  Audits: $(ls -1 audits/ 2>/dev/null | wc -l | tr -d ' ') files"
-echo "  Guides: $(ls -1 guides/ 2>/dev/null | wc -l | tr -d ' ') files"
-echo "  Sessions: $(ls -1 sessions/ 2>/dev/null | wc -l | tr -d ' ') files"
-echo "  Archive: $(ls -1 archive/ 2>/dev/null | wc -l | tr -d ' ') files"
+echo "📁 Archive structure:"
+tree -L 2 docs/archive 2>/dev/null || find docs/archive -type d | head -10

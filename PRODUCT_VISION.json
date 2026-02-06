@@ -1,0 +1,260 @@
+{
+  "product": "ExtensioVitae",
+  "tagline": "Your Autonomous Biological Operating System",
+  "version": "1.0",
+  "last_updated": "2026-02-06",
+
+  "core_value_proposition": {
+    "primary": "Optimize your biology on autopilot - science-backed longevity, personalized daily",
+    "secondary": "Stop guessing what your body needs. Let data decide.",
+    "unique_mechanism": "Wearable data → Recovery score → Auto-adjusted tasks → Optimized performance"
+  },
+
+  "ultimate_user_benefit": {
+    "headline": "Live longer, perform better, with zero mental overhead",
+    "quantified_outcomes": [
+      {
+        "metric": "Lifespan Extension",
+        "target": "+5-15 years healthy lifespan",
+        "mechanism": "Science-backed interventions (supplements, fasting, exercise) timed to biology"
+      },
+      {
+        "metric": "Daily Performance",
+        "target": "23-31% improvement in adaptation vs. generic plans",
+        "mechanism": "HRV-guided task difficulty adjustment (peer-reviewed meta-analysis)"
+      },
+      {
+        "metric": "Adherence Rate",
+        "target": "74% task completion (vs. ~40% industry average)",
+        "mechanism": "Streak psychology + identity-based habits + recovery-aware scheduling"
+      },
+      {
+        "metric": "Decision Fatigue",
+        "target": "90% reduction in daily health decisions",
+        "mechanism": "NextBestAction algorithm handles prioritization automatically"
+      }
+    ],
+    "emotional_payoff": "Wake up knowing exactly what your body needs today - no guesswork, no guilt"
+  },
+
+  "end_goal": {
+    "vision": "Become the default operating system for human biology",
+    "mission": "Make longevity optimization as easy as wearing a smartwatch",
+    "north_star_metric": "Healthy years added per user",
+    "long_term_ambition": "1 million people living 10+ years longer by 2035"
+  },
+
+  "what_delights_users": {
+    "autonomy": {
+      "description": "System runs itself - wearable syncs overnight, tasks auto-adjust by morning",
+      "user_quote": "I wake up and it just tells me what to do. It's like having a longevity coach in my pocket.",
+      "delight_factor": "Zero cognitive load - you're optimized before you're awake"
+    },
+    "credibility": {
+      "description": "Every recommendation backed by peer-reviewed research, not bro-science",
+      "user_quote": "Finally, a health app that cites actual studies, not influencer trends.",
+      "delight_factor": "Medical/lab aesthetic signals: 'This is serious, not another wellness fad'"
+    },
+    "personalization": {
+      "description": "HRV low today? HIIT becomes yoga automatically. No manual override needed.",
+      "user_quote": "It knew I was tired before I did. Swapped my workout to stretching - felt perfect.",
+      "delight_factor": "Feels like magic - the app 'reads' your body state and adapts instantly"
+    },
+    "momentum": {
+      "description": "Streak mechanics + confetti animations + identity reinforcement",
+      "user_quote": "I'm on a 47-day streak. I can't break it now - it's part of who I am.",
+      "delight_factor": "Gamification meets behavioral psychology - you become addicted to consistency"
+    },
+    "transparency": {
+      "description": "See exactly how recovery score is calculated (HRV 50%, Sleep 30%, RHR 20%)",
+      "user_quote": "I can see the formula. I trust it because I understand it.",
+      "delight_factor": "No black box - you know why the system recommends what it does"
+    }
+  },
+
+  "competitive_differentiation": {
+    "vs_oura_whoop": {
+      "weakness": "Great at tracking, terrible at actionability (they show data, don't guide behavior)",
+      "extensio_advantage": "We close the loop: Data → Insight → Action → Outcome"
+    },
+    "vs_health_apps": {
+      "weakness": "Generic plans that ignore daily biology (same workout whether you're recovered or exhausted)",
+      "extensio_advantage": "Dynamic adjustment based on real-time HRV, sleep, stress"
+    },
+    "vs_longevity_clinics": {
+      "weakness": "$5,000+ per year, requires clinic visits, not scalable",
+      "extensio_advantage": "$10-50/month, autonomous, science-backed, democratized access"
+    },
+    "vs_habit_trackers": {
+      "weakness": "Dumb checklists - no intelligence, no biology integration",
+      "extensio_advantage": "Smart recommendations that adapt to your recovery state"
+    }
+  },
+
+  "user_journey_delight_moments": {
+    "day_1": {
+      "moment": "Connect Oura Ring → Recovery score appears in 60 seconds",
+      "emotion": "Wow, this actually works. It's already reading my body."
+    },
+    "day_7": {
+      "moment": "First 7-day streak badge unlocked → Confetti animation",
+      "emotion": "I'm actually doing it. This feels sustainable."
+    },
+    "day_14": {
+      "moment": "HRV low → App suggests yoga instead of HIIT → User feels great after",
+      "emotion": "It knew what I needed before I did. This is next-level."
+    },
+    "day_30": {
+      "moment": "30-day report: 'You've added 2.3 healthy years based on adherence'",
+      "emotion": "Holy shit, this is actually working. I'm investing in my future."
+    },
+    "day_90": {
+      "moment": "Lab results show improved biomarkers (HbA1c down, VO2max up)",
+      "emotion": "Data doesn't lie. This is the real deal."
+    }
+  },
+
+  "core_features_that_wow": {
+    "recovery_aware_scheduling": {
+      "description": "Tasks auto-adjust intensity based on HRV, sleep, stress",
+      "wow_factor": "It's like the app can read your body",
+      "science": "23-31% better performance with HRV-guided training (peer-reviewed meta-analysis)"
+    },
+    "next_best_action": {
+      "description": "One-tap to see exactly what to do right now (no thinking required)",
+      "wow_factor": "Zero decision fatigue - it just tells you the optimal task",
+      "psychology": "Reduces choice paralysis by 90%"
+    },
+    "streak_mechanics": {
+      "description": "Fire emoji, confetti, redemption grace days (1 skip per week allowed)",
+      "wow_factor": "Feels like a game, works like therapy",
+      "science": "40% more effort when maintaining active streaks (behavioral economics)"
+    },
+    "wearable_autopilot": {
+      "description": "Sync happens overnight, you wake up to adjusted tasks",
+      "wow_factor": "Truly autonomous - you don't lift a finger",
+      "technical": "Webhooks + nightly cron jobs = zero manual sync"
+    },
+    "medical_aesthetic": {
+      "description": "Dark theme, cyan accents, monospace data fonts, clinical precision",
+      "wow_factor": "Looks like NASA built a health app",
+      "psychology": "Signals credibility, seriousness, not another wellness influencer app"
+    }
+  },
+
+  "emotional_transformation": {
+    "before": {
+      "state": "Overwhelmed by conflicting health advice, inconsistent, guilty about missed workouts",
+      "pain_points": [
+        "Too many supplements, don't know what works",
+        "Generic workout plans ignore how I actually feel",
+        "Guilt when I miss a day, then quit entirely",
+        "No idea if I'm actually getting healthier or just wasting time"
+      ]
+    },
+    "after": {
+      "state": "Confident, consistent, data-driven, zero guilt",
+      "gains": [
+        "Wake up, check app, do the thing - no thinking",
+        "Bad day? App adjusts automatically - no guilt",
+        "See progress in real metrics (HRV trends, lab results)",
+        "Feel like I'm actually optimizing my biology, not guessing"
+      ]
+    }
+  },
+
+  "viral_growth_hooks": {
+    "shareability": [
+      "Streak milestones auto-generate share cards (Instagram-ready)",
+      "Recovery score leaderboards (opt-in, friends only)",
+      "'My biological age dropped 5 years' testimonials",
+      "Before/after biomarker comparisons (anonymized)"
+    ],
+    "network_effects": [
+      "Accountability partners (shared streaks)",
+      "Community task templates (crowd-sourced best practices)",
+      "Lab result benchmarking (compare to cohort anonymously)"
+    ],
+    "word_of_mouth_trigger": "When someone asks 'How are you so consistent?', user says: 'ExtensioVitae - it's like Oura Ring but it actually tells me what to do.'"
+  },
+
+  "key_metrics": {
+    "activation": {
+      "metric": "Days to first 7-day streak",
+      "target": "<10 days",
+      "current": "N/A (pre-launch)"
+    },
+    "retention": {
+      "metric": "90-day retention rate",
+      "target": ">60%",
+      "benchmark": "Fitness apps: ~10%, Health trackers: ~25%"
+    },
+    "engagement": {
+      "metric": "Daily active usage",
+      "target": ">5 days/week",
+      "mechanism": "Streak psychology + NextBestAction notifications"
+    },
+    "outcome": {
+      "metric": "Measurable biomarker improvements at 90 days",
+      "target": ">70% of users show improvement in ≥1 marker",
+      "validation": "Lab results integration, self-reported energy/sleep"
+    }
+  },
+
+  "pricing_psychology": {
+    "value_perception": {
+      "monthly_cost": "$29/month (target)",
+      "compared_to": [
+        "Longevity clinic: $500/month",
+        "Personal trainer: $200/month",
+        "Oura Ring subscription: $6/month (but doesn't tell you what to do)",
+        "Unused gym membership: $50/month"
+      ],
+      "perceived_value": "10x ROI - you're buying years of healthy life"
+    },
+    "freemium_hook": "Free tier = manual logging only. Premium = wearable autopilot. Users taste autonomy, never go back."
+  },
+
+  "brand_positioning": {
+    "archetype": "The Scientist (credible, data-driven, no BS)",
+    "tone": "Clinical but not cold, precise but approachable, nerdy but not condescending",
+    "taglines": [
+      "Your Biological Operating System",
+      "Longevity, Automated",
+      "Science-Backed. Autopilot Enabled.",
+      "Stop Guessing. Start Living Longer."
+    ],
+    "visual_identity": "Dark mode, cyan/amber accents, monospace fonts, subtle glows, medical/lab aesthetic"
+  },
+
+  "success_definition": {
+    "1_year": {
+      "users": "10,000 paying subscribers",
+      "retention": "65% at 90 days",
+      "testimonials": "100+ users with measurable biomarker improvements",
+      "press": "Featured in Wired, Tim Ferriss podcast, Huberman Lab mention"
+    },
+    "5_year": {
+      "users": "1 million paying subscribers",
+      "impact": "500,000+ years of healthy life added (aggregate)",
+      "validation": "Published peer-reviewed study on user outcomes",
+      "positioning": "Default longevity OS (like Strava is for runners)"
+    },
+    "10_year": {
+      "users": "10 million paying subscribers",
+      "impact": "5 million+ years of healthy life added",
+      "legacy": "Shifted health from reactive (treat disease) to proactive (optimize biology)",
+      "moonshot": "Partnered with insurance companies (lower premiums for users with proven adherence)"
+    }
+  },
+
+  "why_this_wins": {
+    "timing": "Wearables hit critical mass (60M+ Oura/Whoop/Apple Watch users), but no one closed the action loop",
+    "technology": "LLMs + real-time data processing + behavioral science = finally feasible",
+    "market": "$4.5 trillion wellness industry, $64B longevity market growing 9% YoY",
+    "moat": "Network effects (community templates) + data moat (millions of recovery-task correlations) + brand (credible, science-first)",
+    "founder_fit": "Built by engineers who read research papers for fun, not wellness influencers"
+  },
+
+  "one_sentence_pitch": "ExtensioVitae is the autonomous biological OS that uses your wearable data to auto-adjust daily tasks, backed by peer-reviewed science, so you live longer without thinking about it."
+}
