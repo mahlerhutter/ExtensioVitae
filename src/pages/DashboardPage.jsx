@@ -81,6 +81,7 @@ import DailyInsight from '../components/dashboard/DailyInsight';
 import NextBestAction from '../components/dashboard/NextBestAction';
 import TrendChart from '../components/progress/TrendChart';
 import MorningCheckIn from '../components/dashboard/MorningCheckIn';
+import OnboardingTour from '../components/dashboard/OnboardingTour';
 
 // Pillar configuration
 const PILLARS = {
@@ -911,20 +912,22 @@ export default function DashboardPage() {
             )}
 
             {/* Today Dashboard - Unified view showing all active modules */}
-            <TodayDashboard
-              userId={user?.id}
-              language="de"
-              onShowModuleHub={() => setShowModuleHub(true)}
-              hasPlan={!!(plan?.supabase_plan_id || plan?.days?.length > 0)}
-              plan={plan}
-              planProgress={progress}
-              currentPlanDay={currentDay}
-              onTaskToggle={handleTaskToggle}
-              activePack={activePack}
-              onProtocolTaskToggle={handleProtocolTaskToggle}
-              activeMode={activeMode || 'normal'}
-              calendarEvents={todayEvents || []}
-            />
+            <div data-tour="daily-progress">
+              <TodayDashboard
+                userId={user?.id}
+                language="de"
+                onShowModuleHub={() => setShowModuleHub(true)}
+                hasPlan={!!(plan?.supabase_plan_id || plan?.days?.length > 0)}
+                plan={plan}
+                planProgress={progress}
+                currentPlanDay={currentDay}
+                onTaskToggle={handleTaskToggle}
+                activePack={activePack}
+                onProtocolTaskToggle={handleProtocolTaskToggle}
+                activeMode={activeMode || 'normal'}
+                calendarEvents={todayEvents || []}
+              />
+            </div>
 
             <PlanSummary
               plan={plan}
@@ -1017,127 +1020,120 @@ export default function DashboardPage() {
                   <span className="text-lg">🧪</span>
                   <span>Laborberichte</span>
                 </button>
-
-                {/* Module Hub Button */}
-                <button
-                  onClick={() => navigate('/modules')}
-                  className="w-full py-2.5 bg-slate-800/70 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-all border border-slate-700/50 hover:border-slate-600 flex items-center gap-3 px-4"
-                >
-                  <span className="text-lg">🧩</span>
-                  <span>Module Hub</span>
-                </button>
-
-                {/* Recovery & Performance Button */}
-                <button
-                  onClick={() => navigate('/recovery')}
-                  className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-sm font-medium rounded-lg transition-all border border-purple-500/50 hover:border-purple-400 flex items-center gap-3 px-4 shadow-lg shadow-purple-500/20"
-                >
-                  <span className="text-lg">📊</span>
-                  <span>Recovery & Performance</span>
-                </button>
-              </div>
-
-              {/* Export Actions */}
-              <div className="pt-3 border-t border-slate-800 space-y-2">
-                <p className="text-slate-500 text-xs uppercase tracking-wider font-semibold mb-2">Export</p>
-
-                {/* Calendar Export Button */}
-                <button
-                  onClick={() => {
-                    const icsContent = generateICS(plan);
-                    downloadICS(icsContent);
-                    addToast('📅 Kalender exportiert!', 'success');
-                    trackFeatureUsed('calendar_export');
-                  }}
-                  className="w-full py-2.5 bg-slate-800/70 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-all border border-slate-700/50 hover:border-slate-600 flex items-center gap-3 px-4"
-                >
-                  <span className="text-lg">📅</span>
-                  <span>Kalender exportieren</span>
-                </button>
-
-                <WhatsAppButton />
               </div>
             </div>
 
-            <MonthOverview
-              plan={plan}
-              progress={progress}
-              currentDay={currentDay}
-              onDayClick={handleDayClick}
-              startDate={plan.start_date}
-              userId={user?.id}
-            />
+            {/* Recovery & Performance Button */}
+            <button
+              onClick={() => navigate('/recovery')}
+              className="w-full py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-sm font-medium rounded-lg transition-all border border-purple-500/50 hover:border-purple-400 flex items-center gap-3 px-4 shadow-lg shadow-purple-500/20"
+            >
+              <span className="text-lg">📊</span>
+              <span>Recovery & Performance</span>
+            </button>
+          </div>
 
-            {/* History */}
-            {archivedPlans.length > 0 && (
-              <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
-                <button
-                  onClick={() => setShowArchived(!showArchived)}
-                  className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-800/50 transition-colors"
-                >
-                  <h3 className="text-white font-semibold text-sm uppercase tracking-wider text-slate-400">Vergangene Pläne</h3>
-                  <span className={`text-slate-400 transform transition-transform ${showArchived ? 'rotate-180' : ''}`}>
-                    ▼
-                  </span>
-                </button>
+          {/* Export Actions */}
+          <div className="pt-3 border-t border-slate-800 space-y-2">
+            <p className="text-slate-500 text-xs uppercase tracking-wider font-semibold mb-2">Export</p>
 
-                {showArchived && (
-                  <div className="px-5 pb-5 space-y-3 animate-fadeIn">
-                    {loadingArchivedPlan && (
-                      <div className="p-6 flex flex-col items-center justify-center text-slate-400">
-                        <div className="w-8 h-8 border-3 border-amber-400 border-t-transparent rounded-full animate-spin mb-3"></div>
-                        <p className="text-sm">Plan wird geladen...</p>
-                      </div>
-                    )}
-                    {archivedPlans.map(p => (
-                      <div
-                        key={p.supabase_plan_id}
-                        onClick={async () => {
-                          if (loadingArchivedPlan) return; // Prevent clicks during loading
+            {/* Calendar Export Button */}
+            <button
+              onClick={() => {
+                const icsContent = generateICS(plan);
+                downloadICS(icsContent);
+                addToast('📅 Kalender exportiert!', 'success');
+                trackFeatureUsed('calendar_export');
+              }}
+              className="w-full py-2.5 bg-slate-800/70 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-all border border-slate-700/50 hover:border-slate-600 flex items-center gap-3 px-4"
+            >
+              <span className="text-lg">📅</span>
+              <span>Kalender exportieren</span>
+            </button>
 
-                          try {
-                            setLoadingArchivedPlan(true);
-                            setPlan(p);
-                            const archProgress = await getProgress(p.supabase_plan_id);
-                            setProgress(archProgress);
-                            if (p.start_date) {
-                              setCurrentDay(calculatePlanDay(p.start_date));
-                            } else {
-                              setCurrentDay(1);
-                            }
-                            handleSelectDay(null);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                          } catch (error) {
-                            logger.error('Error loading archived plan:', error);
-                          } finally {
-                            setLoadingArchivedPlan(false);
-                          }
-                        }}
-                        className={`p-3 bg-slate-800/50 border border-slate-700/50 rounded-lg transition-colors cursor-pointer group ${loadingArchivedPlan
-                          ? 'opacity-50 cursor-not-allowed'
-                          : 'hover:bg-slate-700'
-                          }`}
-                      >
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="font-medium text-slate-200 text-sm group-hover:text-amber-400 transition-colors">
-                            {new Date(p.created_at).toLocaleDateString('de-DE')}
-                            {p.updated_at && (
-                              <span className="text-slate-500 font-normal text-xs ml-1">→ {new Date(p.updated_at).toLocaleDateString('de-DE')}</span>
-                            )}
-                          </span>
-                          <span className="text-xs text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded">Archiv</span>
-                        </div>
-                        <div className="text-xs text-slate-400 line-clamp-2">{p.plan_summary}</div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
+            <WhatsAppButton />
           </div>
         </div>
-      </main>
+
+        <MonthOverview
+          plan={plan}
+          progress={progress}
+          currentDay={currentDay}
+          onDayClick={handleDayClick}
+          startDate={plan.start_date}
+          userId={user?.id}
+        />
+
+        {/* History */}
+        {archivedPlans.length > 0 && (
+          <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-sm">
+            <button
+              onClick={() => setShowArchived(!showArchived)}
+              className="w-full px-5 py-4 flex items-center justify-between text-left hover:bg-slate-800/50 transition-colors"
+            >
+              <h3 className="text-white font-semibold text-sm uppercase tracking-wider text-slate-400">Vergangene Pläne</h3>
+              <span className={`text-slate-400 transform transition-transform ${showArchived ? 'rotate-180' : ''}`}>
+                ▼
+              </span>
+            </button>
+
+            {showArchived && (
+              <div className="px-5 pb-5 space-y-3 animate-fadeIn">
+                {loadingArchivedPlan && (
+                  <div className="p-6 flex flex-col items-center justify-center text-slate-400">
+                    <div className="w-8 h-8 border-3 border-amber-400 border-t-transparent rounded-full animate-spin mb-3"></div>
+                    <p className="text-sm">Plan wird geladen...</p>
+                  </div>
+                )}
+                {archivedPlans.map(p => (
+                  <div
+                    key={p.supabase_plan_id}
+                    onClick={async () => {
+                      if (loadingArchivedPlan) return; // Prevent clicks during loading
+
+                      try {
+                        setLoadingArchivedPlan(true);
+                        setPlan(p);
+                        const archProgress = await getProgress(p.supabase_plan_id);
+                        setProgress(archProgress);
+                        if (p.start_date) {
+                          setCurrentDay(calculatePlanDay(p.start_date));
+                        } else {
+                          setCurrentDay(1);
+                        }
+                        handleSelectDay(null);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      } catch (error) {
+                        logger.error('Error loading archived plan:', error);
+                      } finally {
+                        setLoadingArchivedPlan(false);
+                      }
+                    }}
+                    className={`p-3 bg-slate-800/50 border border-slate-700/50 rounded-lg transition-colors cursor-pointer group ${loadingArchivedPlan
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:bg-slate-700'
+                      }`}
+                  >
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="font-medium text-slate-200 text-sm group-hover:text-amber-400 transition-colors">
+                        {new Date(p.created_at).toLocaleDateString('de-DE')}
+                        {p.updated_at && (
+                          <span className="text-slate-500 font-normal text-xs ml-1">→ {new Date(p.updated_at).toLocaleDateString('de-DE')}</span>
+                        )}
+                      </span>
+                      <span className="text-xs text-slate-500 bg-slate-900 px-1.5 py-0.5 rounded">Archiv</span>
+                    </div>
+                    <div className="text-xs text-slate-400 line-clamp-2">{p.plan_summary}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+    </div>
+        </div >
+      </main >
 
       <footer className="border-t border-slate-800 mt-12">
         <div className="max-w-6xl mx-auto px-6 py-6 text-center text-slate-500 text-sm">
@@ -1162,157 +1158,169 @@ export default function DashboardPage() {
         progress={progress}
       />
 
-      {/* Plan History Modal */}
-      <PlanHistoryModal
-        isOpen={showHistoryModal}
-        onClose={() => setShowHistoryModal(false)}
-        plans={archivedPlans}
-        isLoading={loadingHistory}
-        onLoadPlan={async (p) => {
-          setPlan(p);
-          // Load progress for this plan
-          const archProgress = await getProgress(p.supabase_plan_id);
-          setProgress(archProgress);
-          if (p.start_date) {
-            setCurrentDay(calculatePlanDay(p.start_date));
-          } else {
-            setCurrentDay(1);
-          }
+  {/* Plan History Modal */ }
+  <PlanHistoryModal
+    isOpen={showHistoryModal}
+    onClose={() => setShowHistoryModal(false)}
+    plans={archivedPlans}
+    isLoading={loadingHistory}
+    onLoadPlan={async (p) => {
+      setPlan(p);
+      // Load progress for this plan
+      const archProgress = await getProgress(p.supabase_plan_id);
+      setProgress(archProgress);
+      if (p.start_date) {
+        setCurrentDay(calculatePlanDay(p.start_date));
+      } else {
+        setCurrentDay(1);
+      }
 
-          // v0.4.0: Load Active Protocols
+      // v0.4.0: Load Active Protocols
+      try {
+        const activeProtocols = await getActiveProtocols();
+        if (activeProtocols && activeProtocols.length > 0) {
+          const firstActive = activeProtocols[0];
+          const packTemplate = PROTOCOL_PACKS.find(p => p.id === firstActive.protocol_id);
+
+          if (packTemplate) {
+            setActivePack({
+              ...packTemplate,
+              task_completion_status: firstActive.task_completion_status || {},
+              tasks_completed: firstActive.tasks_completed || 0
+            });
+            setActivePackDbId(firstActive.id);
+          }
+        }
+      } catch (error) {
+        logger.warn('[Dashboard] Failed to load protocols:', error);
+      }
+      handleSelectDay(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }}
+  />
+
+  {/* Edit Profile Modal */ }
+  <EditProfileModal
+    isOpen={showEditModal}
+    onClose={() => setShowEditModal(false)}
+    initialData={intakeData}
+    onSave={handleUpdateProfile}
+  />
+
+  {/* Feedback Components */ }
+  {
+    showInitialFeedback && (
+      <InitialFeedbackModal
+        onSubmit={async (feedbackData) => {
           try {
-            const activeProtocols = await getActiveProtocols();
-            if (activeProtocols && activeProtocols.length > 0) {
-              const firstActive = activeProtocols[0];
-              const packTemplate = PROTOCOL_PACKS.find(p => p.id === firstActive.protocol_id);
-
-              if (packTemplate) {
-                setActivePack({
-                  ...packTemplate,
-                  task_completion_status: firstActive.task_completion_status || {},
-                  tasks_completed: firstActive.tasks_completed || 0
-                });
-                setActivePackDbId(firstActive.id);
-              }
-            }
-          } catch (error) {
-            logger.warn('[Dashboard] Failed to load protocols:', error);
-          }
-          handleSelectDay(null);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-      />
-
-      {/* Edit Profile Modal */}
-      <EditProfileModal
-        isOpen={showEditModal}
-        onClose={() => setShowEditModal(false)}
-        initialData={intakeData}
-        onSave={handleUpdateProfile}
-      />
-
-      {/* Feedback Components */}
-      {showInitialFeedback && (
-        <InitialFeedbackModal
-          onSubmit={async (feedbackData) => {
-            try {
-              // Only include plan_id if it exists
-              const feedback = {
-                ...feedbackData,
-                ...(plan?.supabase_plan_id && { plan_id: plan.supabase_plan_id }),
-              };
-              await submitFeedback(feedback);
-              setShowInitialFeedback(false);
-              setFeedbackSubmitted(true);
-              addToast('Vielen Dank für dein Feedback! 🎉', 'success');
-            } catch (error) {
-              logger.error('[Dashboard] Failed to submit initial feedback:', error);
-              addToast(`Fehler: ${error.message || 'Unbekannter Fehler'}`, 'error');
-            }
-          }}
-          onSkip={() => {
+            // Only include plan_id if it exists
+            const feedback = {
+              ...feedbackData,
+              ...(plan?.supabase_plan_id && { plan_id: plan.supabase_plan_id }),
+            };
+            await submitFeedback(feedback);
             setShowInitialFeedback(false);
             setFeedbackSubmitted(true);
-          }}
+            addToast('Vielen Dank für dein Feedback! 🎉', 'success');
+          } catch (error) {
+            logger.error('[Dashboard] Failed to submit initial feedback:', error);
+            addToast(`Fehler: ${error.message || 'Unbekannter Fehler'}`, 'error');
+          }
+        }}
+        onSkip={() => {
+          setShowInitialFeedback(false);
+          setFeedbackSubmitted(true);
+        }}
+      />
+    )
+  }
+
+  {
+    showFeedbackPanel && (
+      <GeneralFeedbackPanel
+        onClose={() => setShowFeedbackPanel(false)}
+        onSubmit={async (feedbackData) => {
+          try {
+            await submitFeedback({
+              ...feedbackData,
+              plan_id: plan?.supabase_plan_id,
+            });
+          } catch (error) {
+            logger.error('[Dashboard] Failed to submit general feedback:', error);
+            throw error;
+          }
+        }}
+      />
+    )
+  }
+
+  {
+    user && (
+      <FloatingFeedbackButton onClick={() => setShowFeedbackPanel(true)} />
+    )
+  }
+
+  {/* Module Activation Flow (New User Onboarding) */ }
+  {
+    showModuleActivation && user?.id && (
+      <ModuleActivationFlow
+        userId={user.id}
+        intakeData={intakeData}
+        language="de"
+        onComplete={() => {
+          setShowModuleActivation(false);
+          setHasActiveModules(true);
+          // Refresh the page to show the new modules
+          window.location.reload();
+          addToast('🧩 Module aktiviert! Dein Daily Tracking ist bereit.', 'success');
+        }}
+        onSkip={() => {
+          setShowModuleActivation(false);
+          localStorage.setItem('module_onboarding_dismissed', 'true');
+        }}
+      />
+    )
+  }
+
+  {/* Module Hub Modal */ }
+  {
+    showModuleHub && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+          className="absolute inset-0 bg-black/70"
+          onClick={() => setShowModuleHub(false)}
         />
-      )}
-
-      {showFeedbackPanel && (
-        <GeneralFeedbackPanel
-          onClose={() => setShowFeedbackPanel(false)}
-          onSubmit={async (feedbackData) => {
-            try {
-              await submitFeedback({
-                ...feedbackData,
-                plan_id: plan?.supabase_plan_id,
-              });
-            } catch (error) {
-              logger.error('[Dashboard] Failed to submit general feedback:', error);
-              throw error;
-            }
-          }}
-        />
-      )}
-
-      {user && (
-        <FloatingFeedbackButton onClick={() => setShowFeedbackPanel(true)} />
-      )}
-
-      {/* Module Activation Flow (New User Onboarding) */}
-      {showModuleActivation && user?.id && (
-        <ModuleActivationFlow
-          userId={user.id}
-          intakeData={intakeData}
-          language="de"
-          onComplete={() => {
-            setShowModuleActivation(false);
-            setHasActiveModules(true);
-            // Refresh the page to show the new modules
-            window.location.reload();
-            addToast('🧩 Module aktiviert! Dein Daily Tracking ist bereit.', 'success');
-          }}
-          onSkip={() => {
-            setShowModuleActivation(false);
-            localStorage.setItem('module_onboarding_dismissed', 'true');
-          }}
-        />
-      )}
-
-      {/* Module Hub Modal */}
-      {showModuleHub && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-black/70"
+        <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <button
             onClick={() => setShowModuleHub(false)}
-          />
-          <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setShowModuleHub(false)}
-              className="absolute top-4 right-4 z-10 p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <ModuleHub userId={user?.id} language="de" />
-          </div>
+            className="absolute top-4 right-4 z-10 p-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <ModuleHub userId={user?.id} language="de" />
         </div>
-      )}
+      </div>
+    )
+  }
 
-      {/* Morning Check-in Modal (v0.5.1) */}
-      {showMorningCheckIn && (
-        <MorningCheckIn
-          showModal={showMorningCheckIn}
-          onComplete={(result) => {
-            setShowMorningCheckIn(false);
-            addToast(`Recovery Score: ${result.score}/100`, 'success');
-          }}
-          onSkip={() => setShowMorningCheckIn(false)}
-        />
-      )}
+  {/* Morning Check-in Modal (v0.5.1) */ }
+  {
+    showMorningCheckIn && (
+      <MorningCheckIn
+        showModal={showMorningCheckIn}
+        onComplete={(result) => {
+          setShowMorningCheckIn(false);
+          addToast(`Recovery Score: ${result.score}/100`, 'success');
+        }}
+        onSkip={() => setShowMorningCheckIn(false)}
+      />
+    )
+  }
 
-      {/* Confirmation Dialog */}
-      <ConfirmDialog />
-    </div>
+  {/* Confirmation Dialog */ }
+  <ConfirmDialog />
+    </div >
   );
 }
