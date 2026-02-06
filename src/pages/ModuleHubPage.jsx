@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../components/Toast';
 import { getUserModules, activateModule, getAvailableModules } from '../lib/moduleService';
+import { getActivePlanFromSupabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
@@ -23,6 +24,7 @@ export default function ModuleHubPage() {
 
     const [modules, setModules] = useState([]);
     const [activeModules, setActiveModules] = useState([]);
+    const [hasActivePlan, setHasActivePlan] = useState(false);
     const [loading, setLoading] = useState(true);
     const [activating, setActivating] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState('all');
@@ -39,13 +41,15 @@ export default function ModuleHubPage() {
 
         try {
             setLoading(true);
-            const [allModules, userModules] = await Promise.all([
+            const [allModules, userModules, activePlan] = await Promise.all([
                 getAvailableModules(),
-                getUserModules(user.id)
+                getUserModules(user.id),
+                getActivePlanFromSupabase(user.id)
             ]);
 
             setModules(allModules || []);
             setActiveModules(userModules || []);
+            setHasActivePlan(!!activePlan);
         } catch (error) {
             logger.error('[ModuleHub] Failed to load modules:', error);
             addToast('Fehler beim Laden der Module', 'error');
@@ -143,8 +147,8 @@ export default function ModuleHubPage() {
                             key={key}
                             onClick={() => setSelectedCategory(key)}
                             className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${selectedCategory === key
-                                    ? 'bg-amber-500 text-slate-900'
-                                    : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+                                ? 'bg-amber-500 text-slate-900'
+                                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
                                 }`}
                         >
                             <span className="mr-2">{cat.icon}</span>
@@ -165,6 +169,8 @@ export default function ModuleHubPage() {
                                 key={module.id}
                                 module={module}
                                 isActive={isModuleActive(module.id)}
+                                isConflict={hasActivePlan && module.slug === 'longevity-kickstart'}
+                                conflictMessage="Bereits durch Hauptplan abgedeckt"
                                 isActivating={activating === module.id}
                                 onActivate={() => handleActivate(module)}
                             />
@@ -179,7 +185,7 @@ export default function ModuleHubPage() {
 /**
  * Module Card Component
  */
-function ModuleCard({ module, isActive, isActivating, onActivate }) {
+function ModuleCard({ module, isActive, isConflict, conflictMessage, isActivating, onActivate }) {
     const [expanded, setExpanded] = useState(false);
 
     const categoryColors = {
@@ -269,12 +275,12 @@ function ModuleCard({ module, isActive, isActivating, onActivate }) {
             <div className="p-6 pt-4">
                 <button
                     onClick={onActivate}
-                    disabled={isActive || isActivating}
-                    className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${isActive
-                            ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                            : isActivating
-                                ? 'bg-amber-500/50 text-slate-900 cursor-wait'
-                                : 'bg-amber-500 hover:bg-amber-400 text-slate-900 shadow-lg shadow-amber-500/20'
+                    disabled={isActive || isActivating || isConflict}
+                    className={`w-full py-3 rounded-xl font-bold text-sm transition-all ${isActive || isConflict
+                        ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                        : isActivating
+                            ? 'bg-amber-500/50 text-slate-900 cursor-wait'
+                            : 'bg-amber-500 hover:bg-amber-400 text-slate-900 shadow-lg shadow-amber-500/20'
                         }`}
                 >
                     {isActivating ? (
@@ -284,6 +290,8 @@ function ModuleCard({ module, isActive, isActivating, onActivate }) {
                         </span>
                     ) : isActive ? (
                         '✓ Bereits aktiviert'
+                    ) : isConflict ? (
+                        `✕ ${conflictMessage}`
                     ) : (
                         'Modul aktivieren'
                     )}
