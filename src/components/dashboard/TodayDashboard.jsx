@@ -7,7 +7,7 @@ import { useConfirm } from '../ui/ConfirmModal';
 import ModuleDetailSheet from './ModuleDetailSheet';
 import { optimizeDailyPlan } from '../../lib/optimizationEngine';
 import { getCircadianIntelligence } from '../../lib/circadianService';
-import YearlySuggestionBanner from './YearlySuggestionBanner';
+import YearlySuggestionBanner from './YearlySuggestionBanner.jsx';
 import { getTodayLogs, deleteActivityLog, PILLAR_META } from '../../lib/smartLogService';
 
 /**
