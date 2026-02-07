@@ -1,6 +1,116 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Heart, ChevronDown } from 'lucide-react';
+import { User, Heart, ChevronDown, Zap, Send, Loader2, Check, X } from 'lucide-react';
+import { logSmartActivity, PILLAR_META } from '../../lib/smartLogService';
+
+/**
+ * SmartLogQuickInput — Inline header component for quick activity logging
+ */
+function SmartLogQuickInput() {
+    const [isOpen, setIsOpen] = useState(false);
+    const [input, setInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [result, setResult] = useState(null);
+    const inputRef = useRef(null);
+
+    useEffect(() => {
+        if (isOpen && inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, [isOpen]);
+
+    // Auto-close result after 3 seconds
+    useEffect(() => {
+        if (result) {
+            const timer = setTimeout(() => {
+                setResult(null);
+                setIsOpen(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [result]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!input.trim() || isLoading) return;
+
+        setIsLoading(true);
+        const res = await logSmartActivity(input.trim());
+        setIsLoading(false);
+
+        if (res.success) {
+            setResult(res.log);
+            setInput('');
+        }
+    };
+
+    const handleClose = () => {
+        setIsOpen(false);
+        setInput('');
+        setResult(null);
+    };
+
+    // Success state
+    if (result) {
+        const meta = PILLAR_META[result.pillar];
+        return (
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm animate-pulse">
+                <Check className="w-4 h-4" />
+                <span>{result.display_emoji} {result.display_text}</span>
+                {meta && <span className={`text-xs px-1.5 py-0.5 rounded ${meta.bgColor} ${meta.color}`}>{meta.label}</span>}
+            </div>
+        );
+    }
+
+    // Collapsed state
+    if (!isOpen) {
+        return (
+            <button
+                onClick={() => setIsOpen(true)}
+                className="text-amber-400 hover:text-amber-300 text-sm transition-all flex items-center gap-2 hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-amber-400/20 hover:border-amber-400/40"
+            >
+                <Zap className="w-4 h-4" />
+                <span className="hidden sm:inline">Neue Aktivität tracken</span>
+                <span className="sm:hidden">Track</span>
+            </button>
+        );
+    }
+
+    // Expanded state
+    return (
+        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+            <div className="relative">
+                <input
+                    ref={inputRef}
+                    type="text"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="z.B. 1h joggen, Steak gegessen..."
+                    disabled={isLoading}
+                    className="w-48 sm:w-64 bg-slate-800 border border-amber-500/30 rounded-lg px-3 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500/60 transition-all disabled:opacity-50"
+                    autoComplete="off"
+                />
+                {isLoading && (
+                    <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 animate-spin" />
+                )}
+            </div>
+            <button
+                type="submit"
+                disabled={isLoading || !input.trim()}
+                className="p-1.5 bg-amber-500 hover:bg-amber-600 disabled:bg-slate-700 text-slate-900 rounded-lg transition-colors"
+            >
+                <Send className="w-3.5 h-3.5" />
+            </button>
+            <button
+                type="button"
+                onClick={handleClose}
+                className="p-1.5 text-slate-500 hover:text-slate-300 transition-colors"
+            >
+                <X className="w-3.5 h-3.5" />
+            </button>
+        </form>
+    );
+}
 
 /**
  * Dashboard Header (V2 Design)
@@ -49,16 +159,8 @@ export default function DashboardHeader({ userName, onSignOut, onProfileClick, i
                 </Link>
 
                 <div className="flex items-center gap-3">
-                    {/* Longevity Store */}
-                    <Link
-                        to="/shop"
-                        className="text-amber-400 hover:text-amber-300 text-sm transition-colors flex items-center gap-2 hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-amber-400/20"
-                    >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                        <span className="hidden sm:inline">Store</span>
-                    </Link>
+                    {/* Smart Log — Quick Activity Tracking */}
+                    <SmartLogQuickInput />
 
                     {/* Admin Link */}
                     {isAdmin && (
