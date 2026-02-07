@@ -281,27 +281,27 @@ export default function VersionsPage() {
                 </div>
 
                 {/* Current Version Highlight */}
-                <div className="mb-12 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl p-8 text-white shadow-xl">
+                <div className="mb-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-8 text-white shadow-xl">
                     <div className="flex items-start justify-between mb-6">
                         <div>
                             <div className="text-sm opacity-75 mb-2">Aktuelle Version</div>
-                            <h2 className="text-4xl font-bold mb-2">v0.6.4 Beta Ready</h2>
-                            <h3 className="text-2xl opacity-90">Stabilisation & Lokalisierung</h3>
+                            <h2 className="text-4xl font-bold mb-2">v0.6.4 Smart Log</h2>
+                            <h3 className="text-2xl opacity-90">AI Activity Tracking</h3>
                         </div>
-                        <span className="text-6xl">🧠</span>
+                        <span className="text-6xl">⚡</span>
                     </div>
 
                     <div className="grid grid-cols-3 gap-4 mb-6">
                         <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                            <div className="text-3xl font-bold">8</div>
+                            <div className="text-3xl font-bold">9</div>
                             <div className="text-sm opacity-75">Edge Functions</div>
                         </div>
                         <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                            <div className="text-3xl font-bold">40</div>
+                            <div className="text-3xl font-bold">43</div>
                             <div className="text-sm opacity-75">Components</div>
                         </div>
                         <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                            <div className="text-3xl font-bold">92%</div>
+                            <div className="text-3xl font-bold">94%</div>
                             <div className="text-sm opacity-75">UX Score</div>
                         </div>
                     </div>
@@ -309,10 +309,10 @@ export default function VersionsPage() {
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-sm font-medium">Completion</span>
-                            <span className="text-sm font-bold">95%</span>
+                            <span className="text-sm font-bold">100%</span>
                         </div>
                         <div className="w-full bg-white/20 rounded-full h-2">
-                            <div className="bg-white rounded-full h-2" style={{ width: '95%' }}></div>
+                            <div className="bg-white rounded-full h-2" style={{ width: '100%' }}></div>
                         </div>
                     </div>
                 </div>
@@ -433,15 +433,15 @@ export default function VersionsPage() {
                             <div className="text-sm text-gray-600">Versions Deployed</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-3xl font-bold text-purple-600 mb-1">40</div>
+                            <div className="text-3xl font-bold text-purple-600 mb-1">43</div>
                             <div className="text-sm text-gray-600">Components Built</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-3xl font-bold text-purple-600 mb-1">8</div>
+                            <div className="text-3xl font-bold text-purple-600 mb-1">9</div>
                             <div className="text-sm text-gray-600">Edge Functions</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-3xl font-bold text-purple-600 mb-1">92%</div>
+                            <div className="text-3xl font-bold text-purple-600 mb-1">94%</div>
                             <div className="text-sm text-gray-600">UX Score</div>
                         </div>
                     </div>
