@@ -571,6 +571,688 @@ const FALLBACK_MODULES = [
       { id: 'non-fasting-nutrition', task: '🥗 Ausgewogen essen (keine Kompensation)', type: 'checkbox', duration_minutes: 1 },
       { id: 'fasting-mood', task: '📊 Energie & Stimmung tracken', type: 'checkbox', duration_minutes: 2 }
     ]
+  },
+
+  // =========================================================================
+  // 11. STIMMUNGS-CHECK — Mood Tracking & Pattern Detection (21 Tage)
+  //     Evidenz: PHQ-9 validiert, Emotional Granularity Research, Barrett 2017
+  //     Phasen: awareness(1-7) → patterns(8-14) → integration(15-21)
+  // =========================================================================
+  {
+    id: 'fallback-mood-check-in',
+    slug: 'mood-check-in',
+    name_de: '📊 Stimmungs-Check',
+    name_en: 'Mood Check-In',
+    icon: '📊',
+    category: 'mindset',
+    pillars: ['mental', 'mindset'],
+    duration_days: 21,
+    is_active: true,
+    is_premium: false,
+    difficulty_level: 'beginner',
+    tasks_per_day: 3,
+    description_de: '21 Tage strukturiertes Mood-Tracking zur Muster-Erkennung. Von einfachen Stimmungs-Checks über Trigger-Analyse bis hin zur Aktivitäts-Korrelation — PHQ-9 validiert.',
+    description_en: '21 days structured mood tracking for pattern detection. From simple mood checks to trigger analysis and activity correlation.',
+    expectations: [
+      { de: 'Woche 1: Basis — Morgens & Abends Stimmung erfassen, Skala kennenlernen', en: 'Week 1: Foundation — Track mood morning & evening, learn the scale' },
+      { de: 'Woche 2: Muster — Trigger identifizieren, Schlaf-Stimmung-Korrelation', en: 'Week 2: Patterns — Identify triggers, sleep-mood correlation' },
+      { de: 'Woche 3: Integration — Aktivitäten verknüpfen, Wochen-Trends erkennen', en: 'Week 3: Integration — Link activities, recognize weekly trends' }
+    ],
+    priority_weight: 75,
+    config_schema: {
+      properties: {
+        check_in_times: { type: 'string', title: 'Check-In Zeitpunkt', title_de: 'Wann willst du einchecken?', default: 'both', enum: ['morning', 'evening', 'both'], enumLabels: { morning: 'Nur Morgens', evening: 'Nur Abends', both: 'Morgens & Abends' } },
+        include_triggers: { type: 'boolean', title: 'Trigger tracken', title_de: 'Stimmungs-Trigger identifizieren?', default: true, description_de: 'Hilft Muster zu erkennen' },
+        include_sleep_link: { type: 'boolean', title: 'Schlaf-Link', title_de: 'Schlaf-Stimmung-Korrelation?', default: true, description_de: 'Verbinde Schlafqualität mit Tagesstimmung' },
+        track_activities: { type: 'boolean', title: 'Aktivitäten', title_de: 'Aktivitäten mit Stimmung verknüpfen?', default: false, description_de: 'Welche Aktivitäten heben oder senken deine Stimmung?' }
+      },
+      required: ['check_in_times']
+    },
+    task_template: {
+      tasks: [
+        { id: 'mood-morning', type: 'check-in', time: '08:30', title_de: '🌅 Morgen-Mood: Energie (1-10), Stimmung (1-10), Motivation (1-10)', title_en: 'Morning mood: energy, mood, motivation (1-10)', pillar: 'mindset', duration_minutes: 1, frequency: 'daily', condition: "config.check_in_times === 'morning' || config.check_in_times === 'both'" },
+        { id: 'sleep-mood-link', type: 'check-in', time: '08:35', title_de: '😴 Schlaf-Stimmung: Wie hast du geschlafen? (1-10) Aufwach-Häufigkeit? Träume?', title_en: 'Sleep-mood: How did you sleep? Wake-ups? Dreams?', pillar: 'mental', duration_minutes: 1, frequency: 'daily', condition: 'config.include_sleep_link', min_day: 5 },
+        { id: 'midday-energy', type: 'check-in', time: '13:00', title_de: '⚡ Mittags-Energie: Wie ist dein Energie-Level jetzt? (1-10) Was hast du gegessen?', title_en: 'Midday energy: What is your energy level? What did you eat?', pillar: 'mindset', duration_minutes: 1, frequency: 'daily', min_day: 4 },
+        { id: 'trigger-check', type: 'check-in', time: '18:00', title_de: '⚡ Trigger-Check: Gab es heute einen emotionalen Trigger? Was hat ihn ausgelöst?', title_en: 'Trigger check: Any emotional trigger today? What caused it?', pillar: 'mental', duration_minutes: 2, frequency: 'daily', condition: 'config.include_triggers', min_day: 5 },
+        { id: 'activity-mood', type: 'check-in', time: '18:05', title_de: '🏃 Aktivitäts-Mood: Welche Aktivität hat heute deine Stimmung am meisten beeinflusst?', title_en: 'Activity mood: Which activity most influenced your mood today?', pillar: 'mindset', duration_minutes: 2, frequency: 'daily', condition: 'config.track_activities', min_day: 8 },
+        { id: 'mood-evening', type: 'check-in', time: '21:00', title_de: '🌙 Abend-Mood: Stimmung (1-10), Stress (1-10), Angst (1-10). Was war der beste Moment?', title_en: 'Evening mood: mood, stress, anxiety (1-10). Best moment?', pillar: 'mental', duration_minutes: 2, frequency: 'daily', condition: "config.check_in_times === 'evening' || config.check_in_times === 'both'" },
+        { id: 'gratitude-anchor', type: 'action', time: '21:05', title_de: '🙏 Stimmungs-Anker: 1 positiver Moment heute, egal wie klein. Halte ihn fest', title_en: 'Mood anchor: 1 positive moment today, no matter how small', pillar: 'mindset', duration_minutes: 1, frequency: 'daily', min_day: 10 },
+        { id: 'weekly-analysis', type: 'check-in', time: '19:00', title_de: '📊 Wochen-Mood-Analyse: Trend (besser/gleich/schlechter), häufigste Trigger, beste Tage', title_en: 'Weekly mood analysis: trend, frequent triggers, best days', pillar: 'mental', duration_minutes: 5, frequency: 'weekly', day: 'sunday' },
+        { id: 'pattern-recognition', type: 'check-in', time: '19:10', title_de: '🔍 Muster-Erkennung: Gibt es Wochentag-Muster? Schlaf-Stimmung-Links? Ernährungs-Einflüsse?', title_en: 'Pattern recognition: Weekday patterns? Sleep-mood links? Nutrition effects?', pillar: 'mental', duration_minutes: 3, frequency: 'weekly', day: 'sunday', min_day: 14 }
+      ]
+    },
+    daily_tasks: [
+      { id: 'mood-morning', task: '🌅 Morgen-Mood Check (Energie, Stimmung)', type: 'checkbox', duration_minutes: 1 },
+      { id: 'mood-evening', task: '🌙 Abend-Mood Check (Stimmung, Stress)', type: 'checkbox', duration_minutes: 2 },
+      { id: 'gratitude-anchor', task: '🙏 1 positiver Moment heute', type: 'checkbox', duration_minutes: 1 }
+    ]
+  },
+
+  // =========================================================================
+  // 12. EXTENDED FAST — Sicheres Langzeit-Fasten (1-3 Tage)
+  //     Evidenz: Longo (Fasting-Mimicking), de Cabo & Mattson 2019
+  //     Phasen: Tag 1 Ketose-Start → Tag 2 tiefe Ketose → Tag 3 Autophagie-Peak
+  // =========================================================================
+  {
+    id: 'fallback-fasting-extended',
+    slug: 'fasting-extended',
+    name_de: '⚡ Extended Fast (24-72h)',
+    name_en: 'Extended Fast (24-72h)',
+    icon: '⚡',
+    category: 'nutrition',
+    pillars: ['nutrition', 'metabolism', 'autophagy', 'longevity'],
+    duration_days: 3,
+    is_active: true,
+    is_premium: true,
+    difficulty_level: 'advanced',
+    tasks_per_day: 5,
+    description_de: 'Strukturiertes Extended-Fasting Protokoll (24-72h) für maximale Autophagie. Elektrolyt-Management, Stimmungs-Tracking, Schlaf-Optimierung und sicheres Refeeding — nur mit ärztlicher Freigabe.',
+    description_en: 'Structured extended fasting protocol (24-72h) for maximum autophagy. Electrolyte management, mood tracking, sleep optimization and safe refeeding.',
+    expectations: [
+      { de: 'Tag 1: Ketose-Einstieg, Hunger-Wellen, Elektrolyte', en: 'Day 1: Entering ketosis, hunger waves, electrolytes' },
+      { de: 'Tag 2: Tiefe Ketose, mentale Klarheit, angepasste Bewegung', en: 'Day 2: Deep ketosis, mental clarity, adjusted movement' },
+      { de: 'Tag 3: Autophagie-Peak, Refeeding-Planung, sanfter Abschluss', en: 'Day 3: Autophagy peak, refeeding planning, gentle conclusion' }
+    ],
+    priority_weight: 40,
+    config_schema: {
+      properties: {
+        duration_hours: { type: 'integer', title: 'Fasten-Dauer', title_de: 'Wie lange fastest du?', default: 24, enum: [24, 36, 48, 72], enumLabels: { 24: '24h (1 Tag)', 36: '36h (1.5 Tage)', 48: '48h (2 Tage)', 72: '72h (3 Tage)' } },
+        start_time: { type: 'string', format: 'time', title: 'Startzeit', title_de: 'Wann startest du das Fasten?', default: '20:00', description_de: 'Ideal: Abends nach der letzten Mahlzeit' },
+        has_medical_clearance: { type: 'boolean', title: 'Ärztliche Freigabe', title_de: 'Ärztliche Freigabe vorhanden?', default: false, description_de: 'WICHTIG: Extended Fasting nur mit ärztlicher Beratung' },
+        include_mood_tracking: { type: 'boolean', title: 'Mood-Tracking', title_de: 'Stimmung & Energie tracken?', default: true, description_de: 'Hunger, Energie, Klarheit, Stimmung dokumentieren' }
+      },
+      required: ['duration_hours', 'has_medical_clearance']
+    },
+    task_template: {
+      tasks: [
+        { id: 'fast-start', type: 'action', time: '{{config.start_time}}', title_de: '🚀 Fast beginnt: Letzte leichte Mahlzeit (Protein + Gemüse). Wasser + Elektrolyte bereitstellen', title_en: 'Fast starts: last light meal. Prepare water + electrolytes', pillar: 'nutrition', duration_minutes: 5, frequency: 'once', max_day: 1 },
+        { id: 'electrolyte-morning', type: 'action', time: '08:00', title_de: '⚡ Morgen-Elektrolyte: 1/4 TL Salz + Kalium + Magnesium in 500ml Wasser', title_en: 'Morning electrolytes: salt + potassium + magnesium in water', pillar: 'nutrition', duration_minutes: 2, frequency: 'daily' },
+        { id: 'midday-check', type: 'check-in', time: '12:00', title_de: '📊 Mittags-Check: Hunger (1-10), Energie (1-10), Klarheit (1-10), Schwindel? Kopfschmerz?', title_en: 'Midday check: hunger, energy, clarity, dizziness? headache?', pillar: 'nutrition', duration_minutes: 2, frequency: 'daily', condition: 'config.include_mood_tracking' },
+        { id: 'gentle-movement', type: 'action', time: '10:00', title_de: '🚶 Leichte Bewegung: 15-20min langsamer Spaziergang (KEIN intensives Training!)', title_en: 'Light movement: 15-20min slow walk (NO intense training!)', pillar: 'movement', duration_minutes: 20, frequency: 'daily' },
+        { id: 'electrolyte-afternoon', type: 'action', time: '15:00', title_de: '⚡ Nachmittags-Elektrolyte: Besonders wichtig ab 24h+ — Salz + Kalium nachfüllen', title_en: 'Afternoon electrolytes: especially important after 24h+', pillar: 'nutrition', duration_minutes: 2, frequency: 'daily' },
+        { id: 'evening-check', type: 'check-in', time: '18:00', title_de: '📊 Abend-Check: Energie (1-10), Stimmung (1-10), Schlaf letzte Nacht? Abbruch-Kriterien?', title_en: 'Evening check: energy, mood, last night sleep? Break criteria?', pillar: 'nutrition', duration_minutes: 3, frequency: 'daily', condition: 'config.include_mood_tracking' },
+        { id: 'sleep-prep', type: 'action', time: '21:00', title_de: '😴 Schlaf-Optimierung: Extra Magnesium, kein Screen, Raum kühlen — Schlaf leidet oft beim Fasten', title_en: 'Sleep optimization: extra magnesium, no screen — sleep often suffers during fasting', pillar: 'sleep', duration_minutes: 5, frequency: 'daily' },
+        { id: 'refeeding', type: 'action', time: '{{config.start_time}}', title_de: '🎉 Refeeding-Protokoll: Knochenbrühe/Suppe → 30min warten → leichte Mahlzeit (Protein + Gemüse)', title_en: 'Refeeding protocol: bone broth → wait 30min → light meal', pillar: 'nutrition', duration_minutes: 30, frequency: 'once', min_day: 2 },
+        { id: 'post-fast-reflection', type: 'check-in', time: '20:00', title_de: '📝 Post-Fast Reflexion: Wie war die Erfahrung? Was hast du gelernt? Nächstes Mal anders?', title_en: 'Post-fast reflection: How was the experience? What did you learn?', pillar: 'nutrition', duration_minutes: 5, frequency: 'once', min_day: 2 }
+      ]
+    },
+    daily_tasks: [
+      { id: 'electrolyte-morning', task: '⚡ Morgen-Elektrolyte (Salz+Kalium+Magnesium)', type: 'checkbox', duration_minutes: 2 },
+      { id: 'midday-check', task: '📊 Mittags-Check (Hunger, Energie, Klarheit)', type: 'checkbox', duration_minutes: 2 },
+      { id: 'gentle-movement', task: '🚶 Leichte Bewegung (15-20min Walk)', type: 'checkbox', duration_minutes: 20 },
+      { id: 'sleep-prep', task: '😴 Schlaf-Optimierung (Magnesium, kein Screen)', type: 'checkbox', duration_minutes: 5 }
+    ]
+  },
+
+  // =========================================================================
+  // 13. KÄLTE-PROTOKOLL — Cold Exposure Progressive (21 Tage)
+  //     Evidenz: Huberman Cold Protocol, Soberg et al. 2021, Wim Hof Research
+  //     Phasen: adapt(1-7) → build(8-14) → master(15-21)
+  // =========================================================================
+  {
+    id: 'fallback-cold-exposure',
+    slug: 'cold-exposure',
+    name_de: '🧊 Kälte-Protokoll',
+    name_en: 'Cold Exposure Protocol',
+    icon: '🧊',
+    category: 'health',
+    pillars: ['recovery', 'metabolism', 'mental'],
+    duration_days: 21,
+    is_active: true,
+    is_premium: false,
+    difficulty_level: 'intermediate',
+    tasks_per_day: 3,
+    description_de: '21 Tage progressive Kälte-Adaption. Von 30 Sekunden kalter Dusche bis zum Eisbad — mit Atemvorbereitung, natürlichem Aufwärmen und Mood-Tracking für messbare Dopamin-Steigerung.',
+    description_en: '21 days progressive cold adaptation. From 30 seconds cold shower to ice bath — with breath preparation, natural warmup and mood tracking.',
+    expectations: [
+      { de: 'Woche 1: Adaption — 30s kalt duschen, Atemtechniken lernen', en: 'Week 1: Adaptation — 30s cold shower, learn breathing techniques' },
+      { de: 'Woche 2: Aufbau — 1-2min Kälte, Nachher-Energie tracken', en: 'Week 2: Build — 1-2min cold, track post-cold energy' },
+      { de: 'Woche 3: Meisterschaft — 2-3min+, optional Eisbad, volle Routine', en: 'Week 3: Mastery — 2-3min+, optional ice bath, full routine' }
+    ],
+    priority_weight: 45,
+    config_schema: {
+      properties: {
+        intensity: { type: 'string', title: 'Start-Intensität', title_de: 'Dein aktuelles Kälte-Level?', default: 'beginner', enum: ['beginner', 'intermediate', 'advanced'], enumLabels: { beginner: 'Anfänger (noch nie kalt geduscht)', intermediate: 'Fortgeschritten (kalte Dusche ok)', advanced: 'Profi (Eisbad-Erfahrung)' } },
+        preferred_time: { type: 'string', title: 'Tageszeit', title_de: 'Wann machst du die Kälte-Session?', default: 'morning', enum: ['morning', 'post_workout', 'afternoon'], enumLabels: { morning: 'Morgens (Dopamin-Boost für den Tag)', post_workout: 'Nach dem Training (Recovery)', afternoon: 'Nachmittags (Energie-Kick)' } },
+        include_breathwork: { type: 'boolean', title: 'Atemvorbereitung', title_de: 'Atemübung vor der Kälte?', default: true, description_de: 'Box Breathing oder Wim Hof zur Vorbereitung' },
+        track_tolerance: { type: 'boolean', title: 'Toleranz tracken', title_de: 'Kälte-Toleranz dokumentieren?', default: true, description_de: 'Sekunden/Minuten, Komfort-Level, Nachher-Gefühl' }
+      },
+      required: ['intensity']
+    },
+    task_template: {
+      tasks: [
+        { id: 'pre-cold-breathwork', type: 'action', time: '07:25', title_de: '🫁 Kälte-Atemvorbereitung: 2min Box Breathing (4-4-4-4) oder 10 tiefe Atemzüge', title_en: 'Cold prep breathing: 2min box breathing or 10 deep breaths', pillar: 'mental', duration_minutes: 2, frequency: 'daily', condition: 'config.include_breathwork' },
+        { id: 'cold-session', type: 'action', time: '07:30', title_de: '🧊 Kälte-Session: Kalte Dusche / Eisbad — atme ruhig, bleibe im Moment, zähle die Sekunden', title_en: 'Cold session: cold shower / ice bath — breathe calmly, stay present', pillar: 'recovery', duration_minutes: 5, frequency: 'daily' },
+        { id: 'natural-warmup', type: 'action', time: '07:35', title_de: '☀️ Natürlich aufwärmen: KEINE heiße Dusche! Körper durch Bewegung selbst aufwärmen lassen', title_en: 'Natural warmup: NO hot shower! Let body warm up through movement', pillar: 'recovery', duration_minutes: 5, frequency: 'daily' },
+        { id: 'cold-log', type: 'check-in', time: '07:40', title_de: '📊 Kälte-Log: Dauer (Sekunden), Komfort (1-10), Danach-Energie (1-10), Stimmung', title_en: 'Cold log: duration (seconds), comfort (1-10), post-energy (1-10)', pillar: 'recovery', duration_minutes: 2, frequency: 'daily', condition: 'config.track_tolerance', min_day: 3 },
+        { id: 'dopamine-check', type: 'check-in', time: '09:00', title_de: '⚡ 90min-Dopamin-Check: Wie ist dein Fokus und Energie 90min nach der Kälte?', title_en: '90min dopamine check: Focus and energy 90min after cold?', pillar: 'mental', duration_minutes: 1, frequency: 'daily', min_day: 7 },
+        { id: 'progression-step', type: 'info', time: '07:28', title_de: '📈 Progressions-Schritt: Diese Woche 15 Sek länger als letzte Woche. Konsistenz > Intensität!', title_en: 'Progression step: 15 sec longer this week. Consistency > intensity!', pillar: 'recovery', duration_minutes: 1, frequency: 'weekly', day: 'monday', min_day: 8 },
+        { id: 'cold-contrast', type: 'action', time: '07:30', title_de: '🔥🧊 Kontrast-Training: 30s heiß → 30s kalt → 30s heiß → 1min kalt (immer mit kalt enden!)', title_en: 'Contrast training: 30s hot → 30s cold → repeat (always end cold!)', pillar: 'recovery', duration_minutes: 5, frequency: 'daily', min_day: 15, condition: "config.intensity !== 'beginner'" },
+        { id: 'weekly-review', type: 'check-in', time: '19:00', title_de: '📊 Kälte-Woche: Durchschnittliche Dauer, Komfort-Trend, Energie-Impact, nächste Stufe?', title_en: 'Cold week: avg duration, comfort trend, energy impact, next level?', pillar: 'recovery', duration_minutes: 5, frequency: 'weekly', day: 'sunday' }
+      ]
+    },
+    daily_tasks: [
+      { id: 'cold-session', task: '🧊 Kälte-Session (Dusche/Eisbad)', type: 'checkbox', duration_minutes: 5 },
+      { id: 'natural-warmup', task: '☀️ Natürlich aufwärmen (keine heiße Dusche!)', type: 'checkbox', duration_minutes: 5 },
+      { id: 'cold-log', task: '📊 Kälte-Log (Dauer, Komfort, Energie)', type: 'checkbox', duration_minutes: 2 }
+    ]
+  },
+
+  // =========================================================================
+  // 14. LICHTPROTOKOLL — Circadian Rhythm (21 Tage)
+  //     Evidenz: Huberman Light Toolkit, Circadian Biology (Satchin Panda)
+  //     Phasen: basics(1-7) → optimize(8-14) → master(15-21)
+  // =========================================================================
+  {
+    id: 'fallback-circadian-light',
+    slug: 'circadian-light',
+    name_de: '☀️ Lichtprotokoll',
+    name_en: 'Circadian Light Protocol',
+    icon: '☀️',
+    category: 'sleep',
+    pillars: ['sleep', 'circadian', 'energy'],
+    duration_days: 21,
+    is_active: true,
+    is_premium: false,
+    difficulty_level: 'beginner',
+    tasks_per_day: 3,
+    description_de: '21 Tage Licht-Optimierung für deinen Schlaf-Wach-Rhythmus. Von Morgenlicht über Blaulicht-Management bis zur vollständigen Licht-Hygiene — für besseren Schlaf und mehr Tagesenergie.',
+    description_en: '21 days light optimization for your circadian rhythm. From morning light to blue light management to complete light hygiene.',
+    expectations: [
+      { de: 'Woche 1: Basis — Morgenlicht + Abend-Blaulicht-Reduktion', en: 'Week 1: Basics — Morning light + evening blue light reduction' },
+      { de: 'Woche 2: Optimierung — Nachmittagslicht + Raumbeleuchtung', en: 'Week 2: Optimization — Afternoon light + room lighting' },
+      { de: 'Woche 3: Meisterschaft — Abendsonne + Vollständiges Licht-Protokoll', en: 'Week 3: Mastery — Sunset viewing + complete light protocol' }
+    ],
+    priority_weight: 80,
+    config_schema: {
+      properties: {
+        wake_time: { type: 'string', format: 'time', title: 'Aufwachzeit', title_de: 'Wann stehst du auf?', default: '07:00' },
+        target_bedtime: { type: 'string', format: 'time', title: 'Ziel-Schlafenszeit', title_de: 'Wann willst du schlafen?', default: '22:30' },
+        has_outdoor_access: { type: 'boolean', title: 'Außenzugang', title_de: 'Hast du morgens Zugang nach draußen?', default: true, description_de: 'Wenn nein, Lichttherapie-Lampe empfohlen' },
+        include_sunset: { type: 'boolean', title: 'Abendsonne', title_de: 'Abendsonne anschauen?', default: true, description_de: 'Signalisiert dem Körper: bald Schlafenszeit' }
+      },
+      required: ['wake_time', 'target_bedtime']
+    },
+    task_template: {
+      tasks: [
+        { id: 'morning-light', type: 'action', time: '{{config.wake_time}}+15min', title_de: '☀️ Morgenlicht: 10min draußen ohne Sonnenbrille (bei Wolken: 20min)', title_en: 'Morning light: 10min outside without sunglasses (cloudy: 20min)', pillar: 'circadian', duration_minutes: 10, frequency: 'daily' },
+        { id: 'caffeine-cutoff', type: 'info', time: '14:00', title_de: '☕ Koffein-Stopp: Ab jetzt kein Kaffee/Tee mehr (stört den Schlafrhythmus)', title_en: 'Caffeine cutoff: no more coffee/tea from now', pillar: 'sleep', duration_minutes: 1, frequency: 'daily' },
+        { id: 'afternoon-light', type: 'action', time: '15:00', title_de: '🌤️ Nachmittags-Licht: 5min draußen — stabilisiert Cortisol-Rhythmus', title_en: 'Afternoon light: 5min outside — stabilizes cortisol rhythm', pillar: 'circadian', duration_minutes: 5, frequency: 'daily', min_day: 8 },
+        { id: 'sunset-viewing', type: 'action', time: '{{config.target_bedtime}}-180min', title_de: '🌅 Abendsonne: Oranges/rotes Licht anschauen — signalisiert "bald Schlafenszeit"', title_en: 'Sunset viewing: orange/red light — signals "bedtime approaching"', pillar: 'circadian', duration_minutes: 10, frequency: 'daily', condition: 'config.include_sunset', min_day: 8 },
+        { id: 'blue-light-cutoff', type: 'action', time: '{{config.target_bedtime}}-120min', title_de: '📱 Blaulicht-Stopp: Night Shift/Dark Mode + Blaulichtbrille + Screens dimmen', title_en: 'Blue light cutoff: night shift + blue light glasses + dim screens', pillar: 'circadian', duration_minutes: 2, frequency: 'daily' },
+        { id: 'dim-lights', type: 'action', time: '{{config.target_bedtime}}-60min', title_de: '💡 Lichter dimmen: Nur warmes, gedimmtes Licht. Kein Deckenlicht. Kerzen sind ideal', title_en: 'Dim lights: warm, dimmed light only. No overhead lights. Candles are ideal', pillar: 'sleep', duration_minutes: 1, frequency: 'daily', min_day: 4 },
+        { id: 'bedroom-prep', type: 'action', time: '{{config.target_bedtime}}-30min', title_de: '🛏️ Schlafzimmer: Komplett dunkel (Blackout), kühl (18°C), kein Standby-Licht', title_en: 'Bedroom: completely dark (blackout), cool (18°C), no standby lights', pillar: 'sleep', duration_minutes: 5, frequency: 'daily' },
+        { id: 'light-score', type: 'check-in', time: '{{config.target_bedtime}}-15min', title_de: '📊 Licht-Score: Morgenlicht ✓ Blaulicht-Stopp ✓ Dimmen ✓ Dunkel ✓ — wie viele heute?', title_en: 'Light score: Morning ✓ Blue light ✓ Dim ✓ Dark ✓ — how many today?', pillar: 'circadian', duration_minutes: 1, frequency: 'daily', min_day: 8 },
+        { id: 'weekly-review', type: 'check-in', time: '19:00', title_de: '📊 Licht-Woche: Schlafqualität-Trend, Einschlaf-Geschwindigkeit, Tages-Energie', title_en: 'Light week: sleep quality trend, sleep onset speed, daytime energy', pillar: 'circadian', duration_minutes: 5, frequency: 'weekly', day: 'sunday' }
+      ]
+    },
+    daily_tasks: [
+      { id: 'morning-light', task: '☀️ 10min Morgenlicht draußen', type: 'checkbox', duration_minutes: 10 },
+      { id: 'blue-light-cutoff', task: '📱 Blaulicht-Stopp (2h vor Bett)', type: 'checkbox', duration_minutes: 2 },
+      { id: 'bedroom-prep', task: '🛏️ Schlafzimmer: dunkel, kühl, ruhig', type: 'checkbox', duration_minutes: 5 }
+    ]
+  },
+
+  // =========================================================================
+  // 15. SUPPLEMENT-TIMING — Optimierte Einnahme (14 Tage)
+  //     Evidenz: Examine.com, Rhonda Patrick, Huberman Supplement Series
+  //     Besonderheit: Stark Condition-basiert (welche Supplements der User nimmt)
+  // =========================================================================
+  {
+    id: 'fallback-supplement-timing',
+    slug: 'supplement-timing',
+    name_de: '💊 Supplement-Timing',
+    name_en: 'Supplement Timing',
+    icon: '💊',
+    category: 'supplements',
+    pillars: ['supplements', 'nutrition'],
+    duration_days: 14,
+    is_active: true,
+    is_premium: false,
+    difficulty_level: 'beginner',
+    tasks_per_day: 3,
+    description_de: '14 Tage optimiertes Supplement-Timing. Lerne wann und wie du deine Supplements am besten einnimmst — mit Fett, nüchtern oder abends. Alles individuell auf deine Auswahl abgestimmt.',
+    description_en: '14 days optimized supplement timing. Learn when and how to take your supplements — with fat, fasted, or evening. Individually tailored.',
+    expectations: [
+      { de: 'Woche 1: Timing-Basics — Welches Supplement wann und warum', en: 'Week 1: Timing basics — which supplement when and why' },
+      { de: 'Woche 2: Optimierung — Stacking, Interaktionen, Absorption maximieren', en: 'Week 2: Optimization — stacking, interactions, maximize absorption' }
+    ],
+    priority_weight: 60,
+    config_schema: {
+      properties: {
+        supplements: { type: 'array', title: 'Deine Supplements', title_de: 'Welche Supplements nimmst du?', items: { type: 'string', enum: ['vitamin_d', 'omega3', 'magnesium', 'zinc', 'b_complex', 'vitamin_c', 'iron', 'probiotics', 'creatine', 'collagen'] }, enumLabels: { vitamin_d: 'Vitamin D3+K2', omega3: 'Omega-3', magnesium: 'Magnesium', zinc: 'Zink', b_complex: 'B-Komplex', vitamin_c: 'Vitamin C', iron: 'Eisen', probiotics: 'Probiotika', creatine: 'Kreatin', collagen: 'Kollagen' }, default: ['vitamin_d', 'magnesium', 'omega3'] },
+        wake_time: { type: 'string', format: 'time', title: 'Aufwachzeit', title_de: 'Wann stehst du auf?', default: '07:00' },
+        bedtime: { type: 'string', format: 'time', title: 'Schlafenszeit', title_de: 'Wann gehst du schlafen?', default: '22:30' },
+        has_breakfast: { type: 'boolean', title: 'Frühstück', title_de: 'Frühstückst du morgens?', default: true, description_de: 'Wichtig für fettlösliche Vitamine' }
+      },
+      required: ['supplements', 'wake_time']
+    },
+    task_template: {
+      tasks: [
+        { id: 'morning-empty', type: 'action', time: '{{config.wake_time}}', title_de: '💊 Nüchtern-Supplements: B-Komplex, Probiotika — VOR dem Essen einnehmen', title_en: 'Empty stomach supplements: B-complex, Probiotics — BEFORE eating', pillar: 'supplements', duration_minutes: 1, frequency: 'daily', condition: "config.supplements.includes('b_complex') || config.supplements.includes('probiotics')" },
+        { id: 'morning-fat', type: 'action', time: '{{config.wake_time}}+30min', title_de: '💊 Fettlösliche Supplements: D3+K2, Omega-3 — MIT Fett/Frühstück einnehmen', title_en: 'Fat-soluble supplements: D3+K2, Omega-3 — take WITH fat/breakfast', pillar: 'supplements', duration_minutes: 2, frequency: 'daily', condition: "config.supplements.includes('vitamin_d') || config.supplements.includes('omega3')" },
+        { id: 'creatine', type: 'action', time: '{{config.wake_time}}+30min', title_de: '💊 Kreatin: 5g täglich — Zeitpunkt egal, aber Konsistenz zählt', title_en: 'Creatine: 5g daily — timing doesn\'t matter, consistency does', pillar: 'supplements', duration_minutes: 1, frequency: 'daily', condition: "config.supplements.includes('creatine')" },
+        { id: 'midday-vitamin-c', type: 'action', time: '12:00', title_de: '💊 Mittag: Vitamin C, Eisen (falls supplementiert) — Vitamin C verbessert Eisen-Aufnahme!', title_en: 'Midday: Vitamin C, Iron — Vitamin C improves iron absorption!', pillar: 'supplements', duration_minutes: 1, frequency: 'daily', condition: "config.supplements.includes('vitamin_c') || config.supplements.includes('iron')" },
+        { id: 'collagen', type: 'action', time: '14:00', title_de: '💊 Kollagen: 10-15g in Wasser oder Smoothie — nüchtern oder zwischen Mahlzeiten', title_en: 'Collagen: 10-15g in water or smoothie — fasted or between meals', pillar: 'supplements', duration_minutes: 2, frequency: 'daily', condition: "config.supplements.includes('collagen')" },
+        { id: 'evening-magnesium', type: 'action', time: '{{config.bedtime}}-60min', title_de: '💊 Abend-Magnesium: Glycinat oder Threonat — fördert Schlaf & Muskelrelaxation', title_en: 'Evening magnesium: glycinate or threonate — promotes sleep & muscle relaxation', pillar: 'supplements', duration_minutes: 1, frequency: 'daily', condition: "config.supplements.includes('magnesium')" },
+        { id: 'evening-zinc', type: 'action', time: '{{config.bedtime}}-30min', title_de: '💊 Abend-Zink: 15-30mg — Immunsystem & Schlaf (NICHT zusammen mit Eisen!)', title_en: 'Evening zinc: 15-30mg — immune & sleep (NOT with iron!)', pillar: 'supplements', duration_minutes: 1, frequency: 'daily', condition: "config.supplements.includes('zinc')" },
+        { id: 'weekly-education', type: 'info', time: '10:00', title_de: '📚 Supplement-Wissen: Warum dieses Timing? Interaktionen & Absorptions-Tipps', title_en: 'Supplement education: Why this timing? Interactions & absorption tips', pillar: 'supplements', duration_minutes: 3, frequency: 'weekly', day: 'wednesday', min_day: 4 },
+        { id: 'weekly-review', type: 'check-in', time: '19:00', title_de: '📊 Supplement-Woche: Compliance, Verträglichkeit, Energie-Changes, Schlaf-Impact?', title_en: 'Supplement week: compliance, tolerability, energy changes, sleep impact?', pillar: 'supplements', duration_minutes: 3, frequency: 'weekly', day: 'sunday' }
+      ]
+    },
+    daily_tasks: [
+      { id: 'morning-fat', task: '💊 Morgen-Supplements (D3+K2, Omega-3)', type: 'checkbox', duration_minutes: 2 },
+      { id: 'evening-magnesium', task: '💊 Abend-Magnesium (Schlaf)', type: 'checkbox', duration_minutes: 1 },
+      { id: 'weekly-review', task: '📊 Supplement-Compliance check', type: 'checkbox', duration_minutes: 3 }
+    ]
+  },
+
+  // =========================================================================
+  // 16. JAHRES-OPTIMIERUNG — Continuous Health Module (365+ Tage)
+  //     Evidenz: Periodisierung + Mikro-Habits + Quarterly Reviews = #1 Retention
+  //     Phasen: Q1 Foundation → Q2 Build → Q3 Peak → Q4 Consolidate (Repeat)
+  //     SONDERFALL: duration_days = null (continuous, kein Ende)
+  // =========================================================================
+  {
+    id: 'fallback-yearly-optimization',
+    slug: 'yearly-optimization',
+    name_de: '📅 Jahres-Optimierung',
+    name_en: 'Yearly Optimization',
+    icon: '📅',
+    category: 'health',  // 'longevity' existiert nicht im DB check constraint → 'health' als breiteste Kategorie
+    pillars: ['sleep_recovery', 'circadian_rhythm', 'mental_resilience', 'nutrition_metabolism', 'movement_muscle', 'supplements'],
+    duration_days: null,  // CRITICAL: null = continuous, kein Ende (Fallback-seitig; DB nutzt 365)
+    is_active: true,
+    is_premium: false,
+    difficulty_level: 'intermediate',
+    tasks_per_day: 3,
+    description_de: '365+ Tage kontinuierliche Optimierung mit adaptiven Quarterly-Shifts. Das einzige Modul, das wirklich unbegrenzt läuft und alle 6 Säulen integriert. Tägliche Mikro-Habits (3min) + wöchentliche Reviews + monatliche Messungen + Quarterly Deep-Dives. Basiert auf Periodisierung, saisonaler Chronobiologie und wissenschaftlicher Progression.',
+    description_en: 'Continuous optimization with adaptive quarterly shifts. The only module integrating all 6 pillars indefinitely. Daily micro-habits + weekly reviews + monthly metrics + quarterly deep-dives.',
+    expectations: [
+      { de: 'Q1 (Jan-Mar): Foundation & Recovery — Zirkadianischer Reset, Schlaf-Optimierung, innere Arbeit', en: 'Q1: Foundation & Recovery — circadian reset, sleep, inner work' },
+      { de: 'Q2 (Apr-Jun): Build & Strength — Kraft-Aufbau, Outdoor-Training, Metabolische Optimierung', en: 'Q2: Build & Strength — strength building, outdoor training, metabolic optimization' },
+      { de: 'Q3 (Jul-Sep): Optimize & Peak — Mentale Leistung, Flow, Stress-Management', en: 'Q3: Optimize & Peak — mental performance, flow, stress management' },
+      { de: 'Q4 (Okt-Dez): Consolidate & Integrate — Recovery, Winter-Vorbereitung, Konsolidierung', en: 'Q4: Consolidate & Integrate — recovery, winter prep, consolidation' }
+    ],
+    priority_weight: 99,
+    config_schema: {
+      properties: {
+        wake_time: { type: 'string', format: 'time', title_de: 'Deine regelmäßige Aufwachzeit', default: '06:30' },
+        bedtime: { type: 'string', format: 'time', title_de: 'Deine Ziel-Schlafenszeit', default: '22:30' },
+        review_day: { type: 'string', title_de: 'Welcher Wochentag für Reviews?', default: 'sunday', enum: ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] },
+        focus_areas: {
+          type: 'array',
+          title_de: 'Wo möchtest du dich am meisten verbessern? (1-3 Säulen)',
+          items: { type: 'string', enum: ['sleep_recovery', 'circadian_rhythm', 'mental_resilience', 'nutrition_metabolism', 'movement_muscle', 'supplements'] },
+          default: ['sleep_recovery', 'mental_resilience'],
+          minItems: 1,
+          maxItems: 3,
+          description_de: 'Diese Säulen bekommen extra Aufmerksamkeit in deinem Jahresplan'
+        },
+        seasonal_adaptation: { type: 'boolean', title_de: 'Adaptive Jahreszeiten-Anpassung?', default: true, description_de: 'Tasks ändern sich automatisch nach Jahreszeit (Winter vs. Sommer)' },
+        include_bloodwork: { type: 'boolean', title_de: 'Blutuntersuchungen im Quarterly-Review?', default: false, description_de: 'Erinnert dich an Bluttests (Empfehlung: alle 3-6 Monate)' },
+        include_wearable_sync: { type: 'boolean', title_de: 'Wearable-Daten integrieren?', default: true, description_de: 'Nutzt HRV, Schlaf, Aktivität von Smartwatch/Ring' },
+        daily_time_budget: { type: 'number', title_de: 'Tägliches Zeitbudget (Minuten)', default: 10, minimum: 5, maximum: 30, description_de: 'Wie viel Zeit pro Tag für Gesundheits-Tasks?' }
+      },
+      required: ['wake_time', 'review_day', 'focus_areas']
+    },
+    task_template: {
+      tasks: [
+        // ═══════════════════════════════════════════════════════════════
+        // TIER 1: TÄGLICHE MIKRO-HABITS (2 Tasks, ~3min/Tag)
+        // Sticky habits that build consistency and create retention
+        // ═══════════════════════════════════════════════════════════════
+        {
+          id: 'morning-intention',
+          type: 'check-in',
+          time: '{{config.wake_time}}+5min',
+          title_de: '🎯 Morgen-Intention: Was ist heute der Fokus?',
+          title_en: 'Morning intention: What is today\'s focus?',
+          description: 'Setze eine klare Absicht für heute. Was ist die EINE Sache, die du für deine Gesundheit tun willst?',
+          pillar: 'mental_resilience',
+          duration_minutes: 1,
+          frequency: 'daily',
+          tags: ['habit', 'mental', 'quick', 'retention-hook'],
+          science_note: 'Gollwitzer 2008: Implementation Intentions erhöhen Goal-Attainment um 91%. 30s mentale Vorbereitung aktiviert PFC.'
+        },
+        {
+          id: 'evening-gratitude',
+          type: 'check-in',
+          time: '{{config.bedtime}}-60min',
+          title_de: '🙏 3 Dinge, für die du heute dankbar bist',
+          title_en: '3 things you\'re grateful for today',
+          description: 'Schreibe 3 Dinge auf: 1. Person/Moment 2. Kleines Glück 3. Eigene Stärke',
+          pillar: 'mental_resilience',
+          duration_minutes: 2,
+          frequency: 'daily',
+          tags: ['habit', 'mental-health', 'journaling', 'retention-hook'],
+          prompts: [
+            '1. Person oder Moment heute',
+            '2. Etwas Kleines, das Freude brachte',
+            '3. Eine eigene Stärke, die ich genutzt habe'
+          ],
+          science_note: 'Emmons 2003: -73% Rumination. Harvard JAMA 2024: 9% lower mortality. Schreiben verstärkt Effect.'
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // TIER 2: WÖCHENTLICHE REVIEWS (3 Tasks, ~17min/Woche)
+        // Deep check-ins that create awareness and identify patterns
+        // ═══════════════════════════════════════════════════════════════
+        {
+          id: 'weekly-pillar-review',
+          type: 'check-in',
+          time: '19:00',
+          title_de: '📊 Wochenrückblick: 6 Säulen in 10 Minuten',
+          title_en: 'Weekly review: 6 pillars in 10 minutes',
+          description: 'Bewerte jede Säule 1-10. Wo warst du stark? Wo brauchst du Verbesserung?',
+          pillar: 'mental_resilience',
+          duration_minutes: 10,
+          frequency: 'weekly',
+          day: '{{config.review_day}}',
+          tags: ['review', 'metrics', 'reflection', 'weekly'],
+          prompts: [
+            '😴 Schlaf: Qualität & Menge diese Woche? (1-10)',
+            '⚡ Zirkadian: Konsistente Wake/Bed-Zeit? (1-10)',
+            '🧠 Mental: Stress-Level, Fokus, Klarheit? (1-10)',
+            '🥗 Ernährung: Konsequent mit Plan? (1-10)',
+            '🏃 Bewegung: Trainingsqualität? (1-10)',
+            '💊 Supplements: Alle genommen? (1-10)'
+          ],
+          metrics: [
+            { id: 'sleep_score', label_de: 'Schlaf', scale: '1-10' },
+            { id: 'circadian_score', label_de: 'Zirkadian', scale: '1-10' },
+            { id: 'mental_score', label_de: 'Mental', scale: '1-10' },
+            { id: 'nutrition_score', label_de: 'Ernährung', scale: '1-10' },
+            { id: 'movement_score', label_de: 'Bewegung', scale: '1-10' },
+            { id: 'supplement_score', label_de: 'Supplements', scale: '1-10' }
+          ],
+          science_note: 'Ryan & Deci 2000: Self-Determination Theory — wöchentliche Meta-Reflexion reduziert Intention-Action Gap um ~40%.'
+        },
+        {
+          id: 'weekly-win-capture',
+          type: 'check-in',
+          time: '19:15',
+          title_de: '✨ Weekly Win: Dein größter Health Win diese Woche',
+          title_en: 'Weekly Win: Your biggest health win this week',
+          description: 'Was war der einzelne Moment, auf den du am stolzesten bist?',
+          pillar: 'mental_resilience',
+          duration_minutes: 5,
+          frequency: 'weekly',
+          day: '{{config.review_day}}',
+          tags: ['motivation', 'positive-reinforcement', 'progress-tracking'],
+          prompts: [
+            'Mein größter Win diese Woche war...',
+            'Was hat es möglich gemacht?',
+            'Was nehme ich in die nächste Woche mit?'
+          ],
+          science_note: 'Fogg 2015: Tiny Habits — progress loops = #1 engagement predictor. 52 wins/Jahr = massive compound motivation.'
+        },
+        {
+          id: 'weekly-supplement-check',
+          type: 'check-in',
+          time: '12:00',
+          title_de: '💊 Supplement-Compliance: Alle diese Woche genommen?',
+          title_en: 'Supplement compliance: All taken this week?',
+          pillar: 'supplements',
+          duration_minutes: 2,
+          frequency: 'weekly',
+          day: 'wednesday',
+          tags: ['supplements', 'compliance', 'tracking'],
+          science_note: 'Mitmesser 2022: Regelmäßiges Monitoring erhöht Supplement-Adherence um +25%.'
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // TIER 3: MONATLICHE MESSUNGEN (2 Tasks, ~10min/Monat)
+        // Objective biomarker tracking for pattern detection
+        // ═══════════════════════════════════════════════════════════════
+        {
+          id: 'monthly-metrics',
+          type: 'check-in',
+          time: '10:00',
+          title_de: '📏 Monatliche Messungen: Gewicht, Schlaf, RHR, Stimmung',
+          title_en: 'Monthly metrics: weight, sleep, RHR, mood',
+          description: 'Objektive Daten erfassen — Trends über Monate erkennen.',
+          pillar: 'nutrition_metabolism',
+          duration_minutes: 5,
+          frequency: 'monthly',
+          day: 1,
+          tags: ['metrics', 'biomarkers', 'objective-tracking'],
+          metrics: [
+            { id: 'weight_kg', label_de: '⚖️ Gewicht (kg)', optional: false },
+            { id: 'sleep_avg_hours', label_de: '😴 ⌀ Schlaf (h)', optional: false },
+            { id: 'resting_heart_rate', label_de: '❤️ Ruhe-Herzfrequenz', optional: true },
+            { id: 'blood_pressure', label_de: '🩸 Blutdruck (sys/dia)', optional: true },
+            { id: 'mood_avg', label_de: '😊 ⌀ Stimmung (1-10)', optional: false },
+            { id: 'energy_avg', label_de: '⚡ ⌀ Energie (1-10)', optional: false }
+          ],
+          science_note: 'Cialdini 2009: Self-Monitoring Effect — regelmäßiges Tracking verbessert Behavior um 15-30%.'
+        },
+        {
+          id: 'monthly-biomarker-trend',
+          type: 'check-in',
+          time: '10:00',
+          title_de: '📈 Biomarker-Trend: Vergleich zum Vormonat',
+          title_en: 'Biomarker trend: comparison to last month',
+          description: 'Schau dir deine Trends an: Was hat sich verbessert? Was braucht Aufmerksamkeit?',
+          pillar: 'nutrition_metabolism',
+          duration_minutes: 5,
+          frequency: 'monthly',
+          day: 15,
+          tags: ['trends', 'analysis', 'patterns'],
+          prompts: [
+            'Welcher Wert hat sich am meisten verbessert?',
+            'Wo sehe ich noch Handlungsbedarf?',
+            'Welche Gewohnheit korreliert am stärksten mit Verbesserung?'
+          ],
+          science_note: 'Quantified Self Research: Trend-Erkennung ermöglicht proaktive Anpassung statt reaktivem Handeln.'
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // TIER 4: QUARTERLY DEEP REVIEWS (2 Tasks, ~45min/Quartal)
+        // THE RETENTION HOOKS — transformative moments that drive loyalty
+        // ═══════════════════════════════════════════════════════════════
+        {
+          id: 'quarterly-deep-review',
+          type: 'check-in',
+          time: '10:00',
+          title_de: '🔍 Quarterly Deep Review: 90-Tage Rückblick + nächstes Quartal',
+          title_en: 'Quarterly Deep Review: 90-day review + next quarter planning',
+          description: '30 Minuten die alles verändern. Dein Fortschritt wird sichtbar — und du planst die nächsten 90 Tage.',
+          pillar: 'mental_resilience',
+          duration_minutes: 30,
+          frequency: 'quarterly',
+          tags: ['deep-review', 'quarterly', 'transformation', 'retention-hook'],
+          prompts: [
+            '🏆 Top 3 Health Wins dieses Quartals',
+            '📊 Welche Säule hat am meisten Fortschritt gezeigt?',
+            '🔧 Wo stocke ich noch? Was blockiert mich?',
+            '🧬 Welche Gewohnheiten sind automatisch geworden?',
+            '🩸 Blutuntersuchung gemacht? → Trends vergleichen!',
+            '🎯 Focus für nächstes Quartal: Welche 1-2 Säulen?'
+          ],
+          science_note: 'Amabile 2011 (Progress Principle): "Making progress in meaningful work" = #1 predictor of sustained motivation. 30min = 0.4% des Quartals → massive psychological ownership. 3x höhere Retention.'
+        },
+        {
+          id: 'quarterly-goal-adjustment',
+          type: 'check-in',
+          time: '14:00',
+          title_de: '🎯 Quarterly Ziel-Anpassung: Nächstes Quartal planen',
+          title_en: 'Quarterly goal adjustment: Plan next quarter',
+          description: 'Passe deine Ziele an deine Fortschritte an. Was bleibt? Was ändert sich?',
+          pillar: 'mental_resilience',
+          duration_minutes: 15,
+          frequency: 'quarterly',
+          tags: ['goal-setting', 'planning', 'adaptive'],
+          prompts: [
+            'Meine Top-3 Gesundheitsziele für die nächsten 90 Tage:',
+            'Welche Säule bekommt dieses Quartal extra Fokus?',
+            'Was muss ich AUFHÖREN zu tun?',
+            'Welche EINE neue Gewohnheit möchte ich hinzufügen?'
+          ],
+          science_note: 'Locke & Latham 2019: Adaptive Goal-Setting (Ziele anpassen statt aufgeben) → höhere Langzeit-Compliance als starre Ziele.'
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // TIER 5: JAHRESPLANUNG (1 Task, 60min/Jahr)
+        // Once per year — transformational moment
+        // ═══════════════════════════════════════════════════════════════
+        {
+          id: 'yearly-planning',
+          type: 'check-in',
+          time: '10:00',
+          title_de: '🎆 Jahres-Planung: 365-Tage Health Audit & Ziele setzen',
+          title_en: 'Yearly Planning: 365-day health audit & goal setting',
+          description: '60 Minuten für dein wichtigstes Asset: deine Gesundheit. Rückblick + Vorausplanung.',
+          pillar: 'mental_resilience',
+          duration_minutes: 60,
+          frequency: 'yearly',
+          day: 1,
+          month: 1,
+          tags: ['yearly-planning', 'goal-setting', 'vision', 'transformation'],
+          prompts: [
+            '🏆 Jahres-Bilanz: Was habe ich erreicht? Top 5 Wins.',
+            '📊 Vollständige Biomarker-Analyse: Was hat sich verbessert?',
+            '💪 Stärken je Säule identifizieren',
+            '🔧 Schwächen je Säule identifizieren',
+            '🎯 SMART Goals für nächstes Jahr (1 pro Säule)',
+            '📅 Quarterly Milestones: 4 Checkpoints definieren'
+          ],
+          science_note: 'Gollwitzer 2008: Strukturiertes Goal-Setting am Jahresanfang erhöht Compliance um +60% vs. vage Vorsätze.'
+        },
+
+        // ═══════════════════════════════════════════════════════════════
+        // TIER 6: SAISONALE TASKS (8 Tasks, quartalsweise via condition)
+        // Tasks change with seasons — aligned with chronobiology
+        // ═══════════════════════════════════════════════════════════════
+
+        // --- Q1 (Jan-Mar): Foundation & Recovery ---
+        {
+          id: 'q1-light-therapy',
+          type: 'action',
+          time: '{{config.wake_time}}+15min',
+          title_de: '☀️ Morgen-Licht: 15min Tageslicht für Serotonin & Cortisol-Peak',
+          title_en: 'Morning light: 15min daylight for serotonin & cortisol peak',
+          description: 'Geh raus oder sitz am Fenster — 10.000+ Lux optimal. Im Winter: Tageslichtlampe nutzen.',
+          pillar: 'circadian_rhythm',
+          duration_minutes: 15,
+          frequency: 'daily',
+          condition: 'new Date().getMonth() <= 2',
+          tags: ['seasonal', 'q1', 'light-therapy', 'circadian'],
+          science_note: 'Terman 2005: Lichttherapie erhöht Serotonin um 20-30%. Critical in Q1 wegen SAD-Risiko (Seasonal Affective Disorder).'
+        },
+        {
+          id: 'q1-sleep-audit',
+          type: 'check-in',
+          time: '{{config.bedtime}}-30min',
+          title_de: '😴 Schlaf-Audit: Hygiene, Temperatur, Routine prüfen',
+          title_en: 'Sleep audit: hygiene, temperature, routine check',
+          description: 'Winter = beste Zeit für Schlaf-Optimierung. Checke: Temperatur 16-18°C? Dunkelheit? Kein Bildschirm 1h vor Bett?',
+          pillar: 'sleep_recovery',
+          duration_minutes: 10,
+          frequency: 'weekly',
+          day: '{{config.review_day}}',
+          condition: 'new Date().getMonth() <= 2',
+          tags: ['seasonal', 'q1', 'sleep', 'audit'],
+          science_note: 'Walker 2017 (Why We Sleep): Winter-Schlafoptimierung nutzt natürlich höheres Melatonin für tiefere Schlafarchitektur.'
+        },
+
+        // --- Q2 (Apr-Jun): Build & Strength ---
+        {
+          id: 'q2-outdoor-training',
+          type: 'action',
+          time: '17:00',
+          title_de: '🌿 Outdoor-Training: 30min Natur + Bewegung',
+          title_en: 'Outdoor training: 30min nature + movement',
+          description: 'Frühling = Aufbau-Fenster. Draußen trainieren für Vitamin D + psychologische Benefits.',
+          pillar: 'movement_muscle',
+          duration_minutes: 30,
+          frequency: 'daily',
+          condition: 'new Date().getMonth() >= 3 && new Date().getMonth() <= 5',
+          tags: ['seasonal', 'q2', 'outdoor', 'movement', 'nature'],
+          science_note: 'Bratman 2015: Nature + Exercise reduziert Rumination um 25%. Plus Vitamin D-Synthese peak durch UV-B.'
+        },
+        {
+          id: 'q2-nutrition-reset',
+          type: 'check-in',
+          time: '12:00',
+          title_de: '🥗 Ernährungs-Reset: Meal-Prep Planung & Protein-Check',
+          title_en: 'Nutrition reset: meal-prep planning & protein check',
+          description: 'Frühling = perfekter Zeitpunkt für Ernährungs-Upgrade. Protein-Minimum: 1.6g/kg Körpergewicht.',
+          pillar: 'nutrition_metabolism',
+          duration_minutes: 15,
+          frequency: 'weekly',
+          day: '{{config.review_day}}',
+          condition: 'new Date().getMonth() >= 3 && new Date().getMonth() <= 5',
+          tags: ['seasonal', 'q2', 'nutrition', 'protein', 'meal-prep'],
+          science_note: 'Schoenfeld 2015: 1.6-2.2g Protein/kg + Training = optimale Muskelproteinsynthese im Build-Quarter.'
+        },
+
+        // --- Q3 (Jul-Sep): Optimize & Peak ---
+        {
+          id: 'q3-mental-performance',
+          type: 'action',
+          time: '12:00',
+          title_de: '🧠 Mentale Peak-Session: 20min Fokus, Flow oder Mindfulness',
+          title_en: 'Mental peak session: 20min focus, flow or mindfulness',
+          description: 'Sommer = Peak-Performance-Fenster. Nutze die langen Tage für mentale Optimierung.',
+          pillar: 'mental_resilience',
+          duration_minutes: 20,
+          frequency: 'daily',
+          condition: 'new Date().getMonth() >= 6 && new Date().getMonth() <= 8',
+          tags: ['seasonal', 'q3', 'mental', 'focus', 'flow'],
+          science_note: 'Csikszentmihalyi 1990: Flow-State in Peak-Season nutzt höchste Cortisol-Baseline für fokussierte Leistung.'
+        },
+        {
+          id: 'q3-stress-protocol',
+          type: 'action',
+          time: '{{config.bedtime}}-90min',
+          title_de: '🌬️ Stress-Management: 15min Breathwork oder Meditation',
+          title_en: 'Stress management: 15min breathwork or meditation',
+          description: 'Hohe Intensität in Q3 braucht aktives Stress-Management. Physiological Sigh oder Box Breathing.',
+          pillar: 'mental_resilience',
+          duration_minutes: 15,
+          frequency: 'daily',
+          condition: 'new Date().getMonth() >= 6 && new Date().getMonth() <= 8',
+          tags: ['seasonal', 'q3', 'stress', 'breathwork', 'meditation'],
+          science_note: 'Huberman 2023: Physiological Sigh (doppelte Einatmung, lange Ausatmung) senkt Stress in 5min messbar.'
+        },
+
+        // --- Q4 (Okt-Dez): Consolidate & Integrate ---
+        {
+          id: 'q4-recovery-nsdr',
+          type: 'action',
+          time: '13:00',
+          title_de: '🧘 NSDR/Restorative: 15min Yoga Nidra oder Body Scan',
+          title_en: 'NSDR/Restorative: 15min Yoga Nidra or body scan',
+          description: 'Herbst/Winter = Recovery-Phase. NSDR ersetzt Mittagstief durch echte Regeneration.',
+          pillar: 'sleep_recovery',
+          duration_minutes: 15,
+          frequency: 'daily',
+          condition: 'new Date().getMonth() >= 9',
+          tags: ['seasonal', 'q4', 'recovery', 'nsdr', 'yoga-nidra'],
+          science_note: 'Porges 2001: Parasympathikus-Aktivierung via NSDR senkt Cortisol um ~20%. Huberman empfiehlt NSDR für Nachmittags-Reset.'
+        },
+        {
+          id: 'q4-circadian-prep',
+          type: 'action',
+          time: '{{config.bedtime}}-45min',
+          title_de: '🌙 Winter-Zirkadian: Licht-Timing & Melatonin-Support',
+          title_en: 'Winter circadian: light timing & melatonin support',
+          description: 'Weniger Tageslicht = aktives Zirkadian-Management nötig. Blaues Licht ab 20:00 reduzieren.',
+          pillar: 'circadian_rhythm',
+          duration_minutes: 10,
+          frequency: 'daily',
+          condition: 'new Date().getMonth() >= 9',
+          tags: ['seasonal', 'q4', 'circadian', 'light', 'melatonin'],
+          science_note: 'Klerman 2002: Winterliche Licht-Anpassung stabilisiert zirkadianen Rhythmus und verhindert Schlaf-Phase-Drift.'
+        }
+      ]
+    },
+    daily_tasks: [
+      { id: 'morning-intention', task: '🎯 Morgen-Intention: Was ist heute der Fokus?', type: 'checkbox', duration_minutes: 1 },
+      { id: 'evening-gratitude', task: '🙏 3 Dinge, für die du heute dankbar bist', type: 'checkbox', duration_minutes: 2 },
+      { id: 'weekly-pillar-review', task: '📊 Wochenrückblick: 6 Säulen', type: 'checkbox', duration_minutes: 10 }
+    ]
   }
 ];
 
@@ -867,6 +1549,43 @@ export async function activateModule(userId, moduleSlug, config = {}) {
     : null;
 
   try {
+    // ─── MUTEX: Yearly-Optimization replaces 30-Day Plan ───
+    // When activating yearly-optimization → auto-deactivate any active 30-day plan
+    // The yearly module subsumes the plan — same habits, long-term perspective
+    if (moduleSlug === 'yearly-optimization') {
+      try {
+        // Find active 30-day plan instances (both converted plans and direct modules)
+        const { data: planInstances } = await supabase
+          .from('module_instances')
+          .select('id, module:module_definitions(slug)')
+          .eq('user_id', userId)
+          .eq('status', 'active');
+
+        if (planInstances?.length) {
+          const planSlugs = ['30-day-longevity', 'longevity-kickstart'];
+          const toDeactivate = planInstances.filter(
+            inst => planSlugs.includes(inst.module?.slug)
+          );
+
+          for (const inst of toDeactivate) {
+            await supabase
+              .from('module_instances')
+              .update({
+                status: 'completed',
+                completed_at: new Date().toISOString(),
+                completion_note: 'Automatisch abgeschlossen: Upgrade auf Jahres-Optimierung'
+              })
+              .eq('id', inst.id);
+
+            logger.info(`[ModuleService] Auto-completed '${inst.module?.slug}' → yearly-optimization upgrade`);
+          }
+        }
+      } catch (mutexErr) {
+        // Non-fatal: continue with activation even if mutex cleanup fails
+        console.warn('[ModuleService] Mutex cleanup warning:', mutexErr.message);
+      }
+    }
+
     // 2. DB Logic
     // Check existing
     const { data: existing, error: existingError } = await supabase
@@ -1157,6 +1876,73 @@ export async function hasModuleActive(userId, moduleSlug) {
   }
 }
 
+/**
+ * Check if user should be suggested the yearly-optimization module.
+ * Returns suggestion data if:
+ *   1. A 30-day plan just completed (or is on day 28+), AND
+ *   2. Yearly-optimization is NOT already active
+ *
+ * @param {string} userId
+ * @returns {Promise<Object|null>} { reason, completedPlan, focusPillars } or null
+ */
+export async function checkYearlySuggestion(userId) {
+  if (!userId) return null;
+
+  try {
+    // 1. Check: yearly-optimization already active? → no suggestion
+    const yearlyActive = await hasModuleActive(userId, 'yearly-optimization');
+    if (yearlyActive) return null;
+
+    // 2. Check: any completed or near-complete 30-day plan?
+    const { data: instances } = await supabase
+      .from('module_instances')
+      .select(`
+        id, status, current_day, total_days, started_at, config,
+        module:module_definitions(slug, name_de)
+      `)
+      .eq('user_id', userId)
+      .in('status', ['active', 'completed']);
+
+    if (!instances?.length) return null;
+
+    const planSlugs = ['30-day-longevity', 'longevity-kickstart'];
+
+    // Find completed plans
+    const completedPlan = instances.find(
+      inst => planSlugs.includes(inst.module?.slug) && inst.status === 'completed'
+    );
+
+    // Find near-complete active plans (day 28+)
+    const nearCompletePlan = instances.find(inst => {
+      if (!planSlugs.includes(inst.module?.slug) || inst.status !== 'active') return false;
+      const startDate = new Date(inst.started_at);
+      const dayNum = Math.ceil((Date.now() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      return dayNum >= 28;
+    });
+
+    const triggerPlan = completedPlan || nearCompletePlan;
+    if (!triggerPlan) return null;
+
+    // 3. Extract focus pillars from plan config for personalization
+    const focusPillars = triggerPlan.config?.focus_pillars || [];
+
+    return {
+      reason: completedPlan ? 'plan_completed' : 'plan_near_complete',
+      completedPlan: {
+        slug: triggerPlan.module?.slug,
+        name: triggerPlan.module?.name_de,
+        instanceId: triggerPlan.id
+      },
+      focusPillars,
+      // Dismissed tracking: check localStorage
+      dismissKey: `yearly_suggestion_dismissed_${userId}`
+    };
+  } catch (error) {
+    console.warn('[ModuleService] checkYearlySuggestion error:', error.message);
+    return null;
+  }
+}
+
 export default {
   getAvailableModules,
   getModuleBySlug,
@@ -1169,5 +1955,6 @@ export default {
   updateModuleConfig,
   updateModuleProgress,
   getModuleCategories,
-  hasModuleActive
+  hasModuleActive,
+  checkYearlySuggestion
 };
