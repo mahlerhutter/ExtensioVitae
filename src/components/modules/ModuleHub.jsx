@@ -101,10 +101,32 @@ export default function ModuleHub({ userId, language = 'de' }) {
         loadData();
         setConfigModal(null);
       } else {
-        addToast(result.error || 'Error', 'error');
+        // Better error message for common issues
+        const errorMsg = result.error || 'Error';
+        if (errorMsg.includes('foreign key') || errorMsg.includes('module_definitions')) {
+          addToast(
+            language === 'de'
+              ? '⚠️ Module-System noch nicht initialisiert. Bitte Datenbank-Migration ausführen.'
+              : '⚠️ Module system not initialized. Please run database migration.',
+            'error'
+          );
+        } else if (errorMsg.includes('already active')) {
+          addToast(
+            language === 'de' ? 'Modul ist bereits aktiv' : 'Module already active',
+            'info'
+          );
+        } else {
+          addToast(errorMsg, 'error');
+        }
       }
     } catch (error) {
-      addToast(error.message, 'error');
+      console.error('[ModuleHub] Activation error:', error);
+      addToast(
+        language === 'de'
+          ? `Fehler: ${error.message}. Bitte versuche es später erneut.`
+          : `Error: ${error.message}. Please try again later.`,
+        'error'
+      );
     }
   };
 

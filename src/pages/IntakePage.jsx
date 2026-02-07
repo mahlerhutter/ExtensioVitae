@@ -17,34 +17,34 @@ const ALL_QUESTIONS = [
   {
     id: 'name',
     step: 0,
-    question: "What should we call you?",
+    question: "Wie heißt du?",
     type: 'text',
-    placeholder: 'First name',
+    placeholder: 'Vorname',
     required: true,
     autocomplete: 'name',
   },
   {
     id: 'age',
     step: 0,
-    question: "How old are you?",
+    question: "Wie alt bist du?",
     type: 'number',
     min: 18,
     max: 80,
-    placeholder: 'Age (18-80)',
+    placeholder: 'Alter (18-80)',
     required: true,
-    helper: 'We create plans for adults 18-80 years old.',
+    helper: 'Wir erstellen Pläne für Erwachsene von 18-80 Jahren.',
     autocomplete: 'off',
   },
   {
     id: 'sex',
     step: 0,
-    question: "Biological Sex",
+    question: "Biologisches Geschlecht",
     type: 'select',
     required: true,
     options: [
-      { value: 'male', label: 'Male' },
-      { value: 'female', label: 'Female' },
-      { value: 'diverse', label: 'Diverse' },
+      { value: 'male', label: 'Männlich' },
+      { value: 'female', label: 'Weiblich' },
+      { value: 'diverse', label: 'Divers' },
     ],
   },
 
@@ -52,61 +52,61 @@ const ALL_QUESTIONS = [
   {
     id: 'sleep_hours_bucket',
     step: 1,
-    question: "Average nightly sleep?",
+    question: "Durchschnittlicher Nachtschlaf?",
     type: 'select',
     required: true,
     options: [
-      { value: '<6', label: 'Less than 6 hours' },
-      { value: '6-6.5', label: '6 - 6.5 hours' },
-      { value: '6.5-7', label: '6.5 - 7 hours' },
-      { value: '7-7.5', label: '7 - 7.5 hours' },
-      { value: '7.5-8', label: '7.5 - 8 hours' },
-      { value: '>8', label: 'More than 8 hours' },
+      { value: '<6', label: 'Weniger als 6 Stunden' },
+      { value: '6-6.5', label: '6 - 6,5 Stunden' },
+      { value: '6.5-7', label: '6,5 - 7 Stunden' },
+      { value: '7-7.5', label: '7 - 7,5 Stunden' },
+      { value: '7.5-8', label: '7,5 - 8 Stunden' },
+      { value: '>8', label: 'Mehr als 8 Stunden' },
     ],
   },
   {
     id: 'stress_1_10',
     step: 1,
-    question: "Current Stress Level (1-10)",
+    question: "Aktuelles Stresslevel (1-10)",
     type: 'range',
     min: 1,
     max: 10,
     required: true,
-    helper: '1 = Zen master, 10 = About to explode'
+    helper: '1 = Total entspannt, 10 = Kurz vor dem Burnout'
   },
   {
     id: 'training_frequency',
     step: 1,
-    question: "Training sessions per week",
+    question: "Trainingseinheiten pro Woche",
     type: 'select',
     required: true,
     options: [
-      { value: '0', label: '0 times' },
-      { value: '1-2', label: '1-2 times' },
-      { value: '3-4', label: '3-4 times' },
-      { value: '5+', label: '5+ times' },
+      { value: '0', label: '0 Mal' },
+      { value: '1-2', label: '1-2 Mal' },
+      { value: '3-4', label: '3-4 Mal' },
+      { value: '5+', label: '5+ Mal' },
     ],
   },
   {
     id: 'diet_pattern',
     step: 1,
-    question: "Dietary Habits (Select up to 5)",
+    question: "Ernährungsgewohnheiten (Bis zu 5 wählen)",
     type: 'multiselect',
     required: true,
     max_select: 5,
     options: [
-      { value: 'mostly_whole_foods', label: 'Mostly Whole Foods' },
-      { value: 'high_ultra_processed', label: 'High Ultra-Processed' },
-      { value: 'high_sugar_snacks', label: 'High Sugar/Snacks' },
-      { value: 'frequent_alcohol', label: 'Frequent Alcohol' },
-      { value: 'high_protein_focus', label: 'High Protein Focus' },
-      { value: 'late_eating', label: 'Late Eating' },
+      { value: 'mostly_whole_foods', label: 'Überwiegend Vollwertkost' },
+      { value: 'high_ultra_processed', label: 'Viel Fertigprodukte' },
+      { value: 'high_sugar_snacks', label: 'Viel Zucker/Snacks' },
+      { value: 'frequent_alcohol', label: 'Häufig Alkohol' },
+      { value: 'high_protein_focus', label: 'Proteinreich' },
+      { value: 'late_eating', label: 'Spätes Essen' },
     ],
   },
   {
     id: 'height_cm',
     step: 1,
-    question: "Height (cm)",
+    question: "Größe (cm)",
     type: 'number',
     min: 130,
     max: 220,
@@ -116,7 +116,7 @@ const ALL_QUESTIONS = [
   {
     id: 'weight_kg',
     step: 1,
-    question: "Weight (kg)",
+    question: "Gewicht (kg)",
     type: 'number',
     min: 40,
     max: 200,
@@ -128,48 +128,48 @@ const ALL_QUESTIONS = [
   {
     id: 'primary_goal',
     step: 2,
-    question: "What's your #1 longevity goal?",
+    question: "Was ist dein #1 Longevity-Ziel?",
     type: 'select',
     required: true,
     options: [
-      { value: 'energy', label: 'More Energy' },
-      { value: 'sleep', label: 'Better Sleep' },
-      { value: 'stress', label: 'Less Stress' },
-      { value: 'fat_loss', label: 'Fat Loss' },
-      { value: 'strength_fitness', label: 'Strength & Fitness' },
-      { value: 'focus_clarity', label: 'Focus & Clarity' },
+      { value: 'energy', label: 'Mehr Energie' },
+      { value: 'sleep', label: 'Besserer Schlaf' },
+      { value: 'stress', label: 'Weniger Stress' },
+      { value: 'fat_loss', label: 'Fettabbau' },
+      { value: 'strength_fitness', label: 'Kraft & Fitness' },
+      { value: 'focus_clarity', label: 'Fokus & Klarheit' },
     ],
   },
   {
     id: 'daily_time_budget',
     step: 2,
-    question: "Daily time budget (minutes)",
+    question: "Tägliches Zeitbudget (Minuten)",
     type: 'select',
     required: false, // Optional
     options: [
-      { value: '10', label: '10 minutes' },
-      { value: '20', label: '20 minutes' },
-      { value: '30', label: '30 minutes' },
+      { value: '10', label: '10 Minuten' },
+      { value: '20', label: '20 Minuten' },
+      { value: '30', label: '30 Minuten' },
     ],
   },
   {
     id: 'equipment_access',
     step: 2,
-    question: "Equipment Access",
+    question: "Geräte-Zugang",
     type: 'select',
     required: false, // Optional
     options: [
-      { value: 'none', label: 'No equipment' },
-      { value: 'basic', label: 'Basic home gym' },
-      { value: 'gym', label: 'Full commercial gym' },
+      { value: 'none', label: 'Keine Geräte' },
+      { value: 'basic', label: 'Home-Gym (Basics)' },
+      { value: 'gym', label: 'Fitnessstudio' },
     ],
   },
 ];
 
 const STEPS = [
-  { label: 'Basics', title: 'Who are you?' },
-  { label: 'Status', title: 'Start Point' },
-  { label: 'Goals', title: 'Your Targets' },
+  { label: 'Basics', title: 'Wer bist du?' },
+  { label: 'Status', title: 'Dein Ausgangspunkt' },
+  { label: 'Goals', title: 'Deine Ziele' },
 ];
 
 // ============================================
@@ -398,20 +398,20 @@ export default function IntakePage() {
       if (q.required) {
         const val = formData[q.id];
         if (val === undefined || val === null || (typeof val === 'string' && val.trim() === '')) {
-          errors.push(`Please fill in: ${q.question}`);
+          errors.push(`Bitte ausfüllen: ${q.question}`);
           continue;
         }
 
         // Specific type validations
         if (q.type === 'number') {
           const num = Number(val);
-          if (isNaN(num)) errors.push(`${q.question} must be a number`);
-          else if (q.min !== undefined && num < q.min) errors.push(`${q.question} must be at least ${q.min}`);
-          else if (q.max !== undefined && num > q.max) errors.push(`${q.question} must max ${q.max}`);
+          if (isNaN(num)) errors.push(`${q.question} muss eine Zahl sein`);
+          else if (q.min !== undefined && num < q.min) errors.push(`${q.question} muss mindestens ${q.min} sein`);
+          else if (q.max !== undefined && num > q.max) errors.push(`${q.question} darf maximal ${q.max} sein`);
         }
 
         if (q.type === 'multiselect' && (!Array.isArray(val) || val.length === 0)) {
-          errors.push(`Select at least one option for ${q.question}`);
+          errors.push(`Wähle mindestens eine Option für ${q.question}`);
         }
       }
     }
@@ -419,7 +419,7 @@ export default function IntakePage() {
     // Step 2 (Final Step, index 2) - Check Consent
     if (stepIndex === 2) {
       if (!formData.whatsapp_consent) {
-        errors.push('Please accept the consent checkbox to proceed.');
+        errors.push('Bitte akzeptiere die Einwilligung, um fortzufahren.');
       }
     }
 
@@ -479,7 +479,7 @@ export default function IntakePage() {
             Extensio<span className="text-amber-400">Vitae</span>
           </a>
           <div className="text-xs text-slate-500 font-mono">
-            STEP {currentStep + 1}/{STEPS.length}
+            SCHRITT {currentStep + 1}/{STEPS.length}
           </div>
         </div>
       </header>
@@ -505,7 +505,7 @@ export default function IntakePage() {
           {isLoadingUserData ? (
             <div className="flex-1 flex flex-col justify-center items-center opacity-50">
               <div className="animate-spin h-8 w-8 border-2 border-amber-400 rounded-full border-t-transparent mb-4"></div>
-              <p className="text-slate-400">Loading your profile...</p>
+              <p className="text-slate-400">Profil wird geladen...</p>
             </div>
           ) : (
             <>
@@ -526,7 +526,7 @@ export default function IntakePage() {
                         className="mt-1 w-5 h-5 rounded border-slate-600 text-amber-500 focus:ring-amber-500 focus:ring-offset-0 bg-slate-700"
                       />
                       <div className="text-sm text-slate-300">
-                        I agree to receive my Longevity Protocol via WhatsApp and accept the <a href="/terms" target="_blank" className="text-amber-400 hover:underline">Terms</a> & <a href="/privacy" target="_blank" className="text-amber-400 hover:underline">Privacy Policy</a>.
+                        Ich stimme zu, mein Longevity-Protokoll per WhatsApp zu erhalten und akzeptiere die <a href="/terms" target="_blank" className="text-amber-400 hover:underline">Nutzungsbedingungen</a> & <a href="/privacy" target="_blank" className="text-amber-400 hover:underline">Datenschutzerklärung</a>.
                       </div>
                     </label>
                   </div>
@@ -544,7 +544,7 @@ export default function IntakePage() {
                     : 'bg-amber-400 hover:bg-amber-500 text-slate-900 hover:scale-[1.02] shadow-amber-400/20'
                     }`}
                 >
-                  {isSubmitting ? 'Generating Plan...' : (isLastStep ? 'Generate Blueprint →' : 'Continue')}
+                  {isSubmitting ? 'Plan wird erstellt...' : (isLastStep ? 'Blueprint erstellen →' : 'Weiter')}
                 </button>
 
                 {canGoBack && (
@@ -554,7 +554,7 @@ export default function IntakePage() {
                     disabled={isSubmitting}
                     className="w-full py-3 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                   >
-                    Back
+                    Zurück
                   </button>
                 )}
               </div>

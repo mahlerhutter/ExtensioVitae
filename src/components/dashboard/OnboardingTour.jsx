@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Joyride, { ACTIONS, EVENTS, STATUS } from 'react-joyride';
+import { logger } from '../../lib/logger';
 
 export default function OnboardingTour({ canStart = true }) {
     const [run, setRun] = useState(false);
@@ -19,15 +20,15 @@ export default function OnboardingTour({ canStart = true }) {
 
         if (!hasSeenTour || forceReset) {
             // WaitForElement logic
-            console.log('[Onboarding] Waiting for elements...');
+            logger.debug('[Onboarding] Waiting for elements...');
             const checkExist = setInterval(() => {
                 const dashboardElement = document.querySelector('[data-tour="daily-progress"]');
                 const moduleHubElement = document.querySelector('[data-tour="module-hub-trigger"]');
 
-                console.log('[Onboarding] Checking elements:', { dashboard: !!dashboardElement, hub: !!moduleHubElement });
+                logger.debug('[Onboarding] Checking elements:', { dashboard: !!dashboardElement, hub: !!moduleHubElement });
 
                 if (dashboardElement && moduleHubElement) {
-                    console.log('[Onboarding] Elements found! Starting tour.');
+                    logger.debug('[Onboarding] Elements found! Starting tour.');
                     clearInterval(checkExist);
                     setRun(true);
                 }

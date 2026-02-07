@@ -50,46 +50,46 @@ const icons = {
 const pillars = [
   {
     key: 'sleep',
-    label: 'Sleep',
-    description: 'Optimize your recovery architecture',
-    arguments: ['Hormone and immune reset', 'Memory consolidation and clarity', 'Deep repair for longevity'],
+    label: 'Schlaf',
+    description: 'Optimiere deine Erholungsarchitektur',
+    arguments: ['Hormon- & Immunsystem-Reset', 'Gedächtnis und Klarheit', 'Tiefenreparatur für Langlebigkeit'],
   },
   {
     key: 'movement',
-    label: 'Movement',
-    description: 'Strategic physical stress for adaptation',
-    arguments: ['Maintain muscle and bone', 'Boost metabolic resilience', 'Protect cognition and mood'],
+    label: 'Bewegung',
+    description: 'Strategischer physischer Reiz für Anpassung',
+    arguments: ['Muskel- & Knochenerhalt', 'Metabolische Resilienz', 'Kognition & Stimmung schützen'],
   },
   {
     key: 'nutrition',
-    label: 'Nutrition',
-    description: 'Fuel timing and quality, simplified',
-    arguments: ['Stabilize energy and cravings', 'Lower inflammation load', 'Support gut-brain function'],
+    label: 'Ernährung',
+    description: 'Timing und Qualität, vereinfacht',
+    arguments: ['Energie stabilisieren', 'Entzündungen reduzieren', 'Darm-Hirn-Achse unterstützen'],
   },
   {
     key: 'stress',
-    label: 'Calm',
-    description: 'Regulate your nervous system daily',
-    arguments: ['Improve recovery and sleep', 'Protect cardiovascular health', 'Increase focus under pressure'],
+    label: 'Ruhe',
+    description: 'Reguliere dein Nervensystem täglich',
+    arguments: ['Bessere Erholung & Schlaf', 'Herz-Kreislauf-Schutz', 'Fokus unter Druck'],
   },
   {
     key: 'connection',
-    label: 'Connection',
-    description: 'Purpose and social bonds that matter',
-    arguments: ['Stronger resilience and motivation', 'Better immune outcomes', 'Longer, healthier lifespan'],
+    label: 'Verbindung',
+    description: 'Sinn und soziale Bindungen',
+    arguments: ['Stärkere Resilienz', 'Bessere Immunantwort', 'Längeres, gesünderes Leben'],
   },
   {
     key: 'environment',
-    label: 'Environment',
-    description: 'Reduce toxins, optimize your space',
-    arguments: ['Lower chronic exposure risk', 'Support circadian rhythm', 'Make healthy choices easier'],
+    label: 'Umgebung',
+    description: 'Toxine reduzieren, Raum optimieren',
+    arguments: ['Chronische Belastung senken', 'Circadianen Rhythmus stärken', 'Gesunde Entscheidungen erleichtern'],
   },
 ];
 
 const steps = [
-  { number: '01', title: 'Answer', description: '7 focused questions about your life, goals, and constraints.' },
-  { number: '02', title: 'Receive', description: 'Your personalized 30-day plan—organized by pillar, day by day.' },
-  { number: '03', title: 'Execute', description: 'Daily WhatsApp nudges keep you on track. ≤30 min/day.' },
+  { number: '01', title: 'Beantworten', description: '7 gezielte Fragen zu deinem Leben, Zielen und Rahmenbedingungen.' },
+  { number: '02', title: 'Erhalten', description: 'Dein personalisierter 30-Tage-Plan — nach Säulen geordnet, Tag für Tag.' },
+  { number: '03', title: 'Umsetzen', description: 'Tägliche WhatsApp-Erinnerungen halten dich auf Kurs. ≤30 Min/Tag.' },
 ];
 
 // Navbar Component
@@ -105,7 +105,7 @@ function Navbar() {
         </div>
         <div className="flex items-center gap-8">
           <a href="#how-it-works" className="text-slate-300 hover:text-white text-sm transition-colors">
-            How It Works
+            So funktioniert's
           </a>
           {isAuthenticated ? (
             <a href="/dashboard" className="text-amber-400 hover:text-amber-300 text-sm font-medium transition-colors flex items-center gap-2">
@@ -116,14 +116,14 @@ function Navbar() {
             </a>
           ) : (
             <a href="/auth" className="text-slate-300 hover:text-white text-sm transition-colors">
-              Log In
+              Anmelden
             </a>
           )}
           <a
             href={isAuthenticated ? "/dashboard" : "/intake"}
             className="bg-amber-400 hover:bg-amber-500 text-slate-900 px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"
           >
-            {isAuthenticated ? 'Go to Dashboard' : 'Start'}
+            {isAuthenticated ? 'Zum Dashboard' : 'Starten'}
           </a>
         </div>
       </div>
@@ -139,17 +139,17 @@ function Hero() {
         {/* Text Content */}
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-semibold text-white leading-tight mb-6">
-            Your Personalized 30-Day
+            Dein personalisierter 30-Tage
             <br />
             <span className="text-amber-400">Longevity Blueprint</span>
           </h1>
           <p className="text-xl text-slate-300 mb-4 max-w-2xl mx-auto">
-            Science-informed. Delivered daily. Under 30 minutes.
+            Wissenschaftlich fundiert. Täglich geliefert. Unter 30 Minuten.
           </p>
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/10 border border-amber-500/30 rounded-full mb-8">
             <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
             <span className="text-amber-400 text-sm font-medium">
-              v0.6.3 Zerberus
+              v0.6.4
             </span>
           </div>
         </div>
@@ -180,21 +180,21 @@ function Hero() {
             href="/intake"
             className="inline-flex items-center bg-amber-400 hover:bg-amber-500 text-slate-900 px-8 py-4 rounded-lg text-lg font-medium transition-all hover:scale-105"
           >
-            Get My Blueprint
+            Meinen Blueprint holen
             {icons.arrow}
           </a>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 mt-10 text-slate-400">
             <div className="flex items-center gap-2">
               {icons.check}
-              <span>3-minute intake</span>
+              <span>3-Minuten-Intake</span>
             </div>
             <div className="flex items-center gap-2">
               {icons.check}
-              <span>Personalized to your life</span>
+              <span>Auf dein Leben zugeschnitten</span>
             </div>
             <div className="flex items-center gap-2">
               {icons.check}
-              <span>Daily WhatsApp nudges</span>
+              <span>Tägliche WhatsApp-Erinnerungen</span>
             </div>
           </div>
         </div>
@@ -209,10 +209,10 @@ function Pillars() {
     <section className="py-24 bg-slate-800">
       <div className="max-w-6xl mx-auto px-6">
         <h2 className="text-3xl md:text-4xl font-semibold text-white text-center mb-4">
-          Built on 6 Pillars of Longevity
+          Basierend auf 6 Säulen der Langlebigkeit
         </h2>
         <p className="text-slate-400 text-center mb-16 max-w-2xl mx-auto">
-          Each day's plan addresses what matters most for extending your healthspan.
+          Jeder Tag deines Plans adressiert, was für deine Gesundheitsspanne am wichtigsten ist.
         </p>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           {pillars.map((pillar) => (
@@ -227,7 +227,7 @@ function Pillars() {
               <h3 className="text-white font-medium mb-2">{pillar.label}</h3>
               <p className="text-slate-500 text-sm leading-relaxed">{pillar.description}</p>
               <div className="absolute inset-0 rounded-xl bg-slate-950/95 border border-amber-400/40 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity p-4 flex flex-col justify-center">
-                <p className="text-amber-300 text-[10px] uppercase tracking-[0.2em] mb-2">Why it matters</p>
+                <p className="text-amber-300 text-[10px] uppercase tracking-[0.2em] mb-2">Warum es zählt</p>
                 <ul className="text-slate-200 text-xs leading-snug space-y-1.5">
                   {pillar.arguments.map((argument) => (
                     <li key={argument} className="flex items-start gap-2">
@@ -251,10 +251,10 @@ function HowItWorks() {
     <section id="how-it-works" className="py-24 bg-slate-900">
       <div className="max-w-5xl mx-auto px-6">
         <h2 className="text-3xl md:text-4xl font-semibold text-white text-center mb-4">
-          Three Minutes to Your Blueprint
+          Drei Minuten zu deinem Blueprint
         </h2>
         <p className="text-slate-400 text-center mb-8">
-          No fluff. No overwhelm. Just clarity.
+          Kein Blabla. Keine Überforderung. Nur Klarheit.
         </p>
         <div className="bg-slate-800/50 rounded-xl p-6 mb-16 border border-slate-700/50 max-w-3xl mx-auto">
           <p className="text-slate-300 text-center leading-relaxed italic">
@@ -290,24 +290,24 @@ function Philosophy() {
     <section className="py-24 bg-slate-800">
       <div className="max-w-3xl mx-auto px-6 text-center">
         <h2 className="text-3xl md:text-4xl font-semibold text-white mb-8">
-          Our Philosophy
+          Unsere Philosophie
         </h2>
         <p className="text-xl text-slate-300 leading-relaxed mb-12">
-          We believe longevity is built in daily micro-decisions, not radical interventions.
-          ExtensioVitae gives you the clarity to act—without the overwhelm.
+          Wir glauben, dass Langlebigkeit durch tägliche Mikro-Entscheidungen entsteht — nicht durch radikale Interventionen.
+          ExtensioVitae gibt dir die Klarheit zum Handeln — ohne Überforderung.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 text-slate-400">
           <div className="flex items-center gap-2">
             {icons.check}
-            <span>No medical claims</span>
+            <span>Keine medizinischen Versprechen</span>
           </div>
           <div className="flex items-center gap-2">
             {icons.check}
-            <span>Evidence-informed</span>
+            <span>Evidenzbasiert</span>
           </div>
           <div className="flex items-center gap-2">
             {icons.check}
-            <span>Privacy-first</span>
+            <span>Datenschutz zuerst</span>
           </div>
         </div>
       </div>
@@ -622,19 +622,19 @@ function ScienceEvidence() {
                   <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  6 Longevity Pillars
+                  6 Longevity-Säulen
                 </span>
                 <span className="flex items-center gap-1 text-slate-500">
                   <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  Peer-reviewed Studies
+                  Peer-Reviewed Studien
                 </span>
                 <span className="flex items-center gap-1 text-slate-500">
                   <svg className="w-4 h-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  No Medical Claims
+                  Keine medizinischen Versprechen
                 </span>
               </div>
             </div>
@@ -660,17 +660,17 @@ function FinalCTA() {
     <section className="py-24 bg-gradient-to-b from-slate-900 to-slate-950">
       <div className="max-w-3xl mx-auto px-6 text-center">
         <h2 className="text-3xl md:text-4xl font-semibold text-white mb-8">
-          Ready to extend your vitae?
+          Bereit, deine Vitae zu verlängern?
         </h2>
         <a
           href="/intake"
           className="inline-flex items-center bg-amber-400 hover:bg-amber-500 text-slate-900 px-8 py-4 rounded-lg text-lg font-medium transition-all hover:scale-105 mb-6"
         >
-          Start Now
+          Jetzt starten
           {icons.arrow}
         </a>
         <p className="text-slate-500">
-          Free for early adopters. No credit card required.
+          Kostenlos für Early Adopters. Keine Kreditkarte nötig.
         </p>
       </div>
     </section>
@@ -684,7 +684,7 @@ function Footer() {
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
           <div className="text-slate-500 text-sm">
-            © 2025 ExtensioVitae. All rights reserved.
+            © 2025 ExtensioVitae. Alle Rechte vorbehalten.
           </div>
           <div className="flex items-center gap-6 text-slate-500 text-sm">
             <a href="/science" className="hover:text-amber-400 transition-colors flex items-center gap-1">
@@ -712,7 +712,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  useDocumentTitle('ExtensioVitae - Scientific Longevity Plans');
+  useDocumentTitle('ExtensioVitae - Wissenschaftliche Longevity-Pläne');
 
   useEffect(() => {
     // Only redirect if authenticated AND 'noredirect' param is NOT present

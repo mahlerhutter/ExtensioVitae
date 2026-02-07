@@ -113,7 +113,6 @@ export function AuthProvider({ children }) {
             // Clear local storage data on sign out
             localStorage.removeItem('intake_data');
             localStorage.removeItem('plan_progress');
-            localStorage.removeItem('plan_progress');
         } catch (error) {
             logger.error('[Auth] Sign out failed:', error);
             throw error;

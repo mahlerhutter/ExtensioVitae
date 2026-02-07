@@ -435,6 +435,269 @@ function getRecommendationReason(module, intakeData) {
   return { de: 'Empfohlen für Longevity', en: 'Recommended for longevity' };
 }
 
+// =====================================================
+// 30-DAY MODULE PREVIEW
+// Generates a complete day-by-day schedule preview for
+// any module, allowing users to see exactly what to expect
+// before activation.
+// =====================================================
+
+/**
+ * Generate a 30-day (or module-duration) preview schedule for any module.
+ * Works for ALL modules — fallback, DB, and plan-based.
+ *
+ * @param {Object} moduleDef - Module definition (from getModuleBySlug or FALLBACK_MODULES)
+ * @param {Object} config - User configuration (from config_schema defaults or user input)
+ * @param {Date} startDate - When the module would start (default: today)
+ * @returns {Object} { days: [...], summary: {...} }
+ */
+export function generateModulePreview(moduleDef, config = {}, startDate = new Date()) {
+  if (!moduleDef) return { days: [], summary: {} };
+
+  const duration = moduleDef.duration_days || 30;
+  const templateTasks = moduleDef.task_template?.tasks || [];
+  const legacyTasks = moduleDef.daily_tasks || [];
+  const days = [];
+
+  // Build config with defaults from schema
+  const fullConfig = buildDefaultConfig(moduleDef.config_schema, config);
+
+  // Phase boundaries for display
+  const phases = getModulePhases(duration);
+
+  for (let dayNum = 1; dayNum <= duration; dayNum++) {
+    const dayDate = new Date(startDate);
+    dayDate.setDate(dayDate.getDate() + dayNum - 1);
+    const dayOfWeek = dayDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    const dayOfMonth = dayDate.getDate();
+    const isWeekend = dayOfWeek === 'saturday' || dayOfWeek === 'sunday';
+
+    // Determine current phase
+    const phase = getPhaseForDay(dayNum, phases);
+
+    // Collect tasks for this day
+    const dayTasks = [];
+
+    if (templateTasks.length > 0) {
+      // Path A: task_template
+      for (const taskDef of templateTasks) {
+        // Check day-based progression (min_day / max_day)
+        if (taskDef.min_day && dayNum < taskDef.min_day) continue;
+        if (taskDef.max_day && dayNum > taskDef.max_day) continue;
+
+        // Check frequency
+        if (taskDef.frequency === 'weekly' && taskDef.day !== dayOfWeek) continue;
+        if (taskDef.frequency === 'monthly' && taskDef.day !== dayOfMonth) continue;
+        if (taskDef.frequency === 'quarterly' || taskDef.frequency === 'yearly') continue;
+        if (taskDef.frequency === 'once' && taskDef.day !== dayNum) continue;
+        if (taskDef.frequency === 'as_needed') continue;
+
+        // Check condition (simplified for preview — can't access runtime state)
+        if (taskDef.condition && !previewEvaluateCondition(taskDef.condition, fullConfig)) continue;
+
+        // Resolve template variables in time
+        const resolvedTime = previewResolveTemplate(taskDef.time, fullConfig);
+        const resolvedTitle = previewResolveTemplate(taskDef.title_de || taskDef.title_en || '', fullConfig);
+
+        dayTasks.push({
+          id: taskDef.id,
+          title_de: resolvedTitle,
+          type: taskDef.type || 'action',
+          time: resolvedTime,
+          pillar: taskDef.pillar || moduleDef.category || 'general',
+          duration_minutes: taskDef.duration_minutes || 5,
+          is_new_in_phase: taskDef.min_day === dayNum
+        });
+      }
+    } else if (legacyTasks.length > 0) {
+      // Path B: legacy daily_tasks (same every day)
+      for (const taskDef of legacyTasks) {
+        dayTasks.push({
+          id: taskDef.id,
+          title_de: taskDef.task || taskDef.title_de || '',
+          type: taskDef.type === 'checkbox' ? 'action' : (taskDef.type || 'action'),
+          time: taskDef.time || null,
+          pillar: taskDef.pillar || moduleDef.category || 'general',
+          duration_minutes: taskDef.duration_minutes || 5,
+          is_new_in_phase: false
+        });
+      }
+    }
+
+    // Sort tasks by time
+    dayTasks.sort((a, b) => {
+      if (!a.time && !b.time) return 0;
+      if (!a.time) return 1;
+      if (!b.time) return -1;
+      return a.time.localeCompare(b.time);
+    });
+
+    days.push({
+      day: dayNum,
+      date: dayDate.toISOString().split('T')[0],
+      day_of_week: dayOfWeek,
+      is_weekend: isWeekend,
+      phase: phase.name,
+      phase_de: phase.name_de,
+      tasks: dayTasks,
+      task_count: dayTasks.length,
+      total_minutes: dayTasks.reduce((sum, t) => sum + (t.duration_minutes || 0), 0),
+      new_tasks_unlocked: dayTasks.filter(t => t.is_new_in_phase).map(t => t.title_de)
+    });
+  }
+
+  // Build summary
+  const allTasks = days.flatMap(d => d.tasks);
+  const uniqueTaskIds = [...new Set(allTasks.map(t => t.id))];
+  const pillarCounts = {};
+  allTasks.forEach(t => { pillarCounts[t.pillar] = (pillarCounts[t.pillar] || 0) + 1; });
+
+  const summary = {
+    module_name: moduleDef.name_de || moduleDef.name_en || moduleDef.slug,
+    duration_days: duration,
+    total_unique_tasks: uniqueTaskIds.length,
+    avg_tasks_per_day: Math.round((allTasks.length / duration) * 10) / 10,
+    avg_minutes_per_day: Math.round(days.reduce((s, d) => s + d.total_minutes, 0) / duration),
+    pillar_distribution: pillarCounts,
+    phases: phases.map(p => ({
+      ...p,
+      tasks_in_phase: uniqueTaskIds.filter(id => {
+        const task = templateTasks.find(t => t.id === id);
+        if (!task) return true;
+        const inRange = (!task.min_day || task.min_day <= p.end_day) &&
+                        (!task.max_day || task.max_day >= p.start_day);
+        return inRange;
+      }).length
+    })),
+    weekly_overview: buildWeeklyOverview(days)
+  };
+
+  return { days, summary };
+}
+
+/**
+ * Get phase definitions based on module duration
+ */
+function getModulePhases(duration) {
+  if (duration <= 7) {
+    return [
+      { name: 'awareness', name_de: 'Awareness', start_day: 1, end_day: 2 },
+      { name: 'practice', name_de: 'Praxis', start_day: 3, end_day: 5 },
+      { name: 'integration', name_de: 'Integration', start_day: 6, end_day: duration }
+    ];
+  }
+  if (duration <= 14) {
+    return [
+      { name: 'core', name_de: 'Kern-Aufbau', start_day: 1, end_day: 7 },
+      { name: 'full', name_de: 'Volles Protokoll', start_day: 8, end_day: duration }
+    ];
+  }
+  if (duration <= 21) {
+    return [
+      { name: 'foundation', name_de: 'Foundation', start_day: 1, end_day: 7 },
+      { name: 'intermediate', name_de: 'Aufbau', start_day: 8, end_day: 14 },
+      { name: 'advanced', name_de: 'Fortgeschritten', start_day: 15, end_day: duration }
+    ];
+  }
+  return [
+    { name: 'stabilize', name_de: 'Stabilisieren', start_day: 1, end_day: 7 },
+    { name: 'build', name_de: 'Aufbauen', start_day: 8, end_day: 14 },
+    { name: 'optimize', name_de: 'Optimieren', start_day: 15, end_day: 21 },
+    { name: 'consolidate', name_de: 'Festigen', start_day: 22, end_day: duration }
+  ];
+}
+
+function getPhaseForDay(dayNum, phases) {
+  return phases.find(p => dayNum >= p.start_day && dayNum <= p.end_day) || phases[phases.length - 1];
+}
+
+/**
+ * Simplified condition evaluator for preview (no runtime state)
+ */
+function previewEvaluateCondition(condition, config) {
+  if (!condition || typeof condition !== 'string') return true;
+  try {
+    // Array .includes()
+    const includesMatch = condition.match(/config\.(\w+)\.includes\(['"]([\w_]+)['"]\)/);
+    if (includesMatch) {
+      const arr = config[includesMatch[1]];
+      return Array.isArray(arr) && arr.includes(includesMatch[2]);
+    }
+    // Boolean check
+    if (condition.match(/^config\.\w+$/)) {
+      return !!config[condition.replace('config.', '')];
+    }
+    // Equality
+    if (condition.includes('===')) {
+      const [left, right] = condition.split('===').map(s => s.trim());
+      const lVal = left.startsWith('config.') ? config[left.replace('config.', '')] : left.replace(/['"]/g, '');
+      const rVal = right.startsWith('config.') ? config[right.replace('config.', '')] : right.replace(/['"]/g, '');
+      return lVal === rVal;
+    }
+    // Inequality
+    if (condition.includes('!==')) {
+      const [left, right] = condition.split('!==').map(s => s.trim());
+      const lVal = left.startsWith('config.') ? config[left.replace('config.', '')] : left.replace(/['"]/g, '');
+      const rVal = right.startsWith('config.') ? config[right.replace('config.', '')] : right.replace(/['"]/g, '');
+      return lVal !== rVal;
+    }
+    // OR
+    if (condition.includes(' || ')) {
+      return condition.split(' || ').some(part => previewEvaluateCondition(part.trim(), config));
+    }
+    // AND
+    if (condition.includes(' && ')) {
+      return condition.split(' && ').every(part => previewEvaluateCondition(part.trim(), config));
+    }
+    return true;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Simplified template resolver for preview
+ */
+function previewResolveTemplate(value, config) {
+  if (!value || typeof value !== 'string') return value;
+
+  // Time arithmetic first
+  value = value.replace(/\{\{config\.(\w+)\}\}([+-])(\d+)min/g, (match, key, op, minutes) => {
+    const baseTime = config[key];
+    if (!baseTime || typeof baseTime !== 'string' || !baseTime.includes(':')) return match;
+    const [hours, mins] = baseTime.split(':').map(Number);
+    const totalMins = hours * 60 + mins + (op === '+' ? parseInt(minutes) : -parseInt(minutes));
+    const normalizedMins = ((totalMins % 1440) + 1440) % 1440;
+    return `${String(Math.floor(normalizedMins / 60)).padStart(2, '0')}:${String(normalizedMins % 60).padStart(2, '0')}`;
+  });
+
+  // Simple substitution
+  value = value.replace(/\{\{config\.(\w+)\}\}/g, (match, key) => {
+    return config[key] !== undefined ? String(config[key]) : match;
+  });
+
+  return value;
+}
+
+/**
+ * Build weekly overview from days array
+ */
+function buildWeeklyOverview(days) {
+  const weeks = [];
+  for (let i = 0; i < days.length; i += 7) {
+    const weekDays = days.slice(i, i + 7);
+    weeks.push({
+      week: Math.floor(i / 7) + 1,
+      avg_tasks: Math.round((weekDays.reduce((s, d) => s + d.task_count, 0) / weekDays.length) * 10) / 10,
+      avg_minutes: Math.round(weekDays.reduce((s, d) => s + d.total_minutes, 0) / weekDays.length),
+      phase: weekDays[0]?.phase || 'unknown',
+      phase_de: weekDays[0]?.phase_de || 'Unbekannt',
+      new_tasks: [...new Set(weekDays.flatMap(d => d.new_tasks_unlocked).filter(Boolean))]
+    });
+  }
+  return weeks;
+}
+
 export default {
   convertPlanToModule,
   generatePlanModuleTasks,
@@ -442,5 +705,6 @@ export default {
   getConvertiblePlan,
   quickActivateModule,
   getRecommendedModules,
-  getStarterBundle
+  getStarterBundle,
+  generateModulePreview
 };

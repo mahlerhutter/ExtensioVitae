@@ -1128,5 +1128,116 @@ export const TASKS_EXAMPLE = [
     // Advanced
     { id: "SUP020", pillar: "supplements", minutes: 10, intensity: 0, equipment: "any", level: "advanced", tags: ["protocol", "advanced"], when: "any", how: "Supplement Audit: Alle Supplemente auf Qualität und Notwendigkeit prüfen.", prerequisites: ["SUP010", "SUP011"] },
     { id: "SUP021", pillar: "supplements", minutes: 5, intensity: 0, equipment: "any", level: "advanced", tags: ["bloodwork", "advanced"], when: "any", how: "Blutwerte planen: Termin für D, B12, Ferritin, Schilddrüse machen.", prerequisites: ["SUP020"] },
-    { id: "SUP022", pillar: "supplements", minutes: 3, intensity: 0, equipment: "any", level: "advanced", tags: ["nootropics", "advanced"], when: "am", how: "Focus Stack: L-Theanin 200mg + Koffein 100mg für fokussierte Arbeit.", prerequisites: ["SUP012"] }
+    { id: "SUP022", pillar: "supplements", minutes: 3, intensity: 0, equipment: "any", level: "advanced", tags: ["nootropics", "advanced"], when: "am", how: "Focus Stack: L-Theanin 200mg + Koffein 100mg für fokussierte Arbeit.", prerequisites: ["SUP012"] },
+
+    // ========================================================================
+    // NEW DOMAINS (v2.2) — Evidence-based expansions
+    // Mapped to existing 6 pillars via tags for domain identification
+    // ========================================================================
+
+    // ========== SOCIAL CONNECTION → mental_resilience (6 tasks) ==========
+    // Evidence: Harvard 80-year study — social connection is strongest longevity predictor
+    // Beginner
+    { id: "MEN024", pillar: "mental_resilience", minutes: 2, intensity: -1, equipment: "any", level: "beginner", tags: ["social", "connection", "micro"], when: "any", how: "Dankbarkeits-Nachricht: Einer Person eine kurze, ehrliche Dankesnachricht senden." },
+    { id: "MEN025", pillar: "mental_resilience", minutes: 5, intensity: -1, equipment: "any", level: "beginner", tags: ["social", "connection", "starter"], when: "any", how: "Anruf statt Text: Jemanden anrufen statt zu schreiben (5 Min genügen)." },
+    { id: "MEN026", pillar: "mental_resilience", minutes: 3, intensity: -1, equipment: "any", level: "beginner", tags: ["social", "offline", "micro"], when: "any", how: "Phone-Free Mahlzeit: Eine Mahlzeit mit jemandem ohne Handys teilen." },
+    // Intermediate
+    { id: "MEN027", pillar: "mental_resilience", minutes: 15, intensity: 0, equipment: "any", level: "intermediate", tags: ["social", "community"], when: "any", how: "Soziales Treffen: 15min persönliches Gespräch (Kaffee, Spaziergang).", prerequisites: ["MEN025"] },
+    { id: "MEN028", pillar: "mental_resilience", minutes: 10, intensity: 0, equipment: "any", level: "intermediate", tags: ["social", "giving", "community"], when: "any", how: "Micro-Volunteering: Einem Nachbarn helfen, Einkauf anbieten, Zuhören.", prerequisites: ["MEN025"] },
+    // Advanced
+    { id: "MEN029", pillar: "mental_resilience", minutes: 20, intensity: 0, equipment: "any", level: "advanced", tags: ["social", "deep_connection", "advanced"], when: "any", how: "Tiefes Gespräch: 20min echtes Gespräch — keine Small-Talk, echte Themen.", prerequisites: ["MEN027"] },
+
+    // ========== COGNITIVE TRAINING → mental_resilience (4 tasks) ==========
+    // Evidence: Neuroplastizität, Demenz-Prävention, kognitive Reserve
+    // Beginner
+    { id: "MEN030", pillar: "mental_resilience", minutes: 5, intensity: -1, equipment: "any", level: "beginner", tags: ["cognitive", "brain", "micro"], when: "any", how: "Denkspiel: 5min Rätsel, Kreuzworträtsel oder Sudoku lösen." },
+    { id: "MEN031", pillar: "mental_resilience", minutes: 3, intensity: -1, equipment: "any", level: "beginner", tags: ["cognitive", "novelty", "micro"], when: "any", how: "Neuer Weg: Heute einen anderen Weg zur Arbeit/Supermarkt nehmen." },
+    // Intermediate
+    { id: "MEN032", pillar: "mental_resilience", minutes: 15, intensity: 0, equipment: "any", level: "intermediate", tags: ["cognitive", "learning"], when: "any", how: "Neues lernen: 15min an Sprache, Instrument oder Fähigkeit arbeiten.", prerequisites: ["MEN030"] },
+    // Advanced
+    { id: "MEN033", pillar: "mental_resilience", minutes: 20, intensity: 0, equipment: "any", level: "advanced", tags: ["cognitive", "flow", "deep_work"], when: "any", how: "Deep Learning: 20min ungestörtes Studium eines komplexen Themas.", prerequisites: ["MEN010", "MEN032"] },
+
+    // ========== GUT HEALTH → nutrition_metabolism (4 tasks) ==========
+    // Evidence: Microbiom → Immunität 70%, Serotonin 95%, systemische Inflammation
+    // Beginner
+    { id: "NUT024", pillar: "nutrition_metabolism", minutes: 3, intensity: -1, equipment: "any", level: "beginner", tags: ["gut", "microbiome", "micro"], when: "any", how: "Fermentiertes Essen: Eine Portion Kimchi, Sauerkraut oder Joghurt heute." },
+    { id: "NUT025", pillar: "nutrition_metabolism", minutes: 2, intensity: -1, equipment: "any", level: "beginner", tags: ["gut", "fiber", "micro"], when: "am", how: "Ballaststoff-Boost: 1 EL Flohsamenschalen in Wasser trinken." },
+    // Intermediate
+    { id: "NUT026", pillar: "nutrition_metabolism", minutes: 8, intensity: 0, equipment: "any", level: "intermediate", tags: ["gut", "prebiotic", "diversity"], when: "any", how: "30-Pflanzen-Challenge: Heute mind. 5 verschiedene Pflanzen essen.", prerequisites: ["NUT003", "NUT024"] },
+    // Advanced
+    { id: "NUT027", pillar: "nutrition_metabolism", minutes: 5, intensity: 0, equipment: "any", level: "advanced", tags: ["gut", "protocol", "advanced"], when: "am", how: "Gut-Reset: Warmes Zitronenwasser + Apfelessig nüchtern für Magensäure.", prerequisites: ["NUT026"] },
+
+    // ========== HYDRATION → nutrition_metabolism (4 tasks) ==========
+    // Evidence: 2% Dehydration = 25% kognitive Leistungseinbuße
+    // Beginner
+    { id: "NUT028", pillar: "nutrition_metabolism", minutes: 1, intensity: -1, equipment: "any", level: "beginner", tags: ["hydration", "awareness", "micro"], when: "any", how: "Urin-Check: Farbe sollte hellgelb sein — wenn dunkel, sofort trinken." },
+    { id: "NUT029", pillar: "nutrition_metabolism", minutes: 2, intensity: -1, equipment: "any", level: "beginner", tags: ["hydration", "morning", "micro"], when: "am", how: "Morgen-Hydration: Glas Wasser + Prise Salz direkt nach dem Aufwachen." },
+    // Intermediate
+    { id: "NUT030", pillar: "nutrition_metabolism", minutes: 3, intensity: 0, equipment: "any", level: "intermediate", tags: ["hydration", "tracking"], when: "any", how: "Wasser-Tracking: Heute 2.5-3L Wasser trinken (alle 2h ein Glas).", prerequisites: ["NUT028"] },
+    // Advanced
+    { id: "NUT031", pillar: "nutrition_metabolism", minutes: 5, intensity: 0, equipment: "any", level: "advanced", tags: ["hydration", "electrolytes", "performance"], when: "any", how: "Elektrolyt-Mix: Na/K/Mg in Wasser für optimale Zellhydration.", prerequisites: ["NUT030"] },
+
+    // ========== ORAL HEALTH → nutrition_metabolism (4 tasks) ==========
+    // Evidence: Parodontitis → 46% höheres Risiko für Herz-Kreislauf-Erkrankungen
+    // Beginner
+    { id: "NUT032", pillar: "nutrition_metabolism", minutes: 2, intensity: -1, equipment: "any", level: "beginner", tags: ["oral", "dental", "micro"], when: "pm", how: "Zahnseide: Jeden Abend Zahnseide benutzen (alle Zahnzwischenräume)." },
+    { id: "NUT033", pillar: "nutrition_metabolism", minutes: 1, intensity: -1, equipment: "any", level: "beginner", tags: ["oral", "timing", "micro"], when: "any", how: "30-Min-Regel: Nach Essen 30min warten vor dem Zähneputzen." },
+    // Intermediate
+    { id: "NUT034", pillar: "nutrition_metabolism", minutes: 3, intensity: 0, equipment: "any", level: "intermediate", tags: ["oral", "tongue"], when: "am", how: "Zungenreinigung: Morgens Zunge mit Schaber reinigen (Bakterien entfernen).", prerequisites: ["NUT032"] },
+    // Advanced
+    { id: "NUT035", pillar: "nutrition_metabolism", minutes: 5, intensity: 0, equipment: "any", level: "advanced", tags: ["oral", "protocol"], when: "pm", how: "Ölziehen: 5min Kokosöl im Mund schwenken für Mundflora-Balance.", prerequisites: ["NUT034"] },
+
+    // ========== BALANCE TRAINING → movement_muscle (3 tasks) ==========
+    // Evidence: Sturzprävention — führende Verletzungsursache bei 65+, Balance-Training senkt Risiko um 23%
+    // Beginner
+    { id: "MOV025", pillar: "movement_muscle", minutes: 3, intensity: -1, equipment: "none", level: "beginner", tags: ["balance", "proprioception", "micro"], when: "any", how: "Einbeinstand: 30s pro Bein, Augen offen. Beim Zähneputzen üben." },
+    // Intermediate
+    { id: "MOV026", pillar: "movement_muscle", minutes: 8, intensity: 0, equipment: "none", level: "intermediate", tags: ["balance", "coordination"], when: "any", how: "Balance Flow: Tandem-Stand, Heel-to-Toe Walk, Einbein mit geschlossenen Augen.", prerequisites: ["MOV025"] },
+    // Advanced
+    { id: "MOV027", pillar: "movement_muscle", minutes: 12, intensity: 0, equipment: "none", level: "advanced", tags: ["balance", "fall_prevention", "advanced"], when: "any", how: "Dynamische Balance: Einbein-Kniebeugen, Ausfallschritte mit Rotation.", prerequisites: ["MOV026", "MOV010"] },
+
+    // ========== GRIP STRENGTH → movement_muscle (2 tasks) ==========
+    // Evidence: Griffstärke korreliert stärker mit Mortalität als Blutdruck (Lancet 2015)
+    // Beginner
+    { id: "MOV028", pillar: "movement_muscle", minutes: 3, intensity: -1, equipment: "any", level: "beginner", tags: ["grip", "strength", "longevity", "micro"], when: "any", how: "Grip-Test: Handtuch auswringen (3x pro Hand) oder Tennisball drücken." },
+    // Intermediate
+    { id: "MOV029", pillar: "movement_muscle", minutes: 5, intensity: 0, equipment: "basic", level: "intermediate", tags: ["grip", "carry", "functional"], when: "any", how: "Farmer's Walk: Schwere Taschen/Gewichte 60s tragen, 3 Sätze.", prerequisites: ["MOV028"] },
+
+    // ========== ZONE 2 / VO2MAX → movement_muscle (3 tasks) ==========
+    // Evidence: Zone 2 = stärkster Prädiktor für kardiovaskuläre Longevity (Peter Attia)
+    // Intermediate
+    { id: "MOV030", pillar: "movement_muscle", minutes: 20, intensity: 0, equipment: "any", level: "intermediate", tags: ["zone2", "endurance", "cardio"], when: "any", how: "Zone 2 Rad: 20min Radfahren, lockeres Tempo (Nasen-Atmung möglich).", prerequisites: ["MOV012"] },
+    // Advanced
+    { id: "MOV031", pillar: "movement_muscle", minutes: 25, intensity: +1, equipment: "any", level: "advanced", tags: ["vo2max", "interval", "cardio"], when: "any", how: "VO2max Intervalle: 4×4min bei 90-95% HRmax, 3min Pause dazwischen.", prerequisites: ["MOV023", "MOV021"] },
+    { id: "MOV032", pillar: "movement_muscle", minutes: 30, intensity: 0, equipment: "any", level: "advanced", tags: ["zone2", "endurance", "long"], when: "any", how: "Long Zone 2: 30min langsames Kardio (Schwimmen, Laufen oder Rad).", prerequisites: ["MOV030"] },
+
+    // ========== MICRO-MOVEMENTS → movement_muscle (2 tasks) ==========
+    // Evidence: NEAT (Non-Exercise Activity) für metabolische Gesundheit + Compliance
+    // Beginner
+    { id: "MOV033", pillar: "movement_muscle", minutes: 2, intensity: -1, equipment: "none", level: "beginner", tags: ["micro", "neat", "desk"], when: "any", how: "Desk Break: Aufstehen, 2min dehnen oder auf der Stelle gehen." },
+    { id: "MOV034", pillar: "movement_muscle", minutes: 1, intensity: -1, equipment: "none", level: "beginner", tags: ["micro", "posture", "breathing"], when: "any", how: "Haltungs-Reset: Schultern zurück, Brust raus, 3 tiefe Bauchatmungen." },
+
+    // ========== HEAT EXPOSURE / SAUNA → sleep_recovery (3 tasks) ==========
+    // Evidence: Sauna 4-7x/Woche = 40% niedrigere kardiovaskuläre Mortalität (Laukkanen 2015)
+    // Beginner
+    { id: "SLP023", pillar: "sleep_recovery", minutes: 15, intensity: -1, equipment: "any", level: "beginner", tags: ["heat", "sauna", "recovery"], when: "pm", how: "Warmes Bad: 15min bei 38-40°C — 1-2h vor dem Schlafen für Kerntemperatur-Drop." },
+    // Intermediate
+    { id: "SLP024", pillar: "sleep_recovery", minutes: 20, intensity: 0, equipment: "any", level: "intermediate", tags: ["sauna", "heat_shock", "cardiovascular"], when: "pm", how: "Sauna-Session: 15-20min bei 80-100°C (finnische Sauna), danach kalt abkühlen.", prerequisites: ["SLP023"] },
+    // Advanced
+    { id: "SLP025", pillar: "sleep_recovery", minutes: 25, intensity: 0, equipment: "any", level: "advanced", tags: ["sauna", "contrast", "protocol", "advanced"], when: "pm", how: "Kontrast-Therapie: 15min Sauna → 2min Kälte → 10min Sauna → kalt abschließen.", prerequisites: ["SLP024"] },
+
+    // ========== AUTONOMIC RECOVERY → sleep_recovery (2 tasks) ==========
+    // Evidence: Vagusnerv-Stimulation verbessert HRV, Schlaf und Stressresilienz
+    // Intermediate
+    { id: "SLP026", pillar: "sleep_recovery", minutes: 5, intensity: 0, equipment: "any", level: "intermediate", tags: ["vagal_tone", "autonomic", "recovery"], when: "pm", how: "Vagus-Stimulation: 3min Summen (Humming) oder Gurgeln für Vagusnerv-Aktivierung.", prerequisites: ["SLP010"] },
+    // Advanced
+    { id: "SLP027", pillar: "sleep_recovery", minutes: 5, intensity: 0, equipment: "any", level: "advanced", tags: ["hrv", "tracking", "biohacking"], when: "am", how: "HRV-Morgen-Check: HRV messen (Oura/Watch), Training nach Score anpassen.", prerequisites: ["SLP021"] },
+
+    // ========== EYE HEALTH → circadian_rhythm (3 tasks) ==========
+    // Evidence: 20-20-20 Regel reduziert digitale Augenermüdung um 50% (AOA Study)
+    // Beginner
+    { id: "CIR023", pillar: "circadian_rhythm", minutes: 1, intensity: -1, equipment: "any", level: "beginner", tags: ["eyes", "screen", "micro"], when: "any", how: "20-20-20: Alle 20min für 20s auf etwas 6m Entferntes schauen." },
+    { id: "CIR024", pillar: "circadian_rhythm", minutes: 3, intensity: -1, equipment: "any", level: "beginner", tags: ["eyes", "outdoor", "micro"], when: "any", how: "Fernblick-Pause: 3min aus dem Fenster schauen, Horizont fixieren." },
+    // Intermediate
+    { id: "CIR025", pillar: "circadian_rhythm", minutes: 5, intensity: 0, equipment: "any", level: "intermediate", tags: ["eyes", "exercise", "screen_recovery"], when: "any", how: "Augen-Yoga: Palmieren (5min), dann Blick links-rechts-oben-unten kreisen.", prerequisites: ["CIR023"] }
 ];

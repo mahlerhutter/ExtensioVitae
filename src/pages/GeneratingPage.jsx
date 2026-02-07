@@ -11,15 +11,15 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 // HACK 2: Labor Illusion - Make generation feel like deep analysis
 const STAGES = [
-  'Parsing Circadian Baseline...',
-  'Cross-referencing Huberman Protocols...',
-  'Optimizing Cortisol Peaks...',
-  'Calculating Sleep Architecture...',
-  'Finalizing Your Blueprint...',
+  'Zirkadianes Basisprofil wird analysiert...',
+  'Huberman-Protokolle werden abgeglichen...',
+  'Cortisol-Peaks werden optimiert...',
+  'Schlafarchitektur wird berechnet...',
+  'Dein Blueprint wird finalisiert...',
 ];
 
 export default function GeneratingPage() {
-  useDocumentTitle('Generating Blueprint... - ExtensioVitae');
+  useDocumentTitle('Blueprint wird erstellt... - ExtensioVitae');
   const [currentStage, setCurrentStage] = useState(0);
   const [dots, setDots] = useState('');
   const [showReview, setShowReview] = useState(false);
@@ -205,7 +205,7 @@ export default function GeneratingPage() {
               {STAGES[currentStage]}{dots}
             </p>
             <p className="text-slate-500 text-sm">
-              This usually takes 15-30 seconds
+              Das dauert normalerweise 15-30 Sekunden
             </p>
           </div>
 
@@ -222,7 +222,7 @@ export default function GeneratingPage() {
 
           {/* Subtle messaging */}
           <p className="text-slate-600 text-xs mt-16 text-center max-w-sm">
-            Your personalized plan is being crafted by AI, optimized for your unique goals and constraints.
+            Dein personalisierter Plan wird per KI erstellt — optimiert für deine individuellen Ziele und Rahmenbedingungen.
           </p>
         </div>
       )}

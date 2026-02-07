@@ -9,6 +9,7 @@ import { supabase } from './supabase';
 import { getActiveUserModules } from './moduleService';
 import { getUserMode } from './modeService';
 import { generatePlanModuleTasks } from './planModuleService';
+import { filterTasksByHealth, healthPreferenceBoost } from './healthConstraints';
 
 // Max tasks per day (AX-1 compliance)
 const MAX_DAILY_TASKS = 8;
@@ -95,8 +96,38 @@ export async function generateDailyTracking(userId, date = new Date()) {
       allTasks.push(...moduleTasks);
     }
 
+    // =====================================================
+    // HEALTH CONSTRAINT FILTERING (v2.1)
+    // Filter out contraindicated tasks based on user health profile
+    // =====================================================
+    let filteredAllTasks = allTasks;
+    try {
+      const { data: profile } = await supabase
+        .from('user_profiles')
+        .select('health_profile')
+        .eq('user_id', userId)
+        .single();
+
+      const healthProfile = profile?.health_profile;
+      if (healthProfile) {
+        const beforeCount = filteredAllTasks.length;
+        filteredAllTasks = filterTasksByHealth(filteredAllTasks, healthProfile);
+        // Apply health preference boost to priority scoring
+        filteredAllTasks = filteredAllTasks.map(task => ({
+          ...task,
+          priority: (task.priority || 50) + (healthPreferenceBoost(task, healthProfile) || 0) * 50
+        }));
+        if (beforeCount !== filteredAllTasks.length) {
+          console.info(`[DailyTracking] Health filtering: ${beforeCount} → ${filteredAllTasks.length} tasks`);
+        }
+      }
+    } catch (healthErr) {
+      // Health profile not available — continue without filtering
+      console.debug('[DailyTracking] No health profile for filtering:', healthErr?.message);
+    }
+
     // Sort by time, then by priority
-    allTasks.sort((a, b) => {
+    filteredAllTasks.sort((a, b) => {
       if (a.scheduled_time && b.scheduled_time) {
         return a.scheduled_time.localeCompare(b.scheduled_time);
       }
@@ -105,8 +136,8 @@ export async function generateDailyTracking(userId, date = new Date()) {
       return (b.priority || 50) - (a.priority || 50);
     });
 
-    // Cap at MAX_DAILY_TASKS
-    const limitedTasks = allTasks.slice(0, MAX_DAILY_TASKS);
+    // Cap at MAX_DAILY_TASKS (AX-1 Zero Cognitive Load)
+    const limitedTasks = filteredAllTasks.slice(0, MAX_DAILY_TASKS);
 
     // Create daily tracking record
     const { data: tracking, error: insertError } = await supabase
@@ -145,54 +176,90 @@ export async function generateDailyTracking(userId, date = new Date()) {
  */
 function generateTasksFromModule(instance, date) {
   const tasks = [];
-  const module = instance.module;
-  const template = module.task_template;
+  const module = instance.module || instance.definition || {};
   const config = instance.config || {};
 
-  if (!template?.tasks) return tasks;
+  // =====================================================
+  // DUAL FORMAT SUPPORT: task_template.tasks AND daily_tasks
+  // Migration modules use task_template, fallback modules use daily_tasks
+  // =====================================================
+  const templateTasks = module.task_template?.tasks;
+  const legacyTasks = module.daily_tasks;
 
-  const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'lowercase' });
-  const dayOfMonth = date.getDate();
+  // Path A: Full task_template with frequency, conditions, templates
+  if (templateTasks && templateTasks.length > 0) {
+    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'lowercase' });
+    const dayOfMonth = date.getDate();
 
-  for (const taskDef of template.tasks) {
-    // Check frequency
-    if (taskDef.frequency === 'weekly' && taskDef.day !== dayOfWeek) {
-      continue;
-    }
-    if (taskDef.frequency === 'monthly' && taskDef.day !== dayOfMonth) {
-      continue;
-    }
-    if (taskDef.frequency === 'once') {
-      // Check if we're on the right day of the module
-      const moduleDay = calculateModuleDay(instance);
-      if (taskDef.day !== moduleDay) {
+    const moduleDay = calculateModuleDay(instance);
+
+    for (const taskDef of templateTasks) {
+      // Check day-based progression (phase gating via min_day / max_day)
+      if (taskDef.min_day && moduleDay < taskDef.min_day) continue;
+      if (taskDef.max_day && moduleDay > taskDef.max_day) continue;
+
+      // Check frequency
+      if (taskDef.frequency === 'weekly' && taskDef.day !== dayOfWeek) {
         continue;
       }
+      if (taskDef.frequency === 'monthly' && taskDef.day !== dayOfMonth) {
+        continue;
+      }
+      if (taskDef.frequency === 'once') {
+        if (taskDef.day !== moduleDay) {
+          continue;
+        }
+      }
+
+      // Check condition (enhanced evaluator)
+      if (taskDef.condition && !evaluateCondition(taskDef.condition, config, instance)) {
+        continue;
+      }
+
+      // Replace template variables
+      const scheduledTime = resolveTemplateValue(taskDef.time, config);
+
+      tasks.push({
+        task_id: `${module.slug}-${taskDef.id}`,
+        task_type: taskDef.type || 'action',
+        title_de: resolveTemplateValue(taskDef.title_de, config),
+        title_en: resolveTemplateValue(taskDef.title_en, config),
+        description: resolveTemplateValue(taskDef.description, config),
+        pillar: taskDef.pillar || module.category || 'general',
+        duration_minutes: taskDef.duration_minutes || 5,
+        scheduled_time: scheduledTime,
+        source_module: module.slug,
+        module_instance_id: instance.id,
+        priority: module.priority_weight || 50
+      });
     }
-
-    // Check condition
-    if (taskDef.condition && !evaluateCondition(taskDef.condition, config, instance)) {
-      continue;
-    }
-
-    // Replace template variables
-    const scheduledTime = resolveTemplateValue(taskDef.time, config);
-
-    tasks.push({
-      task_id: `${module.slug}-${taskDef.id}`,
-      task_type: taskDef.type || 'action',
-      title_de: resolveTemplateValue(taskDef.title_de, config),
-      title_en: resolveTemplateValue(taskDef.title_en, config),
-      description: resolveTemplateValue(taskDef.description, config),
-      pillar: taskDef.pillar,
-      duration_minutes: taskDef.duration_minutes || 5,
-      scheduled_time: scheduledTime,
-      source_module: module.slug,
-      module_instance_id: instance.id,
-      priority: module.priority_weight
-    });
+    return tasks;
   }
 
+  // Path B: Legacy daily_tasks (fallback modules: simple {id, task, type} format)
+  if (legacyTasks && legacyTasks.length > 0) {
+    const pillars = module.pillars || [];
+    const defaultPillar = pillars[0] || module.category || 'general';
+
+    for (const taskDef of legacyTasks) {
+      tasks.push({
+        task_id: `${module.slug}-${taskDef.id}`,
+        task_type: taskDef.type === 'checkbox' ? 'action' : (taskDef.type || 'action'),
+        title_de: taskDef.task || taskDef.title_de || '',
+        title_en: taskDef.task || taskDef.title_en || '',
+        description: taskDef.description || taskDef.task || '',
+        pillar: taskDef.pillar || defaultPillar,
+        duration_minutes: taskDef.duration_minutes || 5,
+        scheduled_time: taskDef.time || null,
+        source_module: module.slug,
+        module_instance_id: instance.id,
+        priority: module.priority_weight || 50
+      });
+    }
+    return tasks;
+  }
+
+  // No tasks found in either format
   return tasks;
 }
 
@@ -208,42 +275,161 @@ function calculateModuleDay(instance) {
 }
 
 /**
- * Resolve template values like {{config.wake_time}}
+ * Resolve template values like {{config.wake_time}} and {{config.wake_time}}+30min
+ *
+ * IMPORTANT: Arithmetic patterns ({{config.field}}+Nmin) must be processed FIRST,
+ * before simple substitution eats the template variable.
  */
 function resolveTemplateValue(value, config) {
   if (!value || typeof value !== 'string') return value;
 
-  return value.replace(/\{\{config\.(\w+)\}\}/g, (match, key) => {
-    return config[key] || match;
-  }).replace(/\{\{config\.(\w+)\}\}([+-])(\d+)min/g, (match, key, op, minutes) => {
+  // FIRST: Handle time arithmetic {{config.field}}+30min or {{config.field}}-60min
+  value = value.replace(/\{\{config\.(\w+)\}\}([+-])(\d+)min/g, (match, key, op, minutes) => {
     const baseTime = config[key];
-    if (!baseTime) return match;
+    if (!baseTime || typeof baseTime !== 'string' || !baseTime.includes(':')) return match;
 
     const [hours, mins] = baseTime.split(':').map(Number);
     const totalMins = hours * 60 + mins + (op === '+' ? parseInt(minutes) : -parseInt(minutes));
-    const newHours = Math.floor(totalMins / 60) % 24;
-    const newMins = totalMins % 60;
+    // Handle negative values (wrap around midnight) and >24h
+    const normalizedMins = ((totalMins % 1440) + 1440) % 1440;
+    const newHours = Math.floor(normalizedMins / 60);
+    const newMins = normalizedMins % 60;
     return `${String(newHours).padStart(2, '0')}:${String(newMins).padStart(2, '0')}`;
   });
+
+  // THEN: Handle simple substitution {{config.field}}
+  value = value.replace(/\{\{config\.(\w+)\}\}/g, (match, key) => {
+    return config[key] !== undefined ? String(config[key]) : match;
+  });
+
+  return value;
 }
 
 /**
- * Simple condition evaluator
+ * Enhanced condition evaluator
+ *
+ * Supports:
+ * - config.field === 'value'   (equality)
+ * - config.field !== 'value'   (inequality)
+ * - config.field > N           (numeric comparison)
+ * - config.array.includes('x') (array membership)
+ * - config.field || config.x   (logical OR)
+ * - config.boolField           (truthy check)
  */
 function evaluateCondition(condition, config, instance) {
-  // Very basic condition evaluation
-  // In production, use a proper expression parser
-  if (condition.includes('config.supplements.includes')) {
-    const match = condition.match(/config\.supplements\.includes\('(\w+)'\)/);
-    if (match) {
-      return (config.supplements || []).includes(match[1]);
+  if (!condition || typeof condition !== 'string') return true;
+  condition = condition.trim();
+
+  // Guard against malicious or oversized input
+  if (condition.length > 500) {
+    console.warn('[Condition] Too long, skipping:', condition.substring(0, 80));
+    return true;
+  }
+
+  try {
+    // --- Logical OR: evaluate each side independently ---
+    if (condition.includes(' || ')) {
+      return condition.split(' || ').some(part => evaluateCondition(part.trim(), config, instance));
     }
+
+    // --- Logical AND ---
+    if (condition.includes(' && ')) {
+      return condition.split(' && ').every(part => evaluateCondition(part.trim(), config, instance));
+    }
+
+    // --- Array .includes() ---
+    const includesMatch = condition.match(/config\.(\w+)\.includes\(['"]([\w_]+)['"]\)/);
+    if (includesMatch) {
+      const [, field, value] = includesMatch;
+      const arr = config[field];
+      return Array.isArray(arr) && arr.includes(value);
+    }
+
+    // --- Strict equality === ---
+    if (condition.includes('===')) {
+      const [left, right] = condition.split('===').map(s => s.trim());
+      return resolveConditionValue(left, config) === resolveConditionValue(right, config);
+    }
+
+    // --- Strict inequality !== ---
+    if (condition.includes('!==')) {
+      const [left, right] = condition.split('!==').map(s => s.trim());
+      return resolveConditionValue(left, config) !== resolveConditionValue(right, config);
+    }
+
+    // --- Numeric >= ---
+    if (condition.includes('>=')) {
+      const [left, right] = condition.split('>=').map(s => s.trim());
+      return Number(resolveConditionValue(left, config)) >= Number(resolveConditionValue(right, config));
+    }
+
+    // --- Numeric <= ---
+    if (condition.includes('<=')) {
+      const [left, right] = condition.split('<=').map(s => s.trim());
+      return Number(resolveConditionValue(left, config)) <= Number(resolveConditionValue(right, config));
+    }
+
+    // --- Numeric > (must come after >=) ---
+    if (condition.includes('>') && !condition.includes('>=')) {
+      const [left, right] = condition.split('>').map(s => s.trim());
+      return Number(resolveConditionValue(left, config)) > Number(resolveConditionValue(right, config));
+    }
+
+    // --- Numeric < (must come after <=) ---
+    if (condition.includes('<') && !condition.includes('<=')) {
+      const [left, right] = condition.split('<').map(s => s.trim());
+      return Number(resolveConditionValue(left, config)) < Number(resolveConditionValue(right, config));
+    }
+
+    // --- Boolean field: config.morning_session → truthy check ---
+    if (condition.match(/^config\.\w+$/)) {
+      const field = condition.replace('config.', '');
+      return !!config[field];
+    }
+
+    // --- Legacy: lab_results check (not available client-side) ---
+    if (condition.includes('lab_results')) {
+      return false;
+    }
+
+    // --- Unknown pattern: default to true (show task) ---
+    console.debug('[Condition] Unrecognized pattern, defaulting true:', condition);
+    return true;
+  } catch (err) {
+    console.error('[Condition] Error evaluating:', condition, err);
+    return true;
   }
-  if (condition.includes('lab_results.deficiencies.length > 0')) {
-    // Would need to fetch lab results
-    return false;
+}
+
+/**
+ * Resolve a value from a condition expression.
+ * Handles: 'string_literal', 123, config.field, config.nested.field
+ */
+function resolveConditionValue(expr, config) {
+  expr = expr.trim();
+  // String literal (single or double quotes)
+  if ((expr.startsWith("'") && expr.endsWith("'")) || (expr.startsWith('"') && expr.endsWith('"'))) {
+    return expr.slice(1, -1);
   }
-  return true;
+  // Numeric literal
+  if (/^-?\d+(\.\d+)?$/.test(expr)) {
+    return Number(expr);
+  }
+  // Boolean literals
+  if (expr === 'true') return true;
+  if (expr === 'false') return false;
+  if (expr === 'null' || expr === 'undefined') return null;
+  // config.path resolution
+  if (expr.startsWith('config.')) {
+    const path = expr.replace('config.', '').split('.');
+    let value = config;
+    for (const key of path) {
+      value = value?.[key];
+      if (value === undefined) return null;
+    }
+    return value;
+  }
+  return expr;
 }
 
 /**

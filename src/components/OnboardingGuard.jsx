@@ -30,7 +30,7 @@ export default function OnboardingGuard({ children }) {
             try {
                 // Check if user has any active plans
                 const { data: plans, error } = await supabase
-                    .from('user_plans')
+                    .from('plans')
                     .select('id, status')
                     .eq('user_id', user.id)
                     .eq('status', 'active')

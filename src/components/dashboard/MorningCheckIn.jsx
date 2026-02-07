@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import recoveryService from '../../lib/recoveryService';
+import { logger } from '../../lib/logger';
 import './MorningCheckIn.css';
 
 /**
@@ -60,7 +61,7 @@ export default function MorningCheckIn({ onComplete, onSkip, showModal: external
         const now = new Date();
         const hour = now.getHours();
         if (hour < 4 || hour >= 12) {
-            console.log('[MorningCheckIn] Skipping check-in (outside morning hours 4-12)');
+            logger.debug('[MorningCheckIn] Skipping check-in (outside morning hours 4-12)');
             return;
         }
 
@@ -72,7 +73,7 @@ export default function MorningCheckIn({ onComplete, onSkip, showModal: external
                 setShowModal(true);
             }
         } catch (error) {
-            console.error('Error checking recovery score:', error);
+            console.error('[MorningCheckIn] Error checking recovery score:', error);
         }
     }
 
@@ -90,10 +91,10 @@ export default function MorningCheckIn({ onComplete, onSkip, showModal: external
             // Try to save to database (non-blocking)
             try {
                 await recoveryService.saveRecoveryScore(supabase, user.id, result);
-                console.log('[MorningCheckIn] Recovery score saved to DB');
+                logger.debug('[MorningCheckIn] Recovery score saved to DB');
             } catch (saveError) {
                 // Log error but don't block the user flow
-                console.warn('[MorningCheckIn] Failed to save to DB (table may not exist):', saveError.message);
+                logger.warn('[MorningCheckIn] Failed to save to DB (table may not exist):', saveError.message);
             }
 
             // Always show results, even if DB save failed

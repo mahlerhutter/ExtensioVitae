@@ -6,7 +6,7 @@ import { logger } from '../lib/logger';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export default function AuthPage() {
-  useDocumentTitle('Login / Sign Up - ExtensioVitae');
+  useDocumentTitle('Anmelden - ExtensioVitae');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -28,7 +28,7 @@ export default function AuthPage() {
         redirectTo: window.location.origin + '/reset-password',
       });
       if (error) throw error;
-      setMessage('Password reset link sent to ' + email);
+      setMessage('Link zum Zurücksetzen wurde an ' + email + ' gesendet.');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -81,7 +81,7 @@ export default function AuthPage() {
       if (error) {
         setError(error.message);
       } else {
-        setMessage('Check your email for the confirmation link!');
+        setMessage('Prüfe deine E-Mail für den Bestätigungslink!');
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({
@@ -117,7 +117,7 @@ export default function AuthPage() {
       // If successful, the page will redirect to Google OAuth
     } catch (err) {
       console.error('[DEBUG] Exception in Google login:', err);
-      setError('Google login failed. Please try again.');
+      setError('Google-Anmeldung fehlgeschlagen. Bitte versuche es erneut.');
       setGoogleLoading(false);
     }
   };
@@ -137,7 +137,7 @@ export default function AuthPage() {
             Extensio<span className="text-amber-400">Vitae</span>
           </h1>
           <p className="text-slate-400">
-            {isSignUp ? 'Create your account' : 'Welcome back'}
+            {isSignUp ? 'Konto erstellen' : 'Willkommen zurück'}
           </p>
         </div>
 
@@ -160,7 +160,7 @@ export default function AuthPage() {
           className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-100 text-slate-900 font-medium px-4 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-6"
         >
           {googleLoading ? (
-            <span>Connecting...</span>
+            <span>Verbinden...</span>
           ) : (
             <>
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -181,7 +181,7 @@ export default function AuthPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Continue with Google
+              Weiter mit Google
             </>
           )}
         </button>
@@ -192,7 +192,7 @@ export default function AuthPage() {
             <div className="w-full border-t border-slate-700"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-slate-900 text-slate-500">or continue with email</span>
+            <span className="px-4 bg-slate-900 text-slate-500">oder weiter mit E-Mail</span>
           </div>
         </div>
 
@@ -200,7 +200,7 @@ export default function AuthPage() {
         <form onSubmit={showReset ? handlePasswordReset : handleAuth} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              Email
+              E-Mail
             </label>
             <input
               type="email"
@@ -216,14 +216,14 @@ export default function AuthPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-sm font-medium text-slate-300">
-                  Password
+                  Passwort
                 </label>
                 <button
                   type="button"
                   onClick={() => { setShowReset(true); setError(null); setMessage(null); }}
                   className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
                 >
-                  Forgot Password?
+                  Passwort vergessen?
                 </button>
               </div>
               <input
@@ -242,7 +242,7 @@ export default function AuthPage() {
             disabled={loading}
             className="w-full bg-amber-400 hover:bg-amber-500 text-slate-900 font-medium px-4 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Processing...' : showReset ? 'Send Reset Link' : (isSignUp ? 'Sign Up' : 'Log In')}
+            {loading ? 'Wird verarbeitet...' : showReset ? 'Link senden' : (isSignUp ? 'Registrieren' : 'Anmelden')}
           </button>
         </form>
 
@@ -252,16 +252,16 @@ export default function AuthPage() {
               onClick={() => { setShowReset(false); setError(null); setMessage(null); }}
               className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
             >
-              Back to Login
+              Zurück zur Anmeldung
             </button>
           ) : (
             <>
-              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+              {isSignUp ? 'Bereits ein Konto?' : 'Noch kein Konto?'}{' '}
               <button
                 onClick={() => setIsSignUp(!isSignUp)}
                 className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
               >
-                {isSignUp ? 'Log In' : 'Sign Up'}
+                {isSignUp ? 'Anmelden' : 'Registrieren'}
               </button>
             </>
           )}
@@ -274,7 +274,7 @@ export default function AuthPage() {
               onClick={handleSkipLogin}
               className="w-full text-slate-500 hover:text-slate-400 text-sm transition-colors"
             >
-              Continue without login (Development mode)
+              Ohne Anmeldung fortfahren (Entwicklungsmodus)
             </button>
           </div>
         )}
@@ -282,7 +282,7 @@ export default function AuthPage() {
 
       {/* Info text */}
       <p className="mt-6 text-slate-500 text-sm text-center max-w-md">
-        By signing in, you agree to our Terms of Service and Privacy Policy.
+        Mit der Anmeldung akzeptierst du unsere Nutzungsbedingungen und Datenschutzerklärung.
       </p>
 
       {/* Back to Home */}
@@ -293,7 +293,7 @@ export default function AuthPage() {
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
-        Back to Home
+        Zurück zur Startseite
       </a>
     </div>
   );
