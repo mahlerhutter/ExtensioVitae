@@ -105,6 +105,14 @@ serve(async (req) => {
             classification.secondary_pillar = null
         }
 
+        // Clamp and validate values
+        const validIntensities = ['low', 'medium', 'high']
+        const validContexts = ['indoor', 'outdoor', 'social', 'digital']
+        const rawImpact = Number(classification.longevity_score_impact) || 5
+        const clampedImpact = Math.max(1, Math.min(10, rawImpact))
+        const rawConfidence = Number(classification.confidence) || 0.8
+        const clampedConfidence = Math.max(0, Math.min(1, rawConfidence))
+
         // Save to database
         const { data: logEntry, error: insertError } = await supabaseClient
             .from('activity_logs')
@@ -114,13 +122,13 @@ serve(async (req) => {
                 pillar: classification.pillar,
                 secondary_pillar: classification.secondary_pillar || null,
                 activity: classification.activity || raw_input.trim(),
-                duration_minutes: classification.duration_minutes || null,
-                intensity: classification.intensity || null,
-                context: classification.context || null,
+                duration_minutes: classification.duration_minutes ? Math.max(0, Number(classification.duration_minutes)) : null,
+                intensity: validIntensities.includes(classification.intensity) ? classification.intensity : null,
+                context: validContexts.includes(classification.context) ? classification.context : null,
                 display_emoji: classification.display_emoji || '📝',
-                display_text: classification.display_text || raw_input.trim(),
-                longevity_impact: classification.longevity_score_impact || 5,
-                confidence: classification.confidence || 0.8,
+                display_text: (classification.display_text || raw_input.trim()).slice(0, 100),
+                longevity_impact: clampedImpact,
+                confidence: clampedConfidence,
                 log_date: new Date().toISOString().split('T')[0]
             })
             .select()
