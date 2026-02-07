@@ -89,6 +89,7 @@ import ImpactCounter from '../components/dashboard/ImpactCounter.jsx';
 import ScienceCredibilityBar from '../components/dashboard/ScienceCredibilityBar.jsx';
 import AdaptationNotice from '../components/dashboard/AdaptationNotice.jsx';
 import EmptyState, { EMPTY_STATE_TYPES } from '../components/dashboard/EmptyState.jsx';
+import SmartLogWidget from '../components/dashboard/SmartLogWidget';
 
 // Pillar configuration
 const PILLARS = {
@@ -995,6 +996,11 @@ export default function DashboardNewPage() {
             }}
             onMorningCheckInClick={() => setShowMorningCheckIn(true)}
           />
+        </div>
+
+        {/* SMART LOG — AI Activity Tracking */}
+        <div className="mb-8">
+          <SmartLogWidget />
         </div>
 
         {/* Concierge Card - Priority Inbox (above today dashboard) */}
