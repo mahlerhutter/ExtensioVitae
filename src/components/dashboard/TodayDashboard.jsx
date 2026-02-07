@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getDailyTracking, completeTask as completeTaskApi } from '../../lib/dailyTrackingService';
 import { getActiveUserModules, deactivateModule, pauseModule, resumeModule } from '../../lib/moduleService';
-import logger from '../../utils/logger';
+import logger from '../../lib/logger';
 import { useConfirm } from '../ui/ConfirmModal';
 import ModuleDetailSheet from './ModuleDetailSheet';
 import { optimizeDailyPlan } from '../../lib/optimizationEngine';
