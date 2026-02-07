@@ -6,10 +6,32 @@ import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 const versions = [
     {
+        version: 'v0.6.4',
+        name: 'Beta Ready',
+        date: '2026-02-07',
+        status: 'current',
+        completion: 100,
+        icon: '🛡️',
+        color: 'from-amber-500 to-orange-600',
+        features: [
+            'Gesamte Critical Path auf Deutsch übersetzt',
+            'OnboardingGuard Fix (user_plans → plans)',
+            'Version Badge korrigiert',
+            'Console.log → Logger Migration',
+            'i18n Roadmap dokumentiert (v0.7.0)',
+            'Beta Readiness Audit bestanden (8/10)',
+        ],
+        metrics: {
+            edgeFunctions: 8,
+            components: 40,
+            uxScore: 92,
+        },
+    },
+    {
         version: 'v0.6.3',
         name: 'Zerberus',
         date: '2026-02-06',
-        status: 'current',
+        status: 'released',
         completion: 95,
         icon: '🧠',
         color: 'from-purple-600 to-blue-600',
@@ -261,8 +283,8 @@ export default function VersionsPage() {
                     <div className="flex items-start justify-between mb-6">
                         <div>
                             <div className="text-sm opacity-75 mb-2">Aktuelle Version</div>
-                            <h2 className="text-4xl font-bold mb-2">v0.6.3 Zerberus</h2>
-                            <h3 className="text-2xl opacity-90">Documentation & Organization</h3>
+                            <h2 className="text-4xl font-bold mb-2">v0.6.4 Beta Ready</h2>
+                            <h3 className="text-2xl opacity-90">Stabilisation & Lokalisierung</h3>
                         </div>
                         <span className="text-6xl">🧠</span>
                     </div>
