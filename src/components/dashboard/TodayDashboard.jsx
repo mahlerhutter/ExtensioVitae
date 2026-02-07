@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getDailyTracking, completeTask as completeTaskApi } from '../../lib/dailyTrackingService';
 import { getActiveUserModules, deactivateModule, pauseModule, resumeModule } from '../../lib/moduleService';
+import logger from '../../utils/logger';
 import { useConfirm } from '../ui/ConfirmModal';
 import ModuleDetailSheet from './ModuleDetailSheet';
 import { optimizeDailyPlan } from '../../lib/optimizationEngine';
 import { getCircadianIntelligence } from '../../lib/circadianService';
+import YearlySuggestionBanner from './YearlySuggestionBanner';
+import { getTodayLogs, deleteActivityLog, PILLAR_META } from '../../lib/smartLogService';
 
 /**
  * Today Dashboard - Unified View
@@ -271,6 +274,13 @@ export default function TodayDashboard({
           </button>
         )}
       </div>
+
+      {/* Yearly Optimization Suggestion Banner */}
+      <YearlySuggestionBanner
+        userId={userId}
+        language={language}
+        onActivate={() => navigate('/module-hub')}
+      />
 
       {/* Progress Overview Card */}
       {totalTasks > 0 && (
@@ -587,6 +597,9 @@ export default function TodayDashboard({
         )}
       </div>
 
+      {/* SMART LOG — Getrackte Aktivitäten */}
+      <TrackedActivitiesSection language={language} />
+
       {/* Module Detail Sheet */}
       {selectedModule && (
         <ModuleDetailSheet
@@ -896,3 +909,115 @@ function ProtocolTaskItem({ task, isCompleted, onComplete }) {
     </div>
   );
 }
+
+// Tracked Activities Section — shows Smart Log entries in the daily overview
+function TrackedActivitiesSection({ language }) {
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadLogs();
+  }, []);
+
+  const loadLogs = async () => {
+    setLoading(true);
+    const data = await getTodayLogs();
+    setLogs(data);
+    setLoading(false);
+  };
+
+  const handleDelete = async (logId) => {
+    const result = await deleteActivityLog(logId);
+    if (result.success) {
+      setLogs(logs.filter(l => l.id !== logId));
+    }
+  };
+
+  if (loading || logs.length === 0) return null;
+
+  return (
+    <div className="mt-4 rounded-2xl border border-amber-500/20 bg-gradient-to-b from-amber-500/5 to-transparent overflow-hidden">
+      {/* Section Header */}
+      <div className="px-4 sm:px-5 py-3 flex items-center gap-3 border-b border-amber-500/10">
+        <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-lg">
+          ⚡
+        </div>
+        <div className="flex-1">
+          <h3 className="text-white font-medium text-sm sm:text-base">
+            {language === 'de' ? 'Getrackte Aktivitäten' : 'Tracked Activities'}
+          </h3>
+          <p className="text-xs text-slate-500">
+            {logs.length} {language === 'de' ? 'heute erfasst' : 'logged today'}
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5">
+          {/* Compact pillar indicators */}
+          {Object.keys(
+            logs.reduce((acc, l) => { acc[l.pillar] = true; return acc; }, {})
+          ).map(pillar => {
+            const meta = PILLAR_META[pillar];
+            return meta ? (
+              <span key={pillar} className={`text-base`} title={meta.label}>{meta.emoji}</span>
+            ) : null;
+          })}
+        </div>
+      </div>
+
+      {/* Activity Items */}
+      <div className="divide-y divide-slate-800/30">
+        {logs.map(log => {
+          const meta = PILLAR_META[log.pillar] || PILLAR_META.movement;
+          const secondaryMeta = log.secondary_pillar ? PILLAR_META[log.secondary_pillar] : null;
+
+          return (
+            <div
+              key={log.id}
+              className="px-4 sm:px-5 py-2.5 sm:py-3 flex items-center gap-3 group hover:bg-slate-800/20 transition-colors"
+            >
+              {/* Emoji */}
+              <span className="text-xl sm:text-2xl shrink-0">{log.display_emoji}</span>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-white text-sm font-medium truncate">
+                    {log.display_text || log.activity}
+                  </span>
+                  {secondaryMeta && (
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${secondaryMeta.bgColor} ${secondaryMeta.color}`}>
+                      +{secondaryMeta.label}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 mt-0.5 text-[10px] sm:text-xs text-slate-500">
+                  <span className={meta.color}>{meta.label}</span>
+                  {log.duration_minutes && <span>· {log.duration_minutes}min</span>}
+                  {log.intensity && (
+                    <span>· {log.intensity === 'high' ? '🔥' : log.intensity === 'medium' ? '⚡' : '🌱'}</span>
+                  )}
+                  <span>· {new Date(log.logged_at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+              </div>
+
+              {/* Pillar Badge */}
+              <span className={`hidden sm:inline-flex text-xs px-2 py-1 rounded-lg ${meta.bgColor} ${meta.color} shrink-0`}>
+                {meta.emoji} {meta.label}
+              </span>
+
+              {/* Delete */}
+              <button
+                onClick={() => handleDelete(log.id)}
+                className="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-red-400 transition-all p-1 shrink-0"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
