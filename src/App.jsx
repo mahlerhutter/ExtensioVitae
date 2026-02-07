@@ -19,6 +19,7 @@ import FuturePage from './pages/FuturePage';
 import FeaturesPage from './pages/FeaturesPage';
 import RecoveryPage from './pages/RecoveryPage';
 import VersionsPage from './pages/VersionsPage';
+import DogfoodingPage from './pages/DogfoodingPage';
 import FriendsPage from './pages/FriendsPage';
 import DashboardMockupPage from './pages/DashboardMockupPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -154,7 +155,16 @@ export default function App() {
               <ErrorBoundary>
                 <DashboardMockupPage />
               </ErrorBoundary>
+            }
+            />
+
+            <Route path="/dogfood" element={
+              <ErrorBoundary>
+                <DogfoodingPage />
+              </ErrorBoundary>
             } />
+
+
 
 
 
