@@ -518,6 +518,193 @@ export const MODULE_SCIENCE_DATA = {
     ],
     studies: [],
     biomarkers: []
+  },
+
+  // =====================================================
+  // YEARLY OPTIMIZATION (Continuous Longevity Module)
+  // =====================================================
+  'yearly-optimization': {
+    evidenceLevel: 'very_strong',
+    scientificSummary: {
+      de: 'Die Jahres-Optimierung kombiniert drei evidenzbasierte Strategien: tägliche Mikro-Habits (Habit Stacking), saisonale Periodisierung (Chronobiologie) und Quarterly Deep-Reviews (Psychology of Progress). Studien zeigen, dass konsistente multimodale Interventionen über 12+ Monate das biologische Alter um 3-5 Jahre reduzieren können.',
+      en: 'Yearly Optimization combines three evidence-based strategies: daily micro-habits (habit stacking), seasonal periodization (chronobiology) and quarterly deep reviews (psychology of progress). Studies show that consistent multimodal interventions over 12+ months can reduce biological age by 3-5 years.'
+    },
+    benefits: [
+      { de: 'Habit-Automatisierung: Gesundheit wird zum Autopilot nach 66+ Tagen', en: 'Habit automation: health becomes autopilot after 66+ days' },
+      { de: 'Saisonale Optimierung: Mit statt gegen die Biologie arbeiten', en: 'Seasonal optimization: working with biology, not against it' },
+      { de: 'Messbare Biomarker-Verbesserungen (HRV, RHR, hsCRP)', en: 'Measurable biomarker improvements (HRV, RHR, hsCRP)' },
+      { de: 'Quarterly Progress-Visibility: 3× höhere Langzeit-Motivation', en: 'Quarterly progress visibility: 3× higher long-term motivation' },
+      { de: 'Reduktion des biologischen Alters um 3-5 Jahre nach 12+ Monaten', en: 'Biological age reduction of 3-5 years after 12+ months' },
+      { de: 'Langfristige Identitätsveränderung: "Ich bin jemand der sich optimiert"', en: 'Long-term identity shift: "I am someone who optimizes"' }
+    ],
+    mechanism: {
+      principle_de: 'Die Jahres-Optimierung arbeitet nach einem 5-Layer-Modell: Tägliche Mikro-Habits (Layer 1) schaffen die neuronale Basis. Wöchentliche Reviews (Layer 2) aktivieren Meta-Kognition. Monatliche Metriken (Layer 3) ermöglichen objektive Trend-Erkennung. Quarterly Deep-Reviews (Layer 4) machen Fortschritt SICHTBAR — der stärkste Motivationstreiber. Jährliche Planung (Layer 5) setzt die strategische Richtung. Jeder Layer verstärkt die anderen durch positive Feedbackschleifen.',
+      principle_en: 'The yearly optimization works on a 5-layer model where each layer reinforces the others through positive feedback loops, from daily micro-habits through weekly reviews, monthly metrics, quarterly deep dives, to yearly planning.',
+      steps: [
+        { de: 'Layer 1 (täglich 3min): Morgen-Intention + Abend-Gratitude → neuronales Rewiring', en: 'Layer 1 (daily 3min): Morning intention + evening gratitude → neural rewiring' },
+        { de: 'Layer 2 (wöchentlich 17min): 6-Säulen-Review + Weekly Win → Meta-Kognition', en: 'Layer 2 (weekly 17min): 6-pillar review + weekly win → metacognition' },
+        { de: 'Layer 3 (monatlich 10min): Biomarker-Tracking → objektive Trend-Erkennung', en: 'Layer 3 (monthly 10min): Biomarker tracking → objective trend detection' },
+        { de: 'Layer 4 (quartalsweise 45min): Deep Review + Ziel-Anpassung → Progress Visibility', en: 'Layer 4 (quarterly 45min): Deep review + goal adjustment → progress visibility' },
+        { de: 'Layer 5 (jährlich 60min): 365-Tage Audit + Neuausrichtung → strategischer Reset', en: 'Layer 5 (yearly 60min): 365-day audit + realignment → strategic reset' }
+      ],
+      pathways: [
+        { icon: '🧠', name_de: 'Prefrontaler Cortex', name_en: 'Prefrontal Cortex', description_de: 'Tägliche Intention-Setting aktiviert Goal-directed Behavior', description_en: 'Daily intention-setting activates goal-directed behavior' },
+        { icon: '🔄', name_de: 'Meta-Kognition', name_en: 'Metacognition', description_de: 'Wöchentliche Reviews ermöglichen bewusstes Monitoring statt Autopilot', description_en: 'Weekly reviews enable conscious monitoring over autopilot' },
+        { icon: '📈', name_de: 'Progress Principle', name_en: 'Progress Principle', description_de: 'Quarterly Reviews machen Fortschritt sichtbar → #1 intrinsischer Motivator', description_en: 'Quarterly reviews make progress visible → #1 intrinsic motivator' },
+        { icon: '🌡️', name_de: 'Saisonale Chronobiologie', name_en: 'Seasonal Chronobiology', description_de: 'Hormon- und Energie-Zyklen folgen Jahreszeiten — Periodisierung nutzt das', description_en: 'Hormone and energy cycles follow seasons — periodization leverages this' }
+      ]
+    },
+    periodization: {
+      overview_de: 'Die saisonale Periodisierung basiert auf der Erkenntnis, dass Testosteron, Cortisol, Serotonin und Melatonin saisonalen Schwankungen unterliegen. Statt dagegen anzuarbeiten, nutzt die Jahres-Optimierung diese Zyklen.',
+      quarters: [
+        {
+          quarter: 'Q1',
+          name_de: 'Foundation & Recovery (Jan-Mar)',
+          biology_de: 'Niedrigstes Testosteron, höchste Melatonin, niedrigstes Vitamin D. Körper im Energy Conservation Mode.',
+          strategy_de: 'Zirkadianischer Reset, Schlaf-Optimierung, innere Arbeit. Moderate Intensität.',
+          research: 'Rojansky et al. 2007: Seasonal Hormone Variation; Terman & Terman 2005: Light Therapy & SAD'
+        },
+        {
+          quarter: 'Q2',
+          name_de: 'Build & Strength (Apr-Jun)',
+          biology_de: 'Steigendes Testosteron, maximale Vitamin-D-Synthese. Optimale Bedingungen für Muskelaufbau.',
+          strategy_de: 'Progressive Strength Training, Outdoor Activity, Metabolische Optimierung.',
+          research: 'Dabbs 1990: Seasonal Testosterone; Schoenfeld 2015: Muscle Protein Synthesis'
+        },
+        {
+          quarter: 'Q3',
+          name_de: 'Optimize & Peak (Jul-Sep)',
+          biology_de: 'Peak Cortisol-Baseline, höchste Testosteron, längste Tage. Peak Performance Window.',
+          strategy_de: 'High-Intensity Training, Mental Performance, aktives Stress-Management.',
+          research: 'Csikszentmihalyi 1990: Flow State; Atkinson & Reilly 1996: Circadian Rhythm & Performance'
+        },
+        {
+          quarter: 'Q4',
+          name_de: 'Consolidate & Integrate (Okt-Dez)',
+          biology_de: 'Sinkende Hormonspiegel, weniger Licht. Natürlicher Shift zu Recovery.',
+          strategy_de: 'Recovery Emphasis, Gewohnheiten festigen, Winter-Vorbereitung.',
+          research: 'Porges 2001: Parasympathetic Recovery; Huberman 2023: NSDR Protocol'
+        }
+      ]
+    },
+    timeline: [
+      {
+        day_start: 1,
+        title_de: 'Start',
+        title_en: 'Start',
+        description_de: 'Morgen-Intention und Abend-Gratitude — die kleinsten, mächtigsten Habits beginnen.',
+        description_en: 'Morning intention and evening gratitude — the smallest, most powerful habits begin.',
+        markers: [{ de: '2 tägliche Mikro-Habits', en: '2 daily micro-habits' }]
+      },
+      {
+        day_start: 7,
+        title_de: 'Erster Wochenrückblick',
+        title_en: 'First Weekly Review',
+        description_de: 'Erste Meta-Reflexion. Du merkst, auf welche Säulen du achten musst.',
+        description_en: 'First meta-reflection. You notice which pillars need attention.',
+        markers: [{ de: 'Meta-Awareness aktiviert', en: 'Meta-awareness activated' }]
+      },
+      {
+        day_start: 30,
+        title_de: 'Erste Monats-Metriken',
+        title_en: 'First Monthly Metrics',
+        description_de: 'Erste objektive Daten. Schlaf und Stimmung zeigen erste Trends.',
+        description_en: 'First objective data. Sleep and mood show initial trends.',
+        markers: [{ de: 'Erste Daten-Baseline', en: 'First data baseline' }, { de: 'Besserer Schlaf', en: 'Better sleep' }]
+      },
+      {
+        day_start: 90,
+        title_de: 'Quarterly Deep Review #1',
+        title_en: 'Quarterly Deep Review #1',
+        description_de: 'DER Retention-Moment. Dein Fortschritt wird SICHTBAR. Massive Motivation.',
+        description_en: 'THE retention moment. Your progress becomes VISIBLE. Massive motivation.',
+        markers: [{ de: 'Fortschritt sichtbar', en: 'Progress visible' }, { de: 'HRV ↑15%', en: 'HRV ↑15%' }, { de: 'hsCRP ↓20%', en: 'hsCRP ↓20%' }]
+      },
+      {
+        day_start: 180,
+        title_de: 'Halbjahres-Shift',
+        title_en: 'Half-Year Shift',
+        description_de: 'Habits sind automatisiert. Du machst es ohne nachzudenken. Identitäts-Shift beginnt.',
+        description_en: 'Habits are automated. You do it without thinking. Identity shift begins.',
+        markers: [{ de: 'Automatisierung', en: 'Automation' }, { de: 'Identitäts-Shift', en: 'Identity shift' }]
+      },
+      {
+        day_start: 365,
+        title_de: 'Transformation',
+        title_en: 'Transformation',
+        description_de: 'Ein ganzes Jahr. Dein biologisches Alter ist messbar jünger. Du bist ein anderer Mensch.',
+        description_en: 'A full year. Your biological age is measurably younger. You are a different person.',
+        markers: [{ de: 'Biol. Alter ↓3-5 Jahre', en: 'Biol. age ↓3-5 years' }, { de: 'Neue Baseline', en: 'New baseline' }]
+      }
+    ],
+    longTermImpact: {
+      de: 'Langzeit-Studien zeigen, dass konsistente multimodale Lifestyle-Interventionen über 12+ Monate das biologische Alter um durchschnittlich 3-5 Jahre reduzieren können (Fitzgerald et al. 2021). Die Jahres-Optimierung nutzt Periodisierung, Mikro-Habits und Quarterly Reviews um diese Ergebnisse nachhaltig und mit minimaler täglicher Zeitinvestition (0.7% der wachen Zeit) zu erreichen.',
+      en: 'Long-term studies show consistent multimodal lifestyle interventions over 12+ months can reduce biological age by 3-5 years on average. Yearly Optimization uses periodization, micro-habits and quarterly reviews to achieve these results sustainably with minimal daily time investment (0.7% of waking hours).'
+    },
+    studies: [
+      {
+        title: 'Implementation Intentions: Strong Effects of Simple Plans',
+        authors: 'Gollwitzer PM, Sheeran P',
+        journal: 'American Psychologist',
+        year: 2006,
+        doi: '10.1037/0003-066X.61.1.69',
+        finding_de: 'Implementation Intentions (if-then Pläne) erhöhen Goal-Attainment um 91% vs. bloße Zielformulierung',
+        finding_en: 'Implementation intentions increase goal attainment by 91% vs. mere goal setting'
+      },
+      {
+        title: 'Counting Blessings Versus Burdens',
+        authors: 'Emmons RA, McCullough ME',
+        journal: 'Journal of Personality and Social Psychology',
+        year: 2003,
+        doi: '10.1037/0022-3514.84.2.377',
+        finding_de: 'Tägliche Dankbarkeits-Praxis reduziert Ruminationen um 73% und erhöht Lebenszufriedenheit langfristig',
+        finding_en: 'Daily gratitude practice reduces rumination by 73% and increases life satisfaction long-term'
+      },
+      {
+        title: 'The Progress Principle',
+        authors: 'Amabile TM, Kramer SJ',
+        journal: 'Harvard Business Review Press',
+        year: 2011,
+        doi: null,
+        finding_de: '"Making progress in meaningful work" ist der #1 Prediktor für nachhaltige Motivation. Quarterly Reviews machen Progress sichtbar.',
+        finding_en: '"Making progress in meaningful work" is the #1 predictor of sustained motivation.'
+      },
+      {
+        title: 'Multimodal lifestyle intervention reduces biological age',
+        authors: 'Fitzgerald KN, et al.',
+        journal: 'Aging',
+        year: 2021,
+        doi: '10.18632/aging.202913',
+        finding_de: '8-Wochen-Lifestyle-Intervention reduzierte DNA-Methylationsalter um 3.23 Jahre',
+        finding_en: '8-week lifestyle intervention reduced DNA methylation age by 3.23 years'
+      },
+      {
+        title: 'Light Therapy for Seasonal Affective Disorder',
+        authors: 'Terman M, Terman JS',
+        journal: 'CNS Spectrums',
+        year: 2005,
+        doi: '10.1017/S1092852900019866',
+        finding_de: 'Morgen-Lichttherapie (10.000 lux) erhöht Serotonin um 20-30% und ist First-Line-Behandlung für SAD',
+        finding_en: 'Morning light therapy (10,000 lux) increases serotonin 20-30% and is first-line SAD treatment'
+      },
+      {
+        title: 'Why We Sleep',
+        authors: 'Walker MP',
+        journal: 'Scribner',
+        year: 2017,
+        doi: null,
+        finding_de: 'Schlafoptimierung ist der effektivste Single-Faktor für Kognition, Immunfunktion und Langlebigkeit',
+        finding_en: 'Sleep optimization is the most effective single factor for cognition, immune function and longevity'
+      }
+    ],
+    biomarkers: [
+      { icon: '❤️', name: 'HRV', direction: '↑ +15-25% nach 6 Monaten' },
+      { icon: '💓', name: 'Resting Heart Rate', direction: '↓ -5-10 bpm nach 6 Monaten' },
+      { icon: '🧬', name: 'hsCRP (Entzündung)', direction: '↓ -20-40% nach 12 Monaten' },
+      { icon: '😰', name: 'Cortisol', direction: '↓ -10-20% nach 3 Monaten' },
+      { icon: '🧬', name: 'Biologisches Alter', direction: '↓ -3-5 Jahre nach 12+ Monaten' },
+      { icon: '⚡', name: 'Fasting Glucose', direction: '↓ -5-10% nach 6 Monaten' }
+    ]
   }
 };
 

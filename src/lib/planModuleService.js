@@ -454,7 +454,10 @@ function getRecommendationReason(module, intakeData) {
 export function generateModulePreview(moduleDef, config = {}, startDate = new Date()) {
   if (!moduleDef) return { days: [], summary: {} };
 
-  const duration = moduleDef.duration_days || 30;
+  // For continuous modules (duration_days: null), show representative year
+  const duration = moduleDef.duration_days === null
+    ? 365
+    : (moduleDef.duration_days || 30);
   const templateTasks = moduleDef.task_template?.tasks || [];
   const legacyTasks = moduleDef.daily_tasks || [];
   const days = [];
@@ -488,12 +491,23 @@ export function generateModulePreview(moduleDef, config = {}, startDate = new Da
         // Check frequency
         if (taskDef.frequency === 'weekly' && taskDef.day !== dayOfWeek) continue;
         if (taskDef.frequency === 'monthly' && taskDef.day !== dayOfMonth) continue;
-        if (taskDef.frequency === 'quarterly' || taskDef.frequency === 'yearly') continue;
+        // Quarterly: show on first day of each quarter (Jan 1, Apr 1, Jul 1, Oct 1)
+        if (taskDef.frequency === 'quarterly') {
+          const month = dayDate.getMonth();
+          const isQuarterStart = [0, 3, 6, 9].includes(month) && dayOfMonth === 1;
+          if (!isQuarterStart) continue;
+        }
+        // Yearly: show on January 1st only
+        if (taskDef.frequency === 'yearly') {
+          const isYearStart = dayDate.getMonth() === 0 && dayOfMonth === 1;
+          if (!isYearStart) continue;
+        }
         if (taskDef.frequency === 'once' && taskDef.day !== dayNum) continue;
         if (taskDef.frequency === 'as_needed') continue;
 
         // Check condition (simplified for preview — can't access runtime state)
-        if (taskDef.condition && !previewEvaluateCondition(taskDef.condition, fullConfig)) continue;
+        // Pass dayDate for date-based conditions (seasonal tasks)
+        if (taskDef.condition && !previewEvaluateCondition(taskDef.condition, fullConfig, dayDate)) continue;
 
         // Resolve template variables in time
         const resolvedTime = previewResolveTemplate(taskDef.time, fullConfig);
@@ -579,6 +593,15 @@ export function generateModulePreview(moduleDef, config = {}, startDate = new Da
  * Get phase definitions based on module duration
  */
 function getModulePhases(duration) {
+  // Continuous / yearly modules: quarterly phases
+  if (duration >= 365) {
+    return [
+      { name: 'q1_foundation', name_de: 'Q1: Foundation & Recovery', start_day: 1, end_day: 90 },
+      { name: 'q2_build', name_de: 'Q2: Build & Strength', start_day: 91, end_day: 181 },
+      { name: 'q3_optimize', name_de: 'Q3: Optimize & Peak', start_day: 182, end_day: 273 },
+      { name: 'q4_consolidate', name_de: 'Q4: Consolidate & Integrate', start_day: 274, end_day: duration }
+    ];
+  }
   if (duration <= 7) {
     return [
       { name: 'awareness', name_de: 'Awareness', start_day: 1, end_day: 2 },
@@ -614,9 +637,35 @@ function getPhaseForDay(dayNum, phases) {
 /**
  * Simplified condition evaluator for preview (no runtime state)
  */
-function previewEvaluateCondition(condition, config) {
+function previewEvaluateCondition(condition, config, dayDate = null) {
   if (!condition || typeof condition !== 'string') return true;
   try {
+    // Date-based conditions (for seasonal tasks):
+    // "new Date().getMonth() <= 2" or "new Date().getMonth() >= 3 && new Date().getMonth() <= 5"
+    if (condition.includes('new Date().getMonth()')) {
+      const evalDate = dayDate || new Date();
+      const month = evalDate.getMonth();
+      // Simple month comparison patterns
+      const simpleMatch = condition.match(/new Date\(\)\.getMonth\(\)\s*(<=|>=|===|<|>)\s*(\d+)/);
+      if (simpleMatch && !condition.includes('&&')) {
+        const op = simpleMatch[1];
+        const val = parseInt(simpleMatch[2]);
+        if (op === '<=') return month <= val;
+        if (op === '>=') return month >= val;
+        if (op === '===') return month === val;
+        if (op === '<') return month < val;
+        if (op === '>') return month > val;
+      }
+      // Compound: "new Date().getMonth() >= 3 && new Date().getMonth() <= 5"
+      if (condition.includes(' && ')) {
+        return condition.split(' && ').every(part => previewEvaluateCondition(part.trim(), config, dayDate));
+      }
+      if (condition.includes(' || ')) {
+        return condition.split(' || ').some(part => previewEvaluateCondition(part.trim(), config, dayDate));
+      }
+      return true;
+    }
+
     // Array .includes()
     const includesMatch = condition.match(/config\.(\w+)\.includes\(['"]([\w_]+)['"]\)/);
     if (includesMatch) {
@@ -643,11 +692,11 @@ function previewEvaluateCondition(condition, config) {
     }
     // OR
     if (condition.includes(' || ')) {
-      return condition.split(' || ').some(part => previewEvaluateCondition(part.trim(), config));
+      return condition.split(' || ').some(part => previewEvaluateCondition(part.trim(), config, dayDate));
     }
     // AND
     if (condition.includes(' && ')) {
-      return condition.split(' && ').every(part => previewEvaluateCondition(part.trim(), config));
+      return condition.split(' && ').every(part => previewEvaluateCondition(part.trim(), config, dayDate));
     }
     return true;
   } catch {
@@ -698,6 +747,250 @@ function buildWeeklyOverview(days) {
   return weeks;
 }
 
+// =====================================================
+// YEARLY OPTIMIZATION PREVIEW
+// Health-profile-aware preview for the continuous module
+// =====================================================
+
+/**
+ * Generate a personalized yearly optimization preview
+ * based on user's health profile and config
+ *
+ * @param {Object} moduleDef - Module definition (yearly-optimization)
+ * @param {Object} config - User configuration
+ * @param {Object|null} healthProfile - User's health profile from DB
+ * @returns {Object} Personalized yearly preview
+ */
+export function generateYearlyPreview(moduleDef, config = {}, healthProfile = null) {
+  // Build config with defaults
+  const fullConfig = buildDefaultConfig(moduleDef?.config_schema, config);
+  const focusAreas = fullConfig.focus_areas || ['sleep_recovery', 'mental_resilience'];
+
+  // ─── Quarterly Breakdown ───
+  const quarters = [
+    {
+      quarter: 'Q1',
+      name_de: 'Q1: Foundation & Recovery',
+      months_de: 'Januar – März',
+      theme_de: 'Zirkadianischer Reset, Schlaf-Optimierung, innere Arbeit',
+      priority_pillars: ['sleep_recovery', 'circadian_rhythm', 'mental_resilience'],
+      intensity: 'moderat',
+      biology_de: 'Niedrigstes Testosteron, wenig Tageslicht, höchste Melatonin-Produktion → ideale Recovery-Phase.',
+      seasonal_tasks: ['q1-light-therapy', 'q1-sleep-audit']
+    },
+    {
+      quarter: 'Q2',
+      name_de: 'Q2: Build & Strength',
+      months_de: 'April – Juni',
+      theme_de: 'Kraft-Aufbau, Outdoor-Training, Metabolische Optimierung',
+      priority_pillars: ['movement_muscle', 'nutrition_metabolism', 'supplements'],
+      intensity: 'hoch',
+      biology_de: 'Steigendes Testosteron, viel Vitamin-D-Synthese, optimale Bedingungen für Muskelaufbau.',
+      seasonal_tasks: ['q2-outdoor-training', 'q2-nutrition-reset']
+    },
+    {
+      quarter: 'Q3',
+      name_de: 'Q3: Optimize & Peak',
+      months_de: 'Juli – September',
+      theme_de: 'Mentale Peak-Leistung, Flow, aktives Stress-Management',
+      priority_pillars: ['mental_resilience', 'nutrition_metabolism', 'movement_muscle'],
+      intensity: 'sehr hoch',
+      biology_de: 'Peak Performance Window — höchste Cortisol-Baseline, längste Tage, maximale Energie.',
+      seasonal_tasks: ['q3-mental-performance', 'q3-stress-protocol']
+    },
+    {
+      quarter: 'Q4',
+      name_de: 'Q4: Consolidate & Integrate',
+      months_de: 'Oktober – Dezember',
+      theme_de: 'Recovery, Winter-Vorbereitung, Gewohnheiten festigen',
+      priority_pillars: ['sleep_recovery', 'supplements', 'mental_resilience'],
+      intensity: 'moderat-niedrig',
+      biology_de: 'Shift zu Recovery — sinkende Hormonspiegel, weniger Licht, Körper braucht Konsolidierung.',
+      seasonal_tasks: ['q4-recovery-nsdr', 'q4-circadian-prep']
+    }
+  ];
+
+  // ─── Pillar Emphasis based on health profile ───
+  const pillarScores = computeSimplePillarScores(healthProfile);
+  const pillarEmphasis = {};
+  const allPillars = ['sleep_recovery', 'circadian_rhythm', 'mental_resilience', 'nutrition_metabolism', 'movement_muscle', 'supplements'];
+
+  allPillars.forEach(pillar => {
+    pillarEmphasis[pillar] = {
+      name_de: getPillarNameDe(pillar),
+      is_focus_area: focusAreas.includes(pillar),
+      need_score: pillarScores[pillar] || 50,
+      quarterly_emphasis: quarters.filter(q => q.priority_pillars.includes(pillar)).map(q => q.quarter)
+    };
+  });
+
+  // ─── Health-Aware Adjustments ───
+  const healthAdjustments = [];
+
+  if (healthProfile) {
+    // Sleep issues → extra Q1 focus
+    if (healthProfile.sleep_hours_bucket === '<6' || healthProfile.sleep_hours_bucket === '6-6.5') {
+      healthAdjustments.push({
+        adjustment_de: 'Schlafdefizit erkannt → Q1 & Q4 bekommen extra Schlaf-Fokus',
+        pillar: 'sleep_recovery',
+        quarters: ['Q1', 'Q4']
+      });
+    }
+    // High stress → extra mental resilience
+    if (healthProfile.stress_level >= 7) {
+      healthAdjustments.push({
+        adjustment_de: 'Hohes Stresslevel → Q3 Stress-Management wird priorisiert',
+        pillar: 'mental_resilience',
+        quarters: ['Q3']
+      });
+    }
+    // Heart conditions → moderate intensity
+    if ((healthProfile.chronic_conditions || []).some(c => ['heart_disease', 'hypertension'].includes(c))) {
+      healthAdjustments.push({
+        adjustment_de: 'Herz-Kreislauf-Erkrankung → Q2 Training moderate Intensität, kein HIIT',
+        pillar: 'movement_muscle',
+        quarters: ['Q2']
+      });
+    }
+    // Depression/Anxiety → extra light & gratitude
+    if ((healthProfile.mental_health_flags || []).some(f => ['depression', 'anxiety'].includes(f))) {
+      healthAdjustments.push({
+        adjustment_de: 'Psychische Gesundheit → Extra Morgen-Licht in Q1, tägliche Gratitude priorisiert',
+        pillar: 'mental_resilience',
+        quarters: ['Q1', 'Q2', 'Q3', 'Q4']
+      });
+    }
+    // Sedentary → gradual movement build
+    if (healthProfile.training_frequency === '0' || healthProfile.training_frequency === '1-2') {
+      healthAdjustments.push({
+        adjustment_de: 'Wenig Training → Sanfter Einstieg in Q1/Q2, progressive Steigerung',
+        pillar: 'movement_muscle',
+        quarters: ['Q1', 'Q2']
+      });
+    }
+  }
+
+  // ─── Time Commitment ───
+  const timeCommitment = {
+    daily_minutes: 3,
+    daily_description_de: 'Morgen-Intention (1min) + Abend-Gratitude (2min)',
+    weekly_minutes: 17,
+    weekly_description_de: 'Pillar-Review (10min) + Weekly Win (5min) + Supplement-Check (2min)',
+    monthly_minutes: 10,
+    monthly_description_de: 'Metriken (5min) + Biomarker-Trend (5min)',
+    quarterly_minutes: 45,
+    quarterly_description_de: 'Deep Review (30min) + Ziel-Anpassung (15min)',
+    yearly_minutes: 60,
+    yearly_description_de: 'Jahres-Planung (60min am 1. Januar)',
+    seasonal_daily_minutes: 15,
+    seasonal_description_de: '~15min/Tag saisonale Tasks (nur im aktiven Quartal)',
+    total_hours_per_year: 61,
+    percentage_of_year: 0.7,
+    commitment_level_de: 'Niedrige Hürde, hoher Impact — 0.7% deiner wachen Zeit'
+  };
+
+  // ─── Personalized Message ───
+  let personalMessage = 'Dein persönliches Jahresprogramm basiert auf ';
+  if (focusAreas.length === 1) {
+    personalMessage += `deinem Fokus auf ${getPillarNameDe(focusAreas[0])}.`;
+  } else {
+    personalMessage += `deinen Schwerpunkten: ${focusAreas.map(getPillarNameDe).join(' und ')}.`;
+  }
+  if (healthAdjustments.length > 0) {
+    personalMessage += ` Wir haben ${healthAdjustments.length} Anpassung${healthAdjustments.length > 1 ? 'en' : ''} basierend auf deinem Gesundheitsprofil vorgenommen.`;
+  }
+
+  // ─── Scientific Summary ───
+  const scienceOverview = {
+    methodology_de: 'Die Jahres-Optimierung basiert auf 3 wissenschaftlichen Säulen:',
+    pillars: [
+      {
+        name_de: '1. Habit Stacking (Fogg 2015)',
+        description_de: 'Kleine tägliche Gewohnheiten schaffen die Basis. 2min/Tag × 365 = 730min/Jahr — massiver Compound-Effekt.'
+      },
+      {
+        name_de: '2. Saisonale Periodisierung (Chronobiologie)',
+        description_de: 'Q1 Recovery → Q2 Build → Q3 Peak → Q4 Consolidate — mit der Biologie statt dagegen arbeiten.'
+      },
+      {
+        name_de: '3. Quarterly Deep Dives (Amabile 2011)',
+        description_de: 'Review-Momente machen Fortschritt SICHTBAR. Users mit Quarterly Reviews haben 3× höhere Retention.'
+      }
+    ],
+    time_to_results_de: [
+      { period: 'Woche 1-2', description: 'Gewöhnung — "Ist das nicht zu wenig?"' },
+      { period: 'Monat 1', description: 'Erste Schlaf-Verbesserungen, leicht besserer Fokus' },
+      { period: 'Monat 3', description: 'Messbare Biomarker-Verbesserungen (HRV ↑, RHR ↓)' },
+      { period: 'Quartal 2', description: 'Major Confidence Shift — "Dieses System funktioniert"' },
+      { period: 'Jahr 1', description: 'Habit-Automatisierung — du machst es ohne nachzudenken' },
+      { period: 'Jahr 2+', description: 'Basis-Shift — "Das bin ich jetzt. Gesundheit ist Teil meiner Identität."' }
+    ]
+  };
+
+  return {
+    module_name: moduleDef?.name_de || '📅 Jahres-Optimierung',
+    module_slug: 'yearly-optimization',
+    duration_text_de: '365+ Tage kontinuierlich (kein Ende — genau wie echte Gesundheit)',
+    headline_de: 'Das einzige Modul, das wirklich mit dir wächst',
+    tagline_de: 'Tägliche Mikro-Habits + Quarterly Deep-Dives = Exponentieller Langfristfortschritt',
+
+    quarterly_breakdown: quarters,
+    pillar_emphasis: pillarEmphasis,
+    health_adjustments: healthAdjustments,
+    time_commitment: timeCommitment,
+    personalized_message_de: personalMessage,
+    science_overview: scienceOverview,
+
+    your_focus_areas: focusAreas,
+    total_unique_tasks: 18,
+    is_continuous: true
+  };
+}
+
+/**
+ * Compute simplified pillar scores from health profile
+ * (Lightweight version of planBuilder's computeNeedScores)
+ */
+function computeSimplePillarScores(healthProfile) {
+  if (!healthProfile) {
+    return { sleep_recovery: 50, circadian_rhythm: 50, mental_resilience: 50, nutrition_metabolism: 50, movement_muscle: 50, supplements: 30 };
+  }
+
+  const sleepMap = { '<6': 1.0, '6-6.5': 0.75, '6.5-7': 0.5, '7-7.5': 0.3, '7.5-8': 0.15, '>8': 0.05 };
+  const sleepDeficit = sleepMap[healthProfile.sleep_hours_bucket] || 0.5;
+  const stressNorm = Math.min(Math.max(((healthProfile.stress_level || 5) - 1) / 9, 0), 1);
+  const trainingMap = { '0': 0.0, '1-2': 0.25, '3-4': 0.5, '5+': 0.8 };
+  const trainingNorm = trainingMap[healthProfile.training_frequency] || 0.3;
+
+  const dietPatterns = healthProfile.diet_patterns || [];
+  const riskFactors = ['high_ultra_processed', 'high_sugar_snacks', 'frequent_alcohol', 'late_eating'];
+  const dietRisk = Math.min(dietPatterns.filter(p => riskFactors.includes(p)).length / 3, 1);
+
+  return {
+    sleep_recovery: Math.round(Math.min(100 * (0.60 * sleepDeficit + 0.25 * stressNorm + 0.15 * dietRisk), 100)),
+    circadian_rhythm: Math.round(Math.min(100 * (0.45 * sleepDeficit + 0.25 * stressNorm + 0.30 * dietRisk), 100)),
+    mental_resilience: Math.round(Math.min(100 * (0.70 * stressNorm + 0.20 * sleepDeficit + 0.10 * 0.5), 100)),
+    nutrition_metabolism: Math.round(Math.min(100 * (0.70 * dietRisk + 0.15 * sleepDeficit + 0.15 * 0.5), 100)),
+    movement_muscle: Math.round(Math.min(100 * (0.60 * (1 - trainingNorm) + 0.20 * 0.3 + 0.20 * 0.5), 100)),
+    supplements: Math.round(Math.min(100 * (0.50 * sleepDeficit + 0.30 * stressNorm + 0.20 * dietRisk) * 0.30, 30))
+  };
+}
+
+/**
+ * Get German pillar name
+ */
+function getPillarNameDe(pillar) {
+  const names = {
+    sleep_recovery: 'Schlaf & Recovery',
+    circadian_rhythm: 'Zirkadianischer Rhythmus',
+    mental_resilience: 'Mentale Resilienz',
+    nutrition_metabolism: 'Ernährung & Metabolismus',
+    movement_muscle: 'Bewegung & Muskulatur',
+    supplements: 'Supplements'
+  };
+  return names[pillar] || pillar;
+}
+
 export default {
   convertPlanToModule,
   generatePlanModuleTasks,
@@ -706,5 +999,6 @@ export default {
   quickActivateModule,
   getRecommendedModules,
   getStarterBundle,
-  generateModulePreview
+  generateModulePreview,
+  generateYearlyPreview
 };

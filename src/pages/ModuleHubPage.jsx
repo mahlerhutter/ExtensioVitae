@@ -1,8 +1,8 @@
 /**
  * Module Hub Page
  *
- * Dedicated page for exploring and activating longevity modules
- * Prominent display with detailed information, science references, and activation
+ * Dedicated page for exploring and activating longevity modules.
+ * Special handling for yearly-optimization with rich preview.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -14,6 +14,7 @@ import { getActivePlanFromSupabase } from '../lib/supabase';
 import { logger } from '../lib/logger';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
+import ModulePreview from '../components/marketplace/ModulePreview';
 
 export default function ModuleHubPage() {
     useDocumentTitle('Module Hub - ExtensioVitae');
@@ -28,6 +29,8 @@ export default function ModuleHubPage() {
     const [loading, setLoading] = useState(true);
     const [activating, setActivating] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState('all');
+    // ─── Preview State ───
+    const [previewModule, setPreviewModule] = useState(null);
 
     useEffect(() => {
         loadModules();
@@ -58,29 +61,45 @@ export default function ModuleHubPage() {
         }
     };
 
-    const handleActivate = async (module) => {
+    // ─── Activation Handler (now receives config from preview) ───
+    const handleActivate = async (module, config = {}) => {
         if (!user?.id) {
             addToast('Bitte anmelden, um Module zu aktivieren', 'error');
             navigate('/auth');
             return;
         }
 
-        setActivating(module.id);
+        setActivating(module.id || module.slug);
 
         try {
-            const result = await activateModule(user.id, module.slug, {});
+            const result = await activateModule(user.id, module.slug, config);
 
             if (result.success) {
                 addToast(`✨ ${module.name_de} aktiviert!`, 'success');
+                setPreviewModule(null);
                 loadModules(); // Refresh
             } else {
                 throw new Error(result.error || 'Activation failed');
             }
         } catch (error) {
             logger.error('[ModuleHub] Failed to activate:', error);
-            addToast('Fehler beim Aktivieren', 'error');
+            addToast(error.message || 'Fehler beim Aktivieren', 'error');
         } finally {
             setActivating(null);
+        }
+    };
+
+    // ─── Card Click Handler ───
+    // Modules with config_schema or yearly-optimization → show preview
+    // Simple modules → activate directly
+    const handleCardClick = (module) => {
+        const hasConfig = module.config_schema?.fields?.length > 0;
+        const isYearly = module.slug === 'yearly-optimization';
+
+        if (hasConfig || isYearly) {
+            setPreviewModule(module);
+        } else {
+            handleActivate(module);
         }
     };
 
@@ -103,6 +122,33 @@ export default function ModuleHubPage() {
         return activeModules.some(am => am.module_id === moduleId && am.status === 'active');
     };
 
+    // ═══════════════════════════════════════
+    // PREVIEW MODE: Full-screen module preview
+    // ═══════════════════════════════════════
+    if (previewModule) {
+        return (
+            <div className="min-h-screen bg-slate-950">
+                <DashboardHeader
+                    userName={user?.email?.split('@')[0]}
+                    onSignOut={() => navigate('/dashboard')}
+                    onProfileClick={() => navigate('/dashboard')}
+                />
+                <main className="max-w-3xl mx-auto px-4 py-6" style={{ height: 'calc(100vh - 64px)' }}>
+                    <ModulePreview
+                        module={previewModule}
+                        userId={user?.id}
+                        language="de"
+                        onActivate={(config) => handleActivate(previewModule, config)}
+                        onBack={() => setPreviewModule(null)}
+                    />
+                </main>
+            </div>
+        );
+    }
+
+    // ═══════════════════════════════════════
+    // DEFAULT: Module Grid
+    // ═══════════════════════════════════════
     if (loading) {
         return (
             <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -166,13 +212,13 @@ export default function ModuleHubPage() {
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredModules.map(module => (
                             <ModuleCard
-                                key={module.id}
+                                key={module.id || module.slug}
                                 module={module}
                                 isActive={isModuleActive(module.id)}
                                 isConflict={hasActivePlan && module.slug === 'longevity-kickstart'}
                                 conflictMessage="Bereits durch Hauptplan abgedeckt"
-                                isActivating={activating === module.id}
-                                onActivate={() => handleActivate(module)}
+                                isActivating={activating === module.id || activating === module.slug}
+                                onActivate={() => handleCardClick(module)}
                             />
                         ))}
                     </div>
@@ -187,6 +233,7 @@ export default function ModuleHubPage() {
  */
 function ModuleCard({ module, isActive, isConflict, conflictMessage, isActivating, onActivate }) {
     const [expanded, setExpanded] = useState(false);
+    const isYearly = module.slug === 'yearly-optimization';
 
     const categoryColors = {
         nutrition: 'from-green-500/20 to-emerald-500/20 border-green-500/30',
@@ -198,17 +245,24 @@ function ModuleCard({ module, isActive, isConflict, conflictMessage, isActivatin
         general: 'from-slate-500/20 to-slate-600/20 border-slate-500/30'
     };
 
-    const colorClass = categoryColors[module.category] || categoryColors.general;
+    const colorClass = isYearly
+        ? 'from-amber-500/20 to-orange-500/20 border-amber-500/30'
+        : (categoryColors[module.category] || categoryColors.general);
 
     return (
-        <div className={`bg-gradient-to-br ${colorClass} border rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all`}>
+        <div className={`bg-gradient-to-br ${colorClass} border rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all ${isYearly ? 'ring-1 ring-amber-500/20' : ''}`}>
             {/* Header */}
             <div className="p-6 pb-4">
                 <div className="flex items-start justify-between mb-3">
-                    <div className="w-14 h-14 rounded-xl bg-slate-800/50 flex items-center justify-center text-3xl flex-shrink-0">
+                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center text-3xl flex-shrink-0 ${isYearly ? 'bg-amber-500/10' : 'bg-slate-800/50'}`}>
                         {module.icon}
                     </div>
                     <div className="flex gap-2">
+                        {isYearly && (
+                            <span className="px-2 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full text-[10px] font-bold text-amber-400 uppercase">
+                                Jahresprogramm
+                            </span>
+                        )}
                         {module.is_premium && (
                             <span className="px-2 py-1 bg-amber-500/20 border border-amber-500/30 rounded-full text-[10px] font-bold text-amber-400 uppercase">
                                 Premium
@@ -228,11 +282,22 @@ function ModuleCard({ module, isActive, isConflict, conflictMessage, isActivatin
                 <p className="text-slate-300 text-sm leading-relaxed">
                     {module.description_de}
                 </p>
+
+                {/* Yearly teaser */}
+                {isYearly && (
+                    <div className="mt-3 flex items-center gap-3 text-xs text-amber-400/80">
+                        <span>18 Tasks</span>
+                        <span>·</span>
+                        <span>4 Quartale</span>
+                        <span>·</span>
+                        <span>0.7% deiner Zeit</span>
+                    </div>
+                )}
             </div>
 
             {/* Details Toggle */}
             <button
-                onClick={() => setExpanded(!expanded)}
+                onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
                 className="w-full px-6 py-3 bg-slate-800/30 hover:bg-slate-800/50 transition-colors flex items-center justify-between text-sm"
             >
                 <span className="text-slate-400 font-medium">Details</span>
@@ -252,6 +317,9 @@ function ModuleCard({ module, isActive, isConflict, conflictMessage, isActivatin
                     <DetailRow label="Typ" value={getTypeLabel(module.type)} />
                     {module.duration_days && (
                         <DetailRow label="Dauer" value={`${module.duration_days} Tage`} />
+                    )}
+                    {!module.duration_days && isYearly && (
+                        <DetailRow label="Dauer" value="Kontinuierlich (365+ Tage)" />
                     )}
                     <DetailRow
                         label="Pillars"
@@ -280,7 +348,9 @@ function ModuleCard({ module, isActive, isConflict, conflictMessage, isActivatin
                         ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
                         : isActivating
                             ? 'bg-amber-500/50 text-slate-900 cursor-wait'
-                            : 'bg-amber-500 hover:bg-amber-400 text-slate-900 shadow-lg shadow-amber-500/20'
+                            : isYearly
+                                ? 'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-900 shadow-lg shadow-amber-500/20'
+                                : 'bg-amber-500 hover:bg-amber-400 text-slate-900 shadow-lg shadow-amber-500/20'
                         }`}
                 >
                     {isActivating ? (
@@ -292,6 +362,8 @@ function ModuleCard({ module, isActive, isConflict, conflictMessage, isActivatin
                         '✓ Bereits aktiviert'
                     ) : isConflict ? (
                         `✕ ${conflictMessage}`
+                    ) : isYearly ? (
+                        '📅 Vorschau & Aktivieren'
                     ) : (
                         'Modul aktivieren'
                     )}

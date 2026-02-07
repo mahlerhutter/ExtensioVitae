@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { getAllModules } from '../../lib/moduleService';
+import { getAvailableModules } from '../../lib/moduleService';
 import ModulePreview from './ModulePreview';
 
 /**
@@ -21,7 +21,7 @@ export default function ModuleMarketplace({ userId, language = 'de', onActivate,
   const loadModules = async () => {
     setLoading(true);
     try {
-      const data = await getAllModules();
+      const data = await getAvailableModules();
       setModules(data || []);
     } catch (error) {
       console.error('Error loading modules:', error);
@@ -110,6 +110,7 @@ export default function ModuleMarketplace({ userId, language = 'de', onActivate,
     return (
       <ModulePreview
         module={selectedModule}
+        userId={userId}
         language={language}
         onActivate={(config) => {
           onActivate?.(selectedModule, config);

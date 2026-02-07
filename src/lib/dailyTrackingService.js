@@ -188,7 +188,7 @@ function generateTasksFromModule(instance, date) {
 
   // Path A: Full task_template with frequency, conditions, templates
   if (templateTasks && templateTasks.length > 0) {
-    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'lowercase' });
+    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
     const dayOfMonth = date.getDate();
 
     const moduleDay = calculateModuleDay(instance);
@@ -205,14 +205,25 @@ function generateTasksFromModule(instance, date) {
       if (taskDef.frequency === 'monthly' && taskDef.day !== dayOfMonth) {
         continue;
       }
+      // Quarterly: show only on first day of each quarter (Jan 1, Apr 1, Jul 1, Oct 1)
+      if (taskDef.frequency === 'quarterly') {
+        const month = date.getMonth();
+        const isQuarterStart = [0, 3, 6, 9].includes(month) && dayOfMonth === 1;
+        if (!isQuarterStart) continue;
+      }
+      // Yearly: show only on January 1st
+      if (taskDef.frequency === 'yearly') {
+        const isYearStart = date.getMonth() === 0 && dayOfMonth === 1;
+        if (!isYearStart) continue;
+      }
       if (taskDef.frequency === 'once') {
         if (taskDef.day !== moduleDay) {
           continue;
         }
       }
 
-      // Check condition (enhanced evaluator)
-      if (taskDef.condition && !evaluateCondition(taskDef.condition, config, instance)) {
+      // Check condition (enhanced evaluator — pass date for seasonal conditions)
+      if (taskDef.condition && !evaluateCondition(taskDef.condition, config, instance, date)) {
         continue;
       }
 
@@ -316,7 +327,7 @@ function resolveTemplateValue(value, config) {
  * - config.field || config.x   (logical OR)
  * - config.boolField           (truthy check)
  */
-function evaluateCondition(condition, config, instance) {
+function evaluateCondition(condition, config, instance, date = null) {
   if (!condition || typeof condition !== 'string') return true;
   condition = condition.trim();
 
@@ -327,14 +338,40 @@ function evaluateCondition(condition, config, instance) {
   }
 
   try {
+    // --- Date-based conditions (for seasonal/quarterly tasks) ---
+    // Supports: "new Date().getMonth() <= 2", "new Date().getMonth() >= 3 && new Date().getMonth() <= 5"
+    if (condition.includes('new Date().getMonth()')) {
+      const evalDate = date || new Date();
+      const month = evalDate.getMonth();
+      // Simple: "new Date().getMonth() <= 2"
+      const simpleMatch = condition.match(/new Date\(\)\.getMonth\(\)\s*(<=|>=|===|<|>)\s*(\d+)/);
+      if (simpleMatch && !condition.includes('&&') && !condition.includes('||')) {
+        const op = simpleMatch[1];
+        const val = parseInt(simpleMatch[2]);
+        if (op === '<=') return month <= val;
+        if (op === '>=') return month >= val;
+        if (op === '===') return month === val;
+        if (op === '<') return month < val;
+        if (op === '>') return month > val;
+      }
+      // Compound: "new Date().getMonth() >= 3 && new Date().getMonth() <= 5"
+      if (condition.includes(' && ')) {
+        return condition.split(' && ').every(part => evaluateCondition(part.trim(), config, instance, date));
+      }
+      if (condition.includes(' || ')) {
+        return condition.split(' || ').some(part => evaluateCondition(part.trim(), config, instance, date));
+      }
+      return true;
+    }
+
     // --- Logical OR: evaluate each side independently ---
     if (condition.includes(' || ')) {
-      return condition.split(' || ').some(part => evaluateCondition(part.trim(), config, instance));
+      return condition.split(' || ').some(part => evaluateCondition(part.trim(), config, instance, date));
     }
 
     // --- Logical AND ---
     if (condition.includes(' && ')) {
-      return condition.split(' && ').every(part => evaluateCondition(part.trim(), config, instance));
+      return condition.split(' && ').every(part => evaluateCondition(part.trim(), config, instance, date));
     }
 
     // --- Array .includes() ---
