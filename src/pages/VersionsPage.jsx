@@ -280,6 +280,99 @@ export default function VersionsPage() {
                     </p>
                 </div>
 
+                {/* Product Overview & Resources */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                    {/* Product Overview */}
+                    <div className="bg-gradient-to-br from-blue-600 to-purple-700 rounded-2xl p-8 text-white shadow-xl relative overflow-hidden">
+                        <div className="absolute top-4 right-4 text-6xl opacity-20">🎯</div>
+                        <div className="relative">
+                            <div className="w-16 h-16 bg-blue-500 rounded-2xl flex items-center justify-center mb-4">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" strokeWidth={2} />
+                                    <circle cx="12" cy="12" r="6" strokeWidth={2} />
+                                    <circle cx="12" cy="12" r="2" fill="currentColor" />
+                                </svg>
+                            </div>
+                            <h2 className="text-2xl font-bold mb-3">Product Overview</h2>
+                            <p className="text-blue-100 mb-4">Was ist ExtensioVitae?</p>
+                            <p className="text-sm text-blue-50 mb-6 leading-relaxed">
+                                Der aktuelle Status Quo: Implementierte Features, wissenschaftliche Grundlage, Impact-Zahlen und was ExtensioVitae einzigartig macht.
+                            </p>
+                            <ul className="space-y-2 mb-6">
+                                <li className="flex items-start text-sm">
+                                    <span className="text-blue-300 mr-2">•</span>
+                                    <span>18 implementierte Features</span>
+                                </li>
+                                <li className="flex items-start text-sm">
+                                    <span className="text-blue-300 mr-2">•</span>
+                                    <span>HRV-basierte Recovery-Optimierung</span>
+                                </li>
+                                <li className="flex items-start text-sm">
+                                    <span className="text-blue-300 mr-2">•</span>
+                                    <span>+5-15 Jahre Lebensspanne</span>
+                                </li>
+                                <li className="flex items-start text-sm">
+                                    <span className="text-blue-300 mr-2">•</span>
+                                    <span>74% Task Completion Rate</span>
+                                </li>
+                            </ul>
+                            <button
+                                onClick={() => navigate('/friends/why')}
+                                className="flex items-center gap-2 text-white hover:text-blue-100 transition-colors group"
+                            >
+                                <span className="font-semibold">Explore</span>
+                                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Resources */}
+                    <div className="bg-gradient-to-br from-purple-600 to-pink-700 rounded-2xl p-8 text-white shadow-xl relative overflow-hidden">
+                        <div className="absolute top-4 right-4 text-6xl opacity-20">💎</div>
+                        <div className="relative">
+                            <div className="w-16 h-16 bg-purple-500 rounded-2xl flex items-center justify-center mb-4">
+                                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                </svg>
+                            </div>
+                            <h2 className="text-2xl font-bold mb-3">Resources</h2>
+                            <p className="text-purple-100 mb-4">Wie nutze ich ExtensioVitae?</p>
+                            <p className="text-sm text-purple-50 mb-6 leading-relaxed">
+                                Features im Detail, Best Practices, wissenschaftliche Quellen und wie du das Maximum aus deinem Longevity-Protokoll herausholst.
+                            </p>
+                            <ul className="space-y-2 mb-6">
+                                <li className="flex items-start text-sm">
+                                    <span className="text-purple-300 mr-2">•</span>
+                                    <span>Feature Documentation</span>
+                                </li>
+                                <li className="flex items-start text-sm">
+                                    <span className="text-purple-300 mr-2">•</span>
+                                    <span>Wissenschaftliche Grundlagen</span>
+                                </li>
+                                <li className="flex items-start text-sm">
+                                    <span className="text-purple-300 mr-2">•</span>
+                                    <span>Best Practices & Workflows</span>
+                                </li>
+                                <li className="flex items-start text-sm">
+                                    <span className="text-purple-300 mr-2">•</span>
+                                    <span>API & Integration Guides</span>
+                                </li>
+                            </ul>
+                            <button
+                                onClick={() => window.open('/docs/FEATURES.md', '_blank')}
+                                className="flex items-center gap-2 text-white hover:text-purple-100 transition-colors group"
+                            >
+                                <span className="font-semibold">Explore</span>
+                                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Current Version Highlight */}
                 <div className="mb-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-8 text-white shadow-xl">
                     <div className="flex items-start justify-between mb-6">

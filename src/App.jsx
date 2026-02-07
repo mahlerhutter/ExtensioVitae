@@ -19,6 +19,7 @@ import FuturePage from './pages/FuturePage';
 import FeaturesPage from './pages/FeaturesPage';
 import RecoveryPage from './pages/RecoveryPage';
 import VersionsPage from './pages/VersionsPage';
+import FriendsWhyPage from './pages/FriendsWhyPage';
 import DogfoodingPage from './pages/DogfoodingPage';
 import FriendsPage from './pages/FriendsPage';
 import DashboardMockupPage from './pages/DashboardMockupPage';
@@ -148,6 +149,12 @@ export default function App() {
             <Route path="/friends/versions" element={
               <ErrorBoundary>
                 <VersionsPage />
+              </ErrorBoundary>
+            } />
+
+            <Route path="/friends/why" element={
+              <ErrorBoundary>
+                <FriendsWhyPage />
               </ErrorBoundary>
             } />
 
