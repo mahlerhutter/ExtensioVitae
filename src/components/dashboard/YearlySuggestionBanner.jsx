@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { checkYearlySuggestion } from '../../lib/moduleService';
+import moduleService from '../../lib/moduleService';
+const { checkYearlySuggestion } = moduleService;
 
 /**
  * Yearly Optimization Suggestion Banner
