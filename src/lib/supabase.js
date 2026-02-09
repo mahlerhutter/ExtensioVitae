@@ -239,6 +239,36 @@ export async function saveIntakeToSupabase(intakeData, userId) {
   }
 
   logger.info('[Supabase] Intake saved:', data.id);
+
+  // Initialize user_states from intake data (RAG Integration)
+  try {
+    const stateApiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/state-api`;
+    const response = await fetch(stateApiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'initialize_from_intake',
+        user_id: userId,
+        intake_data: intakeData
+      }),
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      logger.info('[Supabase] User state initialized:', result.message);
+    } else {
+      const errorText = await response.text();
+      logger.warn('[Supabase] Failed to initialize user state:', errorText);
+      // Don't throw - intake save was successful, state init is secondary
+    }
+  } catch (stateError) {
+    logger.warn('[Supabase] Error initializing user state:', stateError);
+    // Don't throw - intake save was successful, state init is secondary
+  }
+
   return data;
 }
 

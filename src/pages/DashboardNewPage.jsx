@@ -91,6 +91,9 @@ import AdaptationNotice from '../components/dashboard/AdaptationNotice.jsx';
 import EmptyState, { EMPTY_STATE_TYPES } from '../components/dashboard/EmptyState.jsx';
 import SmartLogWidget from '../components/dashboard/SmartLogWidget';
 
+// RAG + Chat Components (v0.8.0)
+import { ChatButton, ChatModal } from '../components/Chat';
+
 // Pillar configuration
 const PILLARS = {
   sleep: { label: 'Sleep', color: 'bg-indigo-500', textColor: 'text-indigo-400' },
@@ -224,6 +227,9 @@ export default function DashboardNewPage() {
     incompleteTasks: 0,
     hasLabResults: false
   });
+
+  // Chat State (v0.8.0 - RAG + Chat Integration)
+  const [showChatModal, setShowChatModal] = useState(false);
 
   // Fetch Dashboard Stats
   useEffect(() => {
@@ -1453,6 +1459,10 @@ export default function DashboardNewPage() {
       <OnboardingTour
         canStart={!showInitialFeedback && !showMorningCheckIn && !showModuleActivation && !showModuleHub}
       />
+
+      {/* RAG + Chat Integration (v0.8.0) */}
+      <ChatButton onClick={() => setShowChatModal(true)} />
+      <ChatModal isOpen={showChatModal} onClose={() => setShowChatModal(false)} />
     </div >
   );
 }

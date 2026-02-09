@@ -23,6 +23,7 @@ import FriendsWhyPage from './pages/FriendsWhyPage';
 import DogfoodingPage from './pages/DogfoodingPage';
 import FriendsPage from './pages/FriendsPage';
 import DashboardMockupPage from './pages/DashboardMockupPage';
+import ChatPage from './pages/ChatPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import OnboardingGuard from './components/OnboardingGuard';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -252,6 +253,17 @@ export default function App() {
                 <ProtectedRoute>
                   <OnboardingGuard>
                     <LabsPage />
+                  </OnboardingGuard>
+                </ProtectedRoute>
+              </ErrorBoundary>
+            } />
+
+            {/* Chat (Protected + Onboarding Guard) */}
+            <Route path="/chat" element={
+              <ErrorBoundary>
+                <ProtectedRoute>
+                  <OnboardingGuard>
+                    <ChatPage />
                   </OnboardingGuard>
                 </ProtectedRoute>
               </ErrorBoundary>

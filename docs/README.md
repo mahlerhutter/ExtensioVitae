@@ -1,7 +1,18 @@
 # ExtensioVitae Documentation
 
-**Last Updated:** 2026-02-04  
-**Status:** Organized & Clean
+**Last Updated:** 2026-02-09  
+**Status:** Chat-First Pivot (v0.6.4)
+
+---
+
+## 🚀 Chat-First Pivot
+
+ExtensioVitae is pivoting to a **chat-first** product strategy where conversational AI is the primary user interface.
+
+**Quick Start:**
+- **RAG + Chat Docs:** [`/rag`](./rag/) folder
+- **30-min Setup:** [`rag/QUICK_START.md`](./rag/RAG_CHAT_QUICK_START.md)
+- **Architecture:** [`rag/ARCHITECTURE.md`](./rag/RAG_CHAT_ARCHITECTURE.md)
 
 ---
 
@@ -10,8 +21,8 @@
 ### Core Documents (Root Level)
 
 **Strategic:**
-- **`VISION.md`** - Die große Vision (Axiome, Three Horizons, North Star)
-- **`FUTURE.md`** - Konkrete Umsetzung (Module, Scoring, Build-Sequenz)
+- **`VISION.md`** - Die große Vision (Chat-First, Axiome, Three Horizons)
+- **`FUTURE.md`** - Konkrete Umsetzung (4 Horizons, Module, Roadmap)
 - **`FEATURES.md`** - Feature-Übersicht und Spezifikationen
 - **`Ideas.md`** - Feature-Ideen und Backlog
 
@@ -26,6 +37,17 @@
 ---
 
 ## 📂 Subdirectories
+
+### `/rag` - RAG + Chat System Documentation ⭐ NEW
+- `README.md` - RAG documentation index
+- `canon.md` - 28 longevity principles (source of truth)
+- `ARCHITECTURE.md` - RAG-First + Hybrid LLM architecture
+- `QUICK_START.md` - 30-min deployment guide
+- `DEPLOYMENT_GUIDE.md` - Detailed deployment instructions
+- `BACKEND_IMPLEMENTATION_PLAN.md` - RAG backend plan
+- `PHASE2_QUICK_START.md` - Phase 2 quick start (legacy)
+- `BACKEND_PROMPT.md` - Chat backend prompt (legacy)
+- `WEEK1_SUMMARY.md` - Week 1 summary (legacy)
 
 ### `/audits` - Security & Quality Audits
 - `audit_2026-02-04.json` - Initial security audit

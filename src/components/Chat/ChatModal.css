@@ -1,0 +1,57 @@
+/* Chat Modal Styles */
+
+.chat-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+    animation: fadeIn 0.2s ease-in;
+}
+
+.chat-modal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: 480px;
+    z-index: 9999;
+    animation: slideIn 0.3s ease-out;
+}
+
+.chat-modal-content {
+    height: 100%;
+    background: white;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .chat-modal {
+        max-width: 100%;
+    }
+}
